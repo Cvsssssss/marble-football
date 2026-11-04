@@ -3,6 +3,8 @@
 //   npm run generate -- --competition config/competitions/uel_top16.json --map stadium_day [--forced-pair "Benfica vs Juventus"]
 //                       [--forced-round R16|QF] [--preview] [--no-reels] [--rerender-match <match id, e.g. R16-T1-L2>] [--date YYYY-MM-DD]
 //                       [--match-day YYYY-MM-DD --fixture "A vs B"]  (strong real match slot from `npm run next`: publish D-1 evening)
+//                       [--dry-run]  (P5 rehearsal: everything except the long video and the reel videos; run folder *_dryrun,
+//                                    not added to plan/history.json, output/latest unchanged, preflight skips the media checks)
 // Steps: tournament + long video (build_all.js, render cache) -> 3 reels -> 3 thumbnails -> run.json -> checklist -> preflight.
 // Safe to interrupt: re-running the same command resumes from the seed cache, the block render cache and the reel cache.
 const fs = require('fs');
@@ -42,7 +44,7 @@ function planRun(opts) {
     forced = [{ a, b, round: opts.forcedRound || 'R16' }];
   }
   const date = opts.date || copenhagenDate();
-  const runName = `${date}_${comp.id}_${map}${opts.preview ? '_preview' : ''}`;
+  const runName = `${date}_${comp.id}_${map}${opts.preview ? '_preview' : ''}${opts.dryRun ? '_dryrun' : ''}`;
   return { compFile, comp, map, forced, date, runName, runDir: path.join(ROOT, 'output', 'runs', runName), buildDir: path.join(ROOT, 'build', 'runs', runName) };
 }
 
@@ -87,7 +89,7 @@ function generate(opts) {
 
   step(1, N, 'Turneu + video lung (cache: blocurile deja randate sunt refolosite)', t0);
   if (opts.rerenderMatch) run(['render/render.js', 'forget', opts.rerenderMatch, '--show', path.join('build', 'show.json')].concat(opts.preview ? ['--preview'] : []), 'șterge din cache meciul');
-  run(['build_all.js', '--competition', compRun, '--skip-tests', '--no-stills'].concat(opts.preview ? ['--preview'] : []).concat(opts.workers ? ['--workers', String(opts.workers)] : []), 'video lung');
+  run(['build_all.js', '--competition', compRun, '--skip-tests', '--no-stills'].concat(opts.preview ? ['--preview'] : []).concat(opts.dryRun ? ['--sim-only'] : []).concat(opts.workers ? ['--workers', String(opts.workers)] : []), 'video lung');
   const show = JSON.parse(fs.readFileSync(path.join(ROOT, 'build', 'show.json'), 'utf8'));
   const base = path.basename(runComp.output).replace(/_1080p\.mp4$|\.mp4$/, '');
   fs.copyFileSync(path.join(P.buildDir, `${base}_chapters.txt`), path.join(P.runDir, 'chapters.txt'));
@@ -97,7 +99,7 @@ function generate(opts) {
   let reelsInfo = [];
   if (!opts.noReels) {
     step(2, N, 'Reel-uri verticale (3)', t0);
-    run(['build_reels.js', '--competition', compRun, '--out-dir', path.join(P.runDir, 'reels')].concat(opts.preview ? ['--fast'] : []), 'reel-uri');
+    run(['build_reels.js', '--competition', compRun, '--out-dir', path.join(P.runDir, 'reels')].concat(opts.preview ? ['--fast'] : []).concat(opts.dryRun ? ['--no-render'] : []), 'reel-uri');
     const sel = JSON.parse(fs.readFileSync(path.join(P.runDir, 'reels', 'selection.json'), 'utf8'));
     reelsInfo = sel.reels.map((r) => Object.assign({ dir: `reels/reel${r.rank}_${r.id}` }, JSON.parse(fs.readFileSync(path.join(P.runDir, 'reels', `reel${r.rank}_${r.id}`, 'reel_info.json'), 'utf8'))));
   }
@@ -122,14 +124,14 @@ function generate(opts) {
     long_video: { file: videoFile, seconds: +(show.totalFrames / show.fps).toFixed(2) },
     matches: idx.matches.map((m) => ({ id: m.id, stage: m.stage, leg: m.leg, team_a: m.team_a, team_b: m.team_b, seed: m.seed, timeline_hash: m.timeline_hash, score: m.score })),
     champion: idx.champion, reels: reelsInfo.map((r) => ({ dir: r.dir, seconds: r.seconds, seed: r.seed, timeline_hash: r.timeline_hash })),
-    bracket_r16: r16, fingerprint: fp, build_minutes: +((Date.now() - t0) / 60000).toFixed(1),
+    dry_run: !!opts.dryRun, show_simulation_label: show.cfg.SHOW_SIM_LABEL === true, bracket_r16: r16, fingerprint: fp, build_minutes: +((Date.now() - t0) / 60000).toFixed(1),
   };
   fs.writeFileSync(path.join(P.runDir, 'run.json'), JSON.stringify(runJson, null, 1) + '\n');
 
   step(opts.noReels ? 4 : 5, N, 'PUBLISH_CHECKLIST.md', t0);
   require('./sim/checklist').writeChecklist(P.runDir, runJson);
-  updateHistory({ run: P.runName, generated_at: runJson.created, competition: P.comp.id, map: P.map, accent, quality: runJson.quality, status: 'generated', forced_pair: P.forced[0] || null, fingerprint: fp });
-  linkLatest(P.runDir);
+  if (!opts.dryRun) updateHistory({ run: P.runName, generated_at: runJson.created, competition: P.comp.id, map: P.map, accent, quality: runJson.quality, status: 'generated', forced_pair: P.forced[0] || null, fingerprint: fp });
+  if (!opts.dryRun) linkLatest(P.runDir);
 
   step(opts.noReels ? 5 : 6, N, 'Preflight (verificări automate)', t0);
   const pf = require('./preflight').preflight(P.runDir);
@@ -144,7 +146,7 @@ if (require.main === module) {
   try {
     const r = generate({ competition: arg('--competition', 'config/competitions/ucl_2026_top16.json'), map: arg('--map'), forcedPair: arg('--forced-pair'), forcedRound: arg('--forced-round'),
       preview: has('--preview'), noReels: has('--no-reels'), rerenderMatch: arg('--rerender-match'), date: arg('--date'), workers: arg('--workers'), accent: arg('--accent'),
-      matchDay: arg('--match-day'), fixture: arg('--fixture') });
+      matchDay: arg('--match-day'), fixture: arg('--fixture'), dryRun: has('--dry-run') });
     process.exit(r.preflight.ok ? 0 : 3);
   } catch (e) {
     fs.mkdirSync(path.dirname(logF), { recursive: true });

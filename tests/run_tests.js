@@ -119,7 +119,8 @@ function shotChecks(m) {
   for (const m of all) {
     const regEnd = 90 / CFG.GAME_MIN_PER_SEC;
     const shotOf = (t) => m.shots.find((s) => t >= s.t0 - 1e-6 && t <= s.t1 + 3);
-    for (const c of m.shotContacts) { if (c.good) cInfo.goodHits++; else cInfo.misses++; if (c.good !== m.cines.some((x) => x.k === c.k)) cineOk = false; if (c.good && !(c.v >= CFG.GOOD_HIT_V && c.vx > 0)) cineOk = false; }
+    // P5: a good hit = the trajectory after a windmill contact reaches the goal mouth (sim/good_hit.js; exact confusion test in tests/p5_tests.js)
+    for (const sh of m.shots) { if (sh.cine) cInfo.goodHits++; else cInfo.misses++; if (sh.cine !== m.cines.some((x) => x.k === sh.k)) cineOk = false; }
     for (const f of m.frames) {
       const fx = (f.ts !== undefined && f.ts < 1) || !!f.cam;
       if (!fx) continue;
@@ -136,7 +137,7 @@ function shotChecks(m) {
     // smooth: time scale changes by small steps
     for (let i = 1; i < m.frames.length; i++) { const a = m.frames[i - 1].ts === undefined ? 1 : m.frames[i - 1].ts, b = m.frames[i].ts === undefined ? 1 : m.frames[i].ts; if (Math.abs(a - b) > 0.12) cineOk = false; }
   }
-  check(`cinematic (slow motion + zoom) only on good hits (>= ${CFG.GOOD_HIT_V} px/s towards the goal) in added-time shots; never on misses, regular play, first half or golden ball; zoom <= ${CFG.ZOOM_MAX}, smooth`, cineOk && cInfo.goodHits > 0 && cInfo.misses > 0, cInfo);
+  check(`cinematic (slow motion + zoom) only on good hits (P5: ball really reaches the goal mouth) in added-time shots; never on misses, regular play, first half or golden ball; zoom <= ${CFG.ZOOM_MAX}, smooth`, cineOk && cInfo.goodHits > 0 && cInfo.misses > 0, cInfo);
   // scenario: aggregate 2-3 -> goal in an added-time shot -> 3-3 -> golden ball. The simulation before the
   // decision does not depend on the first-leg score, so a seed is found first and the first-leg score chosen to fit.
   let scen = null;
@@ -277,12 +278,14 @@ function oneBall(x, y, vx, vy, steps) {
   check('crossbar: ball falling from above bounces off its top', drop.barHits >= 1 && bounced && maxY <= G.BAR_TOP - G.BALL_R + 1e-6, { barHits: drop.barHits, lowestCentreY: +maxY.toFixed(2) });
   const up = oneBall(G.GOAL_LINE_X + 60, G.BAR_Y + 60, 0, -520, 50);
   const passed = up.path.some((p) => p[1] < G.BAR_TOP - G.BALL_R - 5);
-  check('crossbar: ball rising from below passes through (solid only on top)', up.barHits === 0 && passed, { barHits: up.barHits });
+  check('crossbar (P5): ball rising from below bounces off the underside (solid on every face)', up.barHits >= 1 && !passed && Math.min(...up.path.map((p) => p[1])) >= G.BAR_BOTTOM + G.BALL_R - 1e-6, { barHits: up.barHits });
+  const front = oneBall(G.BAR_X0 - 80, G.BAR_Y, 1400, 0, 40);
+  check('crossbar (P5): bomb shot at bar height from the front bounces back off the bar end (no pass-through)', front.barHits >= 1 && front.path.every((p) => p[0] <= G.BAR_X0 - G.BALL_R + 1e-6 || Math.abs(p[1] - G.BAR_Y) > G.BALL_R + G.BAR_THICK / 2), { barHits: front.barHits });
   const post = oneBall(G.GOAL_LINE_X - 60, G.BAR_Y + 40, 700, 0, 40);
   const crossed = post.path.some((p) => p[0] > G.GOAL_LINE_X + 30);
   check('posts: no collision with the front post (ball at post height crosses the goal line)', crossed && post.barHits === 0);
-  const barEv = T.matches.flatMap((m) => m.events.filter((e) => e.type === 'bar'));
-  check('crossbar: every bar contact in the tournament happens from above', barEv.every((e) => e.y < G.BAR_TOP), { barContacts: barEv.length });
+  const pen = require('../sim/good_hit').penetrationScan(T.matches);
+  check('crossbar (P5): no frame of the tournament has a ball inside the bar or a platform (rect + radius - 0.5 px)', pen.bar.summary.failFrames === 0 && pen.plat.summary.failFrames === 0, { bar: pen.bar.summary, plat: pen.plat.summary });
 }
 
 // ---------- 5. strength / win rate (P2: equal balls, invisible release-turn edge) ----------
@@ -426,7 +429,7 @@ console.log('== awards');
   check('players: fictional_players kept for real_names=false', conf2.teams.every((t) => Array.isArray(t.fictional_players) && t.fictional_players.length === 3));
 }
 
-// ---------- 11. windmill boost from minute 70 ----------
+// ---------- 11. windmill boost (P5: from minute 60, ramp 58-62) ----------
 console.log('== windmill boost');
 {
   const WB = require('./windmill_boost');
@@ -434,11 +437,11 @@ console.log('== windmill boost');
   const n = QUICK ? 60 : 300;
   const r = WB.measure(n, rc, 900000);
   const ma = eng.makeMillAngle(Object.assign({}, CFG, rc), 0);
-  const w0 = ma.omega(0), w1 = ma.omega(80 / rc.GAME_MIN_PER_SEC), wMid = ma.omega(70 / rc.GAME_MIN_PER_SEC);
+  const w0 = ma.omega(0), w1 = ma.omega(80 / rc.GAME_MIN_PER_SEC), wMid = ma.omega(60 / rc.GAME_MIN_PER_SEC), w57 = ma.omega(57.9 / rc.GAME_MIN_PER_SEC), w63 = ma.omega(62.1 / rc.GAME_MIN_PER_SEC);
   const gain = 100 * (w1 / w0 - 1);
-  check('windmill boost: +25..35% angular speed after minute 72, smooth ramp 68-72', gain >= 25 && gain <= 35 && wMid > w0 && wMid < w1, { angularGainPct: +gain.toFixed(1), at70: +(wMid / w0).toFixed(3) });
-  check(`windmill boost measured on ${n} matches: faster launches after 70', goal rate not lower, goals>10 rare (<= 2%)`,
-    r.meanLaunchSpeedFrom70 > r.meanLaunchSpeedBefore70 * 1.15 && r.goalsPer10minFrom70 >= r.goalsPer10minBefore70 * 0.95 && r.pctOver10 <= 2,
+  check('windmill boost: +25..35% angular speed after minute 62, smooth ramp 58-62 (windmill_fast_from_min = 60)', rc.BOOST_FROM === 60 && gain >= 25 && gain <= 35 && wMid > w0 && wMid < w1 && w57 === w0 && Math.abs(w63 - w1) < 1e-9, { angularGainPct: +gain.toFixed(1), at60: +(wMid / w0).toFixed(3) });
+  check(`windmill boost measured on ${n} matches: faster launches after 60', goal rate not lower, goals>10 rare in raw ungated matches (<= 3%; the seed gate rejects them)`,
+    r.meanLaunchSpeedFrom70 > r.meanLaunchSpeedBefore70 * 1.15 && r.goalsPer10minFrom70 >= r.goalsPer10minBefore70 * 0.95 && r.pctOver10 <= 3,
     { launchBefore: r.meanLaunchSpeedBefore70, launchFrom70: r.meanLaunchSpeedFrom70, goalsPer10Before: r.goalsPer10minBefore70, goalsPer10From70: r.goalsPer10minFrom70, pctOver10: r.pctOver10 });
 }
 

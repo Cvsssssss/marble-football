@@ -1,6 +1,6 @@
 # Reguli de conținut (pe scurt)
 
-1. **Este o simulare.** Eticheta `SIMULATION` e mereu pe ecran. În titlu sau descriere scrii „SIMULATION” și o propoziție că este o simulare pe calculator, nu rezultate reale.
+1. **Este o simulare.** Pe ecran nu mai apare eticheta `SIMULATION` (o poți reporni cu `show_simulation_label: true` în `config/rules/base.json`). La încărcare răspunzi corect la întrebarea YouTube despre conținut modificat/sintetic. În titlu sau descriere scrii „SIMULATION” și o propoziție că este o simulare pe calculator, nu rezultate reale.
 2. **Numele echipelor** apar ca text simplu. **Siglele** apar doar pe bile (`logos_on_balls`). Sunt mărci înregistrate: riscul e al tău (nu e sfat juridic). Le poți opri oricând cu `logos_on_balls: false`.
 3. **Fără** sigle de competiții, trofee oficiale, sponsori, design de tricouri, imnuri sau muzică străină. Muzica e generată de program.
 4. **Numele competițiilor** sunt ale noastre: MARBLE CHAMPIONS, MARBLE CONTINENTAL, MARBLE WORLD NATIONS, MARBLE EURO NATIONS.

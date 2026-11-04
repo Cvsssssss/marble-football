@@ -45,12 +45,14 @@ const S = {
     },
   },
   rules: {
-    type: 'object', required: ['BALLS_PER_TEAM', 'GAME_MIN_PER_SEC', 'ADDED_MIN', 'windmill_boost_from', 'boost', 'golden_ball'],
+    type: 'object', required: ['BALLS_PER_TEAM', 'GAME_MIN_PER_SEC', 'ADDED_MIN', 'boost', 'golden_ball'],
     props: {
       BALLS_PER_TEAM: { type: 'integer', min: 3, max: 3 },
       GAME_MIN_PER_SEC: { type: 'number', min: 0.5, max: 6 },
       ADDED_MIN: { type: 'array', minItems: 2, maxItems: 2, items: { type: 'integer', min: 0, max: 3 } },
-      windmill_boost_from: { type: 'number', min: 0, max: 90 },
+      windmill_fast_from_min: { type: 'number', min: 0, max: 90 }, // P5: game minute where the windmill speed-up is centred (was windmill_boost_from: 70)
+      windmill_boost_ramp_half: { type: 'number', min: 0, max: 10 }, // P5: half width of the smooth ramp (game minutes)
+      windmill_boost_from: { type: 'number', min: 0, max: 90 },   // legacy name (pre-P5), used only if windmill_fast_from_min is missing
       windmill_boost_ramp: { type: 'array', minItems: 2, maxItems: 2, items: { type: 'number', min: 0, max: 90 } },
       boost: { type: 'number', min: 1, max: 1.6 },
       golden_ball: { type: 'boolean' },
@@ -58,6 +60,7 @@ const S = {
       ball_radius: { type: 'number', min: 14, max: 20 },   // P2: ONE radius for every ball of every team (design px)
       logos_on_balls: { type: 'boolean' },                  // P2: team crest printed on the ball (false = colour-only ball)
       strength_edge: { type: 'number', min: 0, max: 0.5 },  // P2: invisible strength lever (release-turn probability)
+      show_simulation_label: { type: 'boolean' },            // P5: small SIMULATION pill on screen (default false = no label)
     },
   },
   audio: {
@@ -81,6 +84,7 @@ const S = {
       standings: { type: 'object', required: ['source_url', 'retrieved'], props: {
         source_url: { type: 'string', pattern: /^https?:\/\// }, retrieved: { type: 'string', pattern: /^\d{4}-\d{2}-\d{2}$/ }, note: { type: 'string' },
         table: { type: 'array', items: { type: 'object', required: ['pos', 'team'], props: { pos: { type: 'integer', min: 1, max: 36 }, team: { type: 'string' }, fifa_rank: { type: 'integer', min: 1, max: 211 }, club: { type: 'string' }, played: { type: 'integer', min: 0, max: 8 }, points: { type: 'integer', min: 0, max: 24 }, gd: { type: 'integer', min: -60, max: 60 } } } } } },
+      draw_seed: { type: 'integer', min: 0 }, // P5: optional fixed seed of the bracket draw (default: derived from id + seed_salt + map)
       seed_salt: { type: 'integer', min: 0, max: 999 }, // P3: offsets the seed search so different competitions never replay the same matches
       forced_pairs: { type: 'array', maxItems: 4, items: { type: 'object', required: ['a', 'b'], props: { a: { type: 'string' }, b: { type: 'string' }, round: { type: 'string', enum: ['R16', 'QF'] } } } },
     },
@@ -222,9 +226,14 @@ function loadCompetition(compFile, opts) {
   const audio = check(readJson(audioF), 'audio', audioF);
   if (errs.length) throw new ConfigError(errs);
   const all = { competition: comp, teams, map, rules, audio };
+  // P5 bracket draw seed: fixed by competition.draw_seed, else derived from competition id + seed_salt + map,
+  // so the same run (preview and final) gets the same draw and another competition/map gets another draw
+  const mapName = opts.map || comp.map;
+  all.drawSeed = comp.draw_seed !== undefined ? comp.draw_seed
+    : parseInt(crypto.createHash('sha256').update(`${comp.id}|${comp.seed_salt || 0}|${mapName}`).digest('hex').slice(0, 8), 16);
   // sim hash: only what changes the simulation (render cache key = simHash + seed)
-  const simPart = { engine: require('./config').ENGINE_VERSION, rules: Object.assign({}, rules, { logos_on_balls: undefined }), pairing: comp.pairing, format: comp.format,
-    teams: comp.teams, forced: comp.forced_pairs || [], ...(comp.seed_salt ? { salt: comp.seed_salt } : {}), strength: teams.map((t) => t.strength) };
+  const simPart = { engine: require('./config').ENGINE_VERSION, rules: Object.assign({}, rules, { logos_on_balls: undefined, show_simulation_label: undefined }), pairing: comp.pairing, format: comp.format,
+    teams: comp.teams, draw: all.drawSeed, forced: comp.forced_pairs || [], ...(comp.seed_salt ? { salt: comp.seed_salt } : {}), strength: teams.map((t) => t.strength) };
   all.simHash = crypto.createHash('sha256').update(JSON.stringify(simPart)).digest('hex').slice(0, 16);
   all.hash = crypto.createHash('sha256').update(JSON.stringify(all)).digest('hex').slice(0, 16);
   all.compFile = compFile;
@@ -232,13 +241,15 @@ function loadCompetition(compFile, opts) {
 }
 
 // rules/base.json -> engine config keys
+const fastFrom = (r) => (r.windmill_fast_from_min !== undefined ? r.windmill_fast_from_min : r.windmill_boost_from !== undefined ? r.windmill_boost_from : 60);
+const rampHalf = (r) => (r.windmill_boost_ramp_half !== undefined ? r.windmill_boost_ramp_half : 2);
 function rulesToCfg(rules) {
   return {
     BALLS_PER_TEAM: rules.BALLS_PER_TEAM,
     GAME_MIN_PER_SEC: rules.GAME_MIN_PER_SEC,
     ADDED_MIN: rules.ADDED_MIN.slice(),
-    BOOST_FROM: rules.windmill_boost_from,
-    BOOST_RAMP: rules.windmill_boost_ramp ? rules.windmill_boost_ramp.slice() : [rules.windmill_boost_from - 2, rules.windmill_boost_from + 2],
+    BOOST_FROM: fastFrom(rules),
+    BOOST_RAMP: rules.windmill_boost_ramp ? rules.windmill_boost_ramp.slice() : [fastFrom(rules) - rampHalf(rules), fastFrom(rules) + rampHalf(rules)],
     BOOST: rules.boost,
     GOLDEN_BALL: rules.golden_ball,
     GOALS_MIN: rules.GOALS_MIN !== undefined ? rules.GOALS_MIN : 1,

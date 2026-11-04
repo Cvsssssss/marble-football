@@ -27,7 +27,8 @@ const UCL = path.join(ROOT, 'config', 'competitions', 'ucl_2026_top16.json');
   const tmpShow = path.join(ROOT, 'build', 'p3test_show.json');
   const { show } = TOUR.buildAll(UCL, tmpShow);
   const index = TOUR.matchesIndex(show);
-  const sel = selectReels(index, 3);
+  // same candidate rule as build_reels.js (P5: reel must fit 30..55 s)
+  const sel = selectReels(Object.assign({}, index, { matches: index.matches.filter((m) => !m.goals.length || buildReel(show, m.index).seconds <= TARGET_MAX + 1) }), 3);
   check('selection: 3 comeback matches from round of 16 / quarter-finals only (never semifinal or final)',
     sel.reels.length === 3 && sel.reels.every((r) => /^(ROUND OF 16|QUARTER-FINAL)/.test(r.stage) && index.matches.find((m) => m.id === r.id).comeback), sel.reels.map((r) => `${r.id}:${r.why}`));
   { // synthetic: a strong semifinal comeback must still be excluded, depth >= 2 ranked first
@@ -48,9 +49,11 @@ const UCL = path.join(ROOT, 'config', 'competitions', 'ucl_2026_top16.json');
   check('fast-forward: x2 only, each stretch <= 1.5 s of output, never over a goal', reels.every(({ reel }) => {
     const plan = reel.segments[1].plan, m = show.matches[reel.matchIndex];
     let run = 0, ok = true;
-    for (const p of plan) { run = p.ff ? run + 1 : 0; if (run > 1.5 * 30 + 1) ok = false; if (p.ff && m.goals.some((g) => Math.abs(p.src / 30 - g.t) < 1.0)) ok = false; }
+    // P5: frame times are read from the frames (with slow motion, frame index / 30 is not the match time)
+    const tOf = (src) => m.frames[Math.min(m.frames.length - 1, Math.round(src))].t;
+    for (const p of plan) { run = p.ff ? run + 1 : 0; if (run > 1.5 * 30 + 1) ok = false; if (p.ff && m.goals.some((g) => Math.abs(tOf(p.src) - g.t) < 1.0)) ok = false; }
     // every goal frame is present at normal speed
-    for (const g of m.goals) if (!plan.some((p) => !p.ff && Math.abs(p.src - g.t * 30) < 1)) ok = false;
+    for (const g of m.goals) if (!plan.some((p) => !p.ff && Math.abs(tOf(p.src) - g.t) < 0.05)) ok = false;
     return ok;
   }));
   check('reel audio: same effects re-timed, no horn / fanfare / cheer', reels.every(({ reel }) => !reel.audio.some((e) => ['fanfare', 'cheer', 'horn'].includes(e.type)) && reel.audio.some((e) => e.type === 'goal')));
@@ -135,7 +138,16 @@ const UCL = path.join(ROOT, 'config', 'competitions', 'ucl_2026_top16.json');
   console.log('== variants: map / competition switching (config only)');
   const showFor = (comp, map) => { const f = path.join(ROOT, 'build', `p3test_${path.basename(comp, '.json')}_${map || 'def'}.json`); return TOUR.buildAll(comp, f, { map }).show; };
   const sN = showFor(UCL, 'stadium_night'), sS = showFor(UCL, 'sunset');
-  check('--map changes only the look: same seeds and timeline hashes as the long video', sN.matches.every((m, i) => m.hash === show.matches[i].hash) && sS.matches.every((m, i) => m.hash === show.matches[i].hash));
+  // P5: the bracket draw seed comes from competition id + seed_salt + map, so another map also gives another draw
+  // (every video different); with a fixed competition.draw_seed, --map changes only the look.
+  const r16 = (s) => s.matches.filter((m) => m.roundKey === 'R16' && m.leg === 'LEG 1').map((m) => [m.ta, m.tb].sort().join('-')).sort().join(',');
+  check('--map gives another bracket draw (P5) and a valid tournament', r16(sN) !== r16(show) && r16(sS) !== r16(show) && sN.matches.length === show.matches.length);
+  {
+    const fixedF = path.join(ROOT, 'build', 'p3test_fixed_draw.json');
+    const cj = JSON.parse(fs.readFileSync(UCL, 'utf8')); cj.draw_seed = L.loadCompetition(UCL).drawSeed; fs.writeFileSync(fixedF, JSON.stringify(cj));
+    const sF = TOUR.buildAll(fixedF, path.join(ROOT, 'build', 'p3test_fixed_sunset.json'), { map: 'sunset' }).show;
+    check('with a fixed competition.draw_seed, --map changes only the look: same seeds and timeline hashes as the long video', sF.matches.every((m, i) => m.hash === show.matches[i].hash));
+  }
   await page.setViewportSize({ width: 1920, height: 1080 });
   const px = {};
   for (const [name, s] of [['sky_clean', show], ['stadium_night', sN], ['sunset', sS]]) {
@@ -200,7 +212,10 @@ const UCL = path.join(ROOT, 'config', 'competitions', 'ucl_2026_top16.json');
     for (const r of S.reels) {
       const dir = path.join(ROOT, 'output', 'reels', `reel${r.rank}_${r.id}`);
       const f = path.join(dir, 'reel.mp4');
-      if (!fs.existsSync(f)) { info.push({ id: r.id, missing: true }); continue; }
+      const lint = () => { const txt = fs.readFileSync(path.join(dir, 'suggestions.txt'), 'utf8');
+        const grab = (h) => { const i = txt.indexOf(h + '\n'); return txt.slice(i + h.length + 1).split('\n\n')[0].trim(); };
+        lintErr.push(...lintSuggestion({ title: grab('TITLU:'), description: grab('DESCRIERE:'), tags: grab('TAGURI:').split(',').map((x) => x.trim()) }, playerNames).map((e) => `${r.id}: ${e}`)); };
+      if (!fs.existsSync(f)) { info.push({ id: r.id, missing: true }); if (fs.existsSync(path.join(dir, 'suggestions.txt'))) lint(); else lintErr.push(`${r.id}: suggestions.txt missing`); continue; }
       const j = JSON.parse(execFileSync(fp, ['-v', 'error', '-show_entries', 'stream=codec_type,codec_name,width,height,r_frame_rate:format=duration', '-of', 'json', f]).toString());
       const v = j.streams.find((s) => s.codec_type === 'video'), a = j.streams.find((s) => s.codec_type === 'audio');
       info.push({ id: r.id, w: v.width, h: v.height, fps: v.r_frame_rate, codec: v.codec_name, audio: a ? a.codec_name : null, dur: +(+j.format.duration).toFixed(1) });
@@ -209,11 +224,15 @@ const UCL = path.join(ROOT, 'config', 'competitions', 'ucl_2026_top16.json');
       const sObj = { title: grab('TITLU:'), description: grab('DESCRIERE:'), tags: grab('TAGURI:').split(',').map((x) => x.trim()) };
       lintErr.push(...lintSuggestion(sObj, playerNames).map((e) => `${r.id}: ${e}`));
     }
-    check('ffprobe: 3 reels, 1080x1920, 30 fps, h264 + aac, 30..60 s', info.length === 3 && info.every((x) => x.w === 1080 && x.h === 1920 && x.fps === '30/1' && x.codec === 'h264' && x.audio === 'aac' && x.dur >= 30 && x.dur <= 60), info);
+    const noVideo = info.length > 0 && info.every((x) => x.missing);
+    if (noVideo) console.log('SKIP ffprobe + loudness of the rendered reels: no reel.mp4 (P5 rule: Claude Code renders no reel sets; Max renders them with START.bat)');
+    if (!noVideo) check('ffprobe: 3 reels, 1080x1920, 30 fps, h264 + aac, 30..60 s', info.length === 3 && info.every((x) => x.w === 1080 && x.h === 1920 && x.fps === '30/1' && x.codec === 'h264' && x.audio === 'aac' && x.dur >= 30 && x.dur <= 60), info);
     check('suggestions.txt of every reel passes the lint (SIMULATION, no player names, no official names)', lintErr.length === 0, lintErr);
+    if (!noVideo) {
     const ln = spawnSync(require('ffmpeg-static'), ['-hide_banner', '-i', path.join(ROOT, 'output', 'reels', `reel1_${S.reels[0].id}`, 'reel.mp4'), '-af', 'ebur128', '-f', 'null', '-'], { encoding: 'utf8' });
     const I = +(((ln.stderr.match(/I:\s+(-?[\d.]+) LUFS/g) || []).pop() || '').match(/-?[\d.]+/) || [NaN])[0];
     check('reel loudness about -14 LUFS (+-1.5)', Math.abs(I + 14) <= 1.5, { I });
+    }
   }
   console.log(`\nP3: ${pass}/${pass + fail} checks passed`);
   process.exit(fail ? 1 : 0);

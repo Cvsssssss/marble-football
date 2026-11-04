@@ -263,6 +263,10 @@ async function balls(dir) {
   else if (mode === 'brackets') await brackets(path.resolve(ROOT, process.argv[3] || 'output/screenshots_p2'));
   else if (mode === 'balls') await balls(path.resolve(ROOT, process.argv[3] || 'output/screenshots_p2'));
   else if (mode === 'video') await video(+process.argv[3] || 8);
+  else if (mode === 'plan') { // P5: render-cache plan only (what `video` would render), nothing is rendered
+    const show = loadShow(); const B = blocks(show); const todo = B.filter((b) => !fs.existsSync(path.join(ROOT, 'build', 'segcache', b.key + '.mp4')));
+    console.log(`blocks: ${B.length}, cached: ${B.length - todo.length}, to render: ${todo.length} (${todo.reduce((a, b) => a + b.len, 0)} of ${show.totalFrames} frames)`);
+  }
   else if (mode === 'forget') { // P4 --rerender-match <id>: drop the cached block(s) of one match so only that match renders again
     const show = loadShow(); const id = process.argv[3];
     const idx = require('../sim/tournament').matchesIndex(show).matches.find((m) => m.id === id);

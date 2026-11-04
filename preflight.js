@@ -46,12 +46,15 @@ function preflight(runDir) {
   const rf = (p) => path.join(runDir, p);
   if (!fs.existsSync(rf('run.json'))) { add('run.json există', false, 'Lipsește run.json: generarea nu s-a terminat. Rulează din nou aceeași comandă (se reia din cache).'); return finish(runDir, C); }
   const run = JSON.parse(fs.readFileSync(rf('run.json'), 'utf8'));
+  const labelOn = run.show_simulation_label === true; // P5: label off by default
   const preview = run.quality !== 'final_1080p';
   const reelsExpected = (run.reels || []).length > 0;
   // 1. files
   const need = [run.long_video.file, 'chapters.txt', 'PUBLISH_CHECKLIST.md', 'LOGO_USAGE.md', 'thumbnails/thumbnail_1.png', 'thumbnails/thumbnail_2.png', 'thumbnails/thumbnail_3.png']
     .concat((run.reels || []).flatMap((r) => [`${r.dir}/reel.mp4`, `${r.dir}/suggestions.txt`]));
-  const missing = need.filter((p) => !fs.existsSync(rf(p)));
+  // P5 dry run (rehearsal without videos): media files are not expected and their checks are skipped
+  const missing = need.filter((p) => !(run.dry_run && /\.mp4$/.test(p)) && !fs.existsSync(rf(p)));
+  if (run.dry_run) add('repetiție fără video (dry run): verificările video/audio sunt sărite', true, '');
   add('toate fișierele rulării există', missing.length === 0, `Lipsesc: ${missing.join(', ')}. Rulează din nou generarea.`);
   // 2. ffprobe
   const lv = rf(run.long_video.file);
@@ -60,11 +63,12 @@ function preflight(runDir) {
     add(`video lung: ${W}×${H}, 30 fps, H.264 + AAC`, p.w === W && p.h === H && p.fps === '30/1' && p.vcodec === 'h264' && p.acodec === 'aac', `Videoul lung are ${p.w}×${p.h}, ${p.fps}, video ${p.vcodec}, audio ${p.acodec || 'LIPSĂ'}.`, p);
     const I = loudness(lv);
     add('video lung: loudness −14 LUFS (±1,5)', Math.abs(I + 14) <= 1.5, `Volumul integrat este ${I} LUFS (ținta −14). Refă pasul audio (mux).`, { I });
-    // SIMULATION label in >= 95 % of sampled frames (bottom-right pill)
+    // SIMULATION label (bottom-right pill): present in >= 95 % of sampled frames if run.show_simulation_label, else absent in all (P5)
     const k = W / 1280, crop = { x: Math.round(1188 * k), y: Math.round(692 * k), w: Math.round(84 * k), h: Math.round(20 * k) };
     const n = 40; let seen = 0;
     for (let i = 0; i < n; i++) { const t = (p.dur - 1) * (i + 0.5) / n; if (labelPresent(grabGray(lv, t, crop), crop.w, crop.h)) seen++; }
-    add('eticheta SIMULATION se vede în ≥ 95 % din cadrele eșantionate (video lung)', seen / n >= 0.95, `Eticheta SIMULATION a fost găsită doar în ${seen} din ${n} cadre.`, { seen, n });
+    if (labelOn) add('eticheta SIMULATION se vede în ≥ 95 % din cadrele eșantionate (video lung)', seen / n >= 0.95, `Eticheta SIMULATION a fost găsită doar în ${seen} din ${n} cadre.`, { seen, n });
+    else add('fără eticheta SIMULATION pe ecran (video lung, show_simulation_label = false)', seen === 0, `Eticheta SIMULATION apare în ${seen} din ${n} cadre, deși e oprită.`, { seen, n });
   }
   for (const r of run.reels || []) {
     const f = rf(`${r.dir}/reel.mp4`); if (!fs.existsSync(f)) continue;
@@ -88,7 +92,8 @@ function preflight(runDir) {
       const g = grabGray(f, t, { x: 470, y: 1668, w: 140, h: 42 }); if (labelPresent(g, 140, 42)) simSeen++;
     }
     add(`${r.dir}: zona sigură (scor și texte în centrul de 80 %)`, bad / tot < 0.002, `Elemente desenate la marginea ecranului (${bad} pixeli), unde interfața telefonului le acoperă.`, { bad, tot });
-    add(`${r.dir}: eticheta SIMULATION vizibilă`, simSeen === ts.length, `Eticheta SIMULATION lipsește în ${ts.length - simSeen} din ${ts.length} cadre.`);
+    if (labelOn) add(`${r.dir}: eticheta SIMULATION vizibilă`, simSeen === ts.length, `Eticheta SIMULATION lipsește în ${ts.length - simSeen} din ${ts.length} cadre.`);
+    else add(`${r.dir}: fără eticheta SIMULATION pe ecran`, simSeen === 0, `Eticheta SIMULATION apare în ${simSeen} din ${ts.length} cadre, deși e oprită.`);
   }
   // 3. image assets: only files listed in the asset manifest (crests / flags as ball decals)
   const man = JSON.parse(fs.readFileSync(path.join(ROOT, 'assets', 'logos', 'manifest.json'), 'utf8')).logos;

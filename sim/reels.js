@@ -35,12 +35,15 @@ function deficitMoment(m) {
 const HARD_MAX = 59.5;
 function buildReel(show, matchIndex, opts) {
   let r;
-  for (const qs of [1, 0.6, 0.35]) { r = buildReelOnce(show, matchIndex, Object.assign({}, opts, { quietScale: qs })); if (r.seconds <= HARD_MAX) return r; }
+  // P5: shorten the protected windows already when the reel exceeds TARGET_MAX + 1 s (was HARD_MAX): the fixed
+  // good-hit slow motion is longer than before, and reels must stay 30..55 s. Reels that fit are unchanged.
+  for (const qs of [1, 0.6, 0.35]) { r = buildReelOnce(show, matchIndex, Object.assign({}, opts, { quietScale: qs })); if (r.seconds <= TARGET_MAX + 1) return r; }
   return r;
 }
 function buildReelOnce(show, matchIndex, opts) {
   opts = opts || {};
-  const QB = QUIET_BEFORE * opts.quietScale, QA = QUIET_AFTER * opts.quietScale;
+  // shortened windows never go below 1.1 s, so goals always keep >= 1 s of normal speed on both sides (P5)
+  const QB = Math.max(1.1, QUIET_BEFORE * opts.quietScale), QA = Math.max(1.1, QUIET_AFTER * opts.quietScale);
   const m = show.matches[matchIndex];
   const F = m.frames;
   // --- protected (normal speed) windows ---

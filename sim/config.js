@@ -40,14 +40,14 @@ module.exports = {
   POWERS: false,
   // ---- v2 rule keys (defaults; the real values come from config/rules/<id>.json via config_loader.rulesToCfg) ----
   ADDED_MIN: [1, 3],       // added time range (minutes), max 3
-  BOOST_FROM: 70,          // game minute from which the windmill turns faster
-  BOOST_RAMP: [68, 72],    // smooth ramp window (game minutes)
+  BOOST_FROM: 60,          // P5 (was 70): game minute from which the windmill turns faster
+  BOOST_RAMP: [58, 62],    // smooth ramp window (game minutes)
   BOOST: 1.3,              // angular speed factor after the ramp
   GOLDEN_BALL: true,
   // crossbar: 'swept' = v2 one-way top surface with swept test (collider == drawing); 'v1' = old matter-js collider (for before/after measurement only)
   BAR_MODE: 'swept',
   // ---- P1b: added time = N extra shots (N = announced added minutes), cinematic good hits ----
-  ENGINE_VERSION: 'p1b-3', // part of the seed-cache key (simHash)
+  ENGINE_VERSION: 'p5-3',  // part of the seed-cache key (simHash)
   CLEAR_TIME: 1.5,         // s after the 90' whistle: balls in play are routed into the pipe
   ROUTE_TIME: 0.9,         // s each ball flies to the pipe mouth
   ROUTE_STAGGER: 0.12,     // s between balls
@@ -60,6 +60,12 @@ module.exports = {
   SLOWMO: 0.35,            // time scale during the cinematic
   SLOWMO_IN: 0.3,          // s of video to ease into slow motion
   SLOWMO_OUT: 0.45,        // s of video to ease back
-  CINE_MAX_SIM: 1.8,       // s of simulation a cinematic may last (then it eases out even if the shot is not resolved)
+  CINE_MAX_SIM: 1.9,       // s of simulation a cinematic may last (P5: 1.8 -> 1.9 = good_hit.REACH_T + CINE_HOLD)
+  CINE_HOLD: 0.35,         // P5: s of simulation the cinematic stays on after the ball reached the goal mouth
   ZOOM_MAX: 1.6,
+  // ---- P5 ----
+  PUMP_TIMING: 'predict',  // 'predict' = timing-aware pump (sim/pump.js); 'phase' = pre-P5 toss phase (before/after measurements only)
+  PUMP_PREDICT_FROM: 'boost', // 'boost' = timing-aware pump once the windmill speeds up (from the ramp start); 'always' = also at normal speed
+  PUMP_PICK: 'top',        // 'top' = among the robust good options prefer the strongest contacts (bombs); 'any' = uniform
+  PUMP_GOOD_V: 540,        // px/s: first-contact peak speed of a good pump hit (with vx > 0 and the ball reaching the goal side; calibrated, tests/pump_measure.js)
 };

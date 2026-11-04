@@ -24,6 +24,9 @@ Totul e în fișiere JSON. După orice modificare rulează opțiunea **6** din m
 - `ball_radius` — o singură valoare pentru toate bilele
 - `logos_on_balls` — `false` = bile doar cu culori, fără sigle/steaguri
 - `strength_edge` — cât contează `strength` (0 = deloc)
+- `windmill_fast_from_min` — minutul de la care moara se învârte mai repede (acum 60; trecerea durează ±`windmill_boost_ramp_half` minute), `boost` — cât de repede (1.3)
+- `show_simulation_label` — `false` (implicit) = fără eticheta SIMULATION pe ecran; `true` = o repune
+- Competiții: `draw_seed` (opțional) fixează tragerea la sorți; fără el, tragerea depinde de competiție + hartă (alt video = alt tablou)
 
 ## Hărți / teme — `config/maps/*.json`
 Culori pentru cer, rocă, iarbă, moară, portar, decor (`scenery`) și muzică (`music`: `transpose`, `bpm`, `progression`, `arp`). O temă nouă = copie a unui fișier cu alt `id`.

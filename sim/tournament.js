@@ -30,9 +30,8 @@ function passesRules(r, rc) {
   if (r.safetyCount > 0) return 'safety';
   if (r.goldenStart !== null && (r.goldenResolve === null || r.goldenResolve > CFG.GOLDEN_CAP)) return 'golden_cap';
   for (const f of r.frames) if (f.b.length !== 2 * CFG.BALLS_PER_TEAM) return 'accounting';
-  // P1b gate (filters rare engine edge cases seen on screen, physics unchanged): every crossbar contact from above
-  // (the 0.1 s front-corner latch can report a side contact), and no ball visibly resting > STUCK_TIME + 0.15 s
-  if (r.events.some((e) => e.type === 'bar' && !(e.y < G.BAR_TOP))) return 'bar_side';
+  // P1b gate: no ball visibly resting > STUCK_TIME + 0.15 s. (The P1b "bar contact only from above" rule is gone in P5:
+  // the crossbar is solid on every face, so side/underside bounces are real contacts.)
   { const still = new Array(2 * CFG.BALLS_PER_TEAM).fill(0); const F = r.frames;
     for (let i = 1; i < F.length; i++) { const dt = F[i].t - F[i - 1].t;
       for (let q = 0; q < still.length; q++) { const b = F[i].b[q], p = F[i - 1].b[q];
@@ -168,7 +167,7 @@ function buildTournament(conf, opts) {
   opts = opts || {};
   conf = conf || L.loadCompetition();
   const TEAMS = teamsFromConf(conf);
-  const rc = L.rulesToCfg(conf.rules);
+  const rc = Object.assign(L.rulesToCfg(conf.rules), opts.cfgExtra || {}); // cfgExtra: test-only flags that do not change the simulation (KEEP_FINE)
   const cache = opts.seedCache || {};
   const comp = conf.competition;
   const format = comp.format;
@@ -187,7 +186,7 @@ function buildTournament(conf, opts) {
   let bracket = null;
   let firstTies;
   if (format === 'semis_two_legs_final') firstTies = comp.pairing.map((p) => p.slice());
-  else { bracket = buildBracket(comp.teams, comp.forced_pairs || []); firstTies = bracket.ties; }
+  else { bracket = buildBracket(comp.teams, comp.forced_pairs || [], { seed: conf.drawSeed, strengths: TEAMS.map((t) => t.rating) }); firstTies = bracket.ties; }
   const R = [];
   let key = 0;
   const cb = { n: 0, strong: 0, list: [] };
@@ -277,7 +276,7 @@ function buildTournament(conf, opts) {
       kits: { A: kits.A, B: kits.B }, kitDE: kits.dE, kitNote: kits.note,
       motm: manOfTheMatch(r.goals, score, r.goldenWinner),
       launches: r.launches, strength: { fav: r.ctx.fav || null, edge: r.ctx.edge || 0 },
-      shots: r.shots, shotStarts: r.shotStarts, shotContacts: r.shotContacts, cines: r.cines,
+      shots: r.shots, shotStarts: r.shotStarts, shotContacts: r.shotContacts, cines: r.cines, fine: r.fine,
       winnerSide, comeback: c.comeback, comeback_depth: c.depth,
     };
     if (early && c.comeback) cb.list.push({ match: matches.length, stage: m.stage, leg, depth: c.depth });
@@ -391,7 +390,7 @@ function makeShow(conf, T) {
   return Object.assign({
     geometryNote: 'design space 1280x720', configHash: conf.hash, simHash: conf.simHash,
     map: conf.map, audioCfg: conf.audio, bracketStyle: style, logosOnBalls: conf.rules.logos_on_balls !== false,
-    cfg: { OMEGA: CFG.OMEGA, GAME_MIN_PER_SEC: conf.rules.GAME_MIN_PER_SEC, BALLS_PER_TEAM: conf.rules.BALLS_PER_TEAM, BALL_RADIUS: conf.rules.ball_radius || G.BALL_R },
+    cfg: { OMEGA: CFG.OMEGA, GAME_MIN_PER_SEC: conf.rules.GAME_MIN_PER_SEC, BALLS_PER_TEAM: conf.rules.BALLS_PER_TEAM, BALL_RADIUS: conf.rules.ball_radius || G.BALL_R, SHOW_SIM_LABEL: conf.rules.show_simulation_label === true },
     bracket: bracketSteps(T, style),
   }, logoPart(conf), T, S);
 }

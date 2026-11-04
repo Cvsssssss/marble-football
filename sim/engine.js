@@ -5,6 +5,8 @@ const crypto = require('crypto');
 const G = require('./geometry');
 const BASE_CFG = require('./config');
 const CINE = require('./cinematic');
+const PUMP = require('./pump');
+const GH = require('./good_hit');
 
 const { Engine, Bodies, Body, Composite, Events, Common } = Matter;
 
@@ -38,7 +40,7 @@ function makeMillAngle(cfg, phase) {
   return { angle, omega, tossPhase };
 }
 
-// ---------- crossbar (v2): one-way top surface, collider == drawn rectangle, swept test ----------
+// ---------- crossbar (P5): solid on every face, collider == drawn rectangle, swept test ----------
 // Closest point of the drawn bar rectangle [BAR_X0,BAR_X1] x [BAR_TOP,BAR_BOTTOM] to (x,y).
 function barClosest(x, y) {
   const cx = Math.max(G.BAR_X0, Math.min(G.BAR_X1, x)), cy = Math.max(G.BAR_TOP, Math.min(G.BAR_BOTTOM, y));
@@ -47,37 +49,68 @@ function barClosest(x, y) {
 }
 // visible overlap depth (px) of a ball of radius r centred at (x,y) into the drawn bar (<=0: no overlap)
 function barOverlap(x, y, r) { const c = barClosest(x, y); return c.inside ? r + (y - G.BAR_TOP) : r - c.d; }
-// b: ball state (holds barGhost), bd: matter body after Engine.update, (p0x,p0y): centre before the step.
-// A ball is solid against the bar only if its centre was above the top surface at the start of the step.
-// A ball that touches the bar with its centre below the top (from below / from the side) becomes a "ghost"
-// and passes through until it is clear of the bar. Returns {impact, x, y} on contact, else null.
-// Latch: for ~0.1 s after its centre was above the top surface, a ball that slid past the front corner is also
-// solid against the bar's front end face (otherwise it would visibly slide into the bar end).
-const BAR_LATCH_STEPS = 12;
+// b: ball state, bd: matter body after Engine.update, (p0x,p0y): centre before the step.
+// P5 root cause of "ball passes through the bar": v2 made the bar solid only for balls whose centre was above its
+// top at the start of the step; a ball arriving at bar height from the front (bomb shots towards the top corner)
+// or touching the underside became a "ghost" and passed through. Now the bar is solid on every face: the step
+// p0 -> p1 is swept in <= 1 px sub-steps, the first touching position is refined by bisection, the ball is put
+// there and its velocity reflected about the contact normal. Only a ball that is already deep inside at the start
+// of a step (never happens in play: kept as a safety net) is let out without a bounce. Returns {impact, x, y} or null.
 function sweptBar(b, bd, r, p0x, p0y, e) {
-  b.barAge = p0y < G.BAR_TOP ? 0 : (b.barAge === undefined ? 1e9 : b.barAge + 1);
-  const latched = b.barAge <= BAR_LATCH_STEPS && p0x < G.BAR_X0 && p0y < G.BAR_BOTTOM + r;
   const o0 = barOverlap(p0x, p0y, r);
-  if (b.barGhost) { if (o0 <= 0) b.barGhost = false; }
-  else if (o0 > 0 && p0y >= G.BAR_TOP && !latched) b.barGhost = true;
-  if (b.barGhost || (p0y >= G.BAR_TOP && !latched)) return null;
+  if (b.barGhost) { if (o0 <= 0) b.barGhost = false; else return null; }
+  if (o0 > r * 0.5) { b.barGhost = true; return null; }
   const x1 = bd.position.x, y1 = bd.position.y;
-  const K = Math.max(1, Math.ceil(Math.hypot(x1 - p0x, y1 - p0y) / 1.5));
-  for (let k = 1; k <= K; k++) {
-    const qx = p0x + ((x1 - p0x) * k) / K, qy = p0y + ((y1 - p0y) * k) / K;
-    const c = barClosest(qx, qy);
-    if (!c.inside && c.d >= r) continue;
-    let nx = 0, ny = -1;
-    if (!c.inside && c.d > 1e-6) { nx = (qx - c.cx) / c.d; ny = (qy - c.cy) / c.d; }
-    const px = c.cx + nx * r, py = c.cy + ny * r;
-    let vx = bd.velocity.x, vy = bd.velocity.y;
-    const vn = vx * nx + vy * ny;
-    if (vn < 0) { const ee = -vn * 60 < 40 ? 0 : e; vx -= (1 + ee) * vn * nx; vy -= (1 + ee) * vn * ny; }
-    Body.setPosition(bd, { x: px, y: py });
-    Body.setVelocity(bd, { x: vx, y: vy });
-    return { impact: Math.max(0, -vn * 60), x: px, y: py };
+  const at = (u) => [p0x + (x1 - p0x) * u, p0y + (y1 - p0y) * u];
+  const hits = (u) => { const q = at(u); return barOverlap(q[0], q[1], r) > 1e-6; };
+  let uHit = -1;
+  if (o0 > 1e-6) uHit = 0;
+  else {
+    const K = Math.max(1, Math.ceil(Math.hypot(x1 - p0x, y1 - p0y) / 1.0));
+    for (let k = 1; k <= K; k++) if (hits(k / K)) { uHit = k / K; break; }
+    if (uHit < 0) return null;
+    let lo = uHit - 1 / K, hi = uHit; // lo: free, hi: overlapping
+    for (let it = 0; it < 20; it++) { const mid = (lo + hi) / 2; if (hits(mid)) hi = mid; else lo = mid; }
+    uHit = lo;
   }
-  return null;
+  const q = at(uHit);
+  const c = barClosest(q[0], q[1]);
+  let nx = 0, ny = -1;
+  if (!c.inside && c.d > 1e-6) { nx = (q[0] - c.cx) / c.d; ny = (q[1] - c.cy) / c.d; }
+  else if (c.inside) { // centre inside (only possible from a resting overlap): leave by the nearest face
+    const dTop = q[1] - G.BAR_TOP, dBot = G.BAR_BOTTOM - q[1], dLeft = q[0] - G.BAR_X0;
+    if (dBot < dTop && dBot < dLeft) { nx = 0; ny = 1; } else if (dLeft < dTop) { nx = -1; ny = 0; }
+  }
+  // ball placed exactly touching the rectangle (+0.01 px) along the contact normal
+  let px, py;
+  if (!c.inside) { px = c.cx + nx * (r + 0.01); py = c.cy + ny * (r + 0.01); }
+  else if (ny < 0) { px = q[0]; py = G.BAR_TOP - r - 0.01; }
+  else if (ny > 0) { px = q[0]; py = G.BAR_BOTTOM + r + 0.01; }
+  else { px = G.BAR_X0 - r - 0.01; py = q[1]; }
+  let vx = bd.velocity.x, vy = bd.velocity.y;
+  const vn = vx * nx + vy * ny;
+  if (vn < 0) { const ee = -vn * 60 < 40 ? 0 : e; vx -= (1 + ee) * vn * nx; vy -= (1 + ee) * vn * ny; }
+  Body.setPosition(bd, { x: px, y: py });
+  Body.setVelocity(bd, { x: vx, y: vy });
+  return { impact: Math.max(0, -vn * 60), x: bd.position.x, y: bd.position.y, nx, ny };
+}
+
+// P5: platforms. matter-js contacts are soft, so a ball squeezed by the kinematic keeper (mass 1e7) could sink
+// ~1.5 px into the ground for a frame. After each step a ball overlapping a platform rectangle by more than
+// PLAT_SLOP px is projected out along the contact normal and its inward velocity removed (no extra bounce).
+const PLAT_SLOP = 0.3;
+const PLAT_RECTS = [[G.LEFT_PLAT[0] - 40, G.LEFT_PLAT[1], G.GROUND_Y, G.GROUND_Y + 300], [G.RIGHT_PLAT[0], G.RIGHT_PLAT[1] + 40, G.GROUND_Y, G.GROUND_Y + 300]];
+function platformProject(bd, r) {
+  for (const [x0, x1, y0, y1] of PLAT_RECTS) {
+    const x = bd.position.x, y = bd.position.y;
+    const cx = Math.max(x0, Math.min(x1, x)), cy = Math.max(y0, Math.min(y1, y));
+    let nx = 0, ny = -1, d = 0;
+    if (cx !== x || cy !== y) { d = Math.hypot(x - cx, y - cy); if (d >= r - PLAT_SLOP) continue; nx = (x - cx) / d; ny = (y - cy) / d; }
+    const px = (cx === x && cy === y) ? x : cx + nx * r, py = (cx === x && cy === y) ? y0 - r : cy + ny * r;
+    Body.setPosition(bd, { x: px, y: py });
+    const vn = bd.velocity.x * nx + bd.velocity.y * ny;
+    if (vn < 0) Body.setVelocity(bd, { x: bd.velocity.x - vn * nx, y: bd.velocity.y - vn * ny });
+  }
 }
 
 // ---------- keeper schedule / pose ----------
@@ -232,6 +265,8 @@ function simulateMatch(seed, ctx, cfgOverride) {
   const millPhase = rng() * Math.PI * 2;
   let shotTeam = xrng() < 0.5 ? 'A' : 'B'; // team of the first added-time shot (seeded)
   const srng = mulberry32((seed ^ 0x2c1b3c6d) >>> 0); // P2 strength lever
+  const prng = mulberry32((seed ^ 0x51ed27f1) >>> 0); // P5 pump: launch vx + timing jitter
+  let pumpPlan = null; // P5: { tPop, vx, vy } of the next launch
   const MA = makeMillAngle(cfg, millPhase);
   const millAngle = MA.angle;
 
@@ -256,7 +291,7 @@ function simulateMatch(seed, ctx, cfgOverride) {
   let tossTarget = cfg.TOSS_PHASE + uni(rng, -cfg.TOSS_PHASE_JIT, cfg.TOSS_PHASE_JIT);
   let mode = 'regular'; // regular | clear | banner | shots | golden | decided | done
   let clearStart = null, bannerStart = null, nextShotAt = 0, decideAt = null;
-  let shotIdx = 0, shotBall = null, shotT0 = 0, shotCineDone = false, cineOpen = null;
+  let shotIdx = 0, shotBall = null, shotT0 = 0, shotCineDone = false, shotMill = [];
   const shots = [], shotStarts = [], shotContacts = [], cines = [];
   let fineMode = false, fineStart = -1; // from the first shot on, one frame per physics step (for slow-motion resampling)
   let goldenStart = null, goldenWinner = null, tailUntil = null;
@@ -275,8 +310,8 @@ function simulateMatch(seed, ctx, cfgOverride) {
   }
   function resolveShot(result, t) {
     const k = shotIdx + 1;
-    shots.push({ k, team: shotBall.team, ball: shotBall.id, t0: +shotT0.toFixed(4), t1: +t.toFixed(4), result, cine: cines.some((c) => c.k === k) });
-    if (cineOpen) { cineOpen.tOut = Math.min(t, cineOpen.tIn + cfg.CINE_MAX_SIM); cineOpen = null; }
+    shots.push({ k, team: shotBall.team, ball: shotBall.id, t0: +shotT0.toFixed(4), t1: +t.toFixed(4), result, cine: false, contacts: GH.mergeContacts(shotMill).map((x) => +x.toFixed(4)) });
+    shotMill = [];
     shotBall = null; shotIdx++;
     nextShotAt = t + (result === 'goal' ? cfg.SHOT_GOAL_GAP : cfg.SHOT_GAP);
     if (shotIdx >= addedTime) decideAt = t + (result === 'goal' ? cfg.SHOT_GOAL_GAP : cfg.SHOT_END_GAP);
@@ -301,6 +336,7 @@ function simulateMatch(seed, ctx, cfgOverride) {
       if (ba && bb) type = 'ballball';
       else type = other.label; // ground | wall | bar | mill | keeper
       if (type === 'mill' && !ball.launch) ball.launch = { step0: step, best: 0, vx: 0, t0: simT };
+      if (type === 'mill' && mode === 'shots' && ball === shotBall) shotMill.push(simT + dt); // P5: every windmill contact of the shot ball (end of this step)
       const n = pair.collision.normal;
       const rvx = A.velocity.x - B.velocity.x, rvy = A.velocity.y - B.velocity.y;
       const imp = Math.abs(rvx * n.x + rvy * n.y) * 60;
@@ -381,12 +417,26 @@ function simulateMatch(seed, ctx, cfgOverride) {
     // --- outlet ---
     const regularFlow = (mode === 'regular' || mode === 'golden') && tailUntil === null && t0 >= nextRelease;
     const shotFlow = mode === 'shots' && shotBall === null && shotIdx < addedTime && t0 >= nextShotAt;
-    const phaseOk = modPi(millAngle(t0) - tossTarget) < MA.omega(t1) * dt * 1.001 + 1e-9;
+    // P5 pump: 'predict' = timing-aware (sim/pump.js: the pop moment and launch speed are chosen from a physics
+    // prediction of the windmill contact); 'phase' = pre-P5 (pop when the windmill angle hits the toss phase).
+    // PUMP_PREDICT_FROM 'boost' (default): prediction only once the windmill speeds up (normal-speed play keeps the
+    // approved pre-P5 feel and goal rate); 'always': at every speed.
+    const predictPump = cfg.PUMP_TIMING !== 'phase' && (cfg.PUMP_PREDICT_FROM === 'always' || MA.omega(t0) > cfg.OMEGA * 1.0005);
+    const phaseOk = predictPump || modPi(millAngle(t0) - tossTarget) < MA.omega(t1) * dt * 1.001 + 1e-9;
     if ((regularFlow || shotFlow) && phaseOk) {
       const inPipe = balls.filter((b) => b.state === 'pipe').sort((a, b) => b.s - a.s);
       const spoutClear = !balls.some((b) => b.body && Math.hypot(b.body.position.x - spoutTop.x, b.body.position.y - spoutTop.y) < 2 * b.r + 6)
         && !balls.some((b) => b.state === 'emerge');
-      if (inPipe.length && inPipe[0].s >= L - 0.5 && spoutClear) {
+      let popNow = true;
+      if (predictPump && inPipe.length && inPipe[0].s >= L - 0.5 && spoutClear) {
+        if (!pumpPlan || t0 > pumpPlan.tPop + dt * 0.5) { // new plan (or the planned moment was missed: spout was blocked)
+          const vx = uni(prng, cfg.TOSS_VX[0], cfg.TOSS_VX[1]);
+          const pl = PUMP.planLaunch(cfg, t0, millAngle, MA.omega, dt, prng, vx);
+          pumpPlan = { tPop: t0 + pl.delaySteps * dt, vx, vy: pl.vy, good: pl.good };
+        }
+        popNow = t0 >= pumpPlan.tPop - dt * 0.5;
+      }
+      if (inPipe.length && inPipe[0].s >= L - 0.5 && spoutClear && popNow) {
         // queued = balls resting in the final queue zone
         const queued = inPipe.filter((b, k) => b.s >= L - k * spacingOf(b) - 0.5);
         // P2 strength (invisible): in regular play the favourite sometimes takes the release turn (ctx.edge = probability,
@@ -396,10 +446,11 @@ function simulateMatch(seed, ctx, cfgOverride) {
         const pick = shotFlow ? queued.find((b) => b.team === shotTeam) : (queued.find((b) => b.team === want) || queued[0]);
         if (pick) {
         pick.state = 'emerge'; pick.t = 0; pick.x = G.SPOUT_X; pick.y = G.GROUND_Y + pick.r;
+        pick.launchV = predictPump && pumpPlan ? { vx: pumpPlan.vx, vy: pumpPlan.vy } : null; pumpPlan = null;
         turn = pick.team === 'A' ? 'B' : 'A';
         ev(t0, 'pop', { ball: pick.id, team: pick.team });
         if (shotFlow) {
-          shotBall = pick; shotT0 = t0; shotCineDone = false; shotStarts.push(+t0.toFixed(4));
+          shotBall = pick; shotT0 = t0; shotCineDone = false; shotMill = []; shotStarts.push(+t0.toFixed(4));
           ev(t0, 'shot', { k: shotIdx + 1, n: addedTime, team: pick.team, ball: pick.id });
           shotTeam = shotTeam === 'A' ? 'B' : 'A';
         }
@@ -434,7 +485,9 @@ function simulateMatch(seed, ctx, cfgOverride) {
             collisionFilter: { category: CAT.BALL, mask: CAT.BALL | CAT.STATIC | CAT.KEEPER | CAT.MILL | CAT.BAR },
             plugin: { ball: b } });
           setDt(body, W.dtMs);
-          Body.setVelocity(body, { x: vToMatter(uni(rng, cfg.TOSS_VX[0], cfg.TOSS_VX[1])), y: vToMatter(-uni(rng, cfg.TOSS_VY[0], cfg.TOSS_VY[1])) });
+          const rvx = uni(rng, cfg.TOSS_VX[0], cfg.TOSS_VX[1]), rvy = uni(rng, cfg.TOSS_VY[0], cfg.TOSS_VY[1]); // drawn in both modes (same rng stream)
+          const lv = b.launchV || { vx: rvx, vy: rvy }; b.launchV = null;
+          Body.setVelocity(body, { x: vToMatter(lv.vx), y: vToMatter(-lv.vy) });
           b.body = body; b.state = 'play'; b.still = 0;
           Composite.add(engine.world, body);
         }
@@ -483,17 +536,17 @@ function simulateMatch(seed, ctx, cfgOverride) {
       const sp = Math.hypot(bd.velocity.x, bd.velocity.y);
       if (sp > maxV) Body.setVelocity(bd, { x: bd.velocity.x * maxV / sp, y: bd.velocity.y * maxV / sp });
       if (cfg.BAR_MODE !== 'v1') { const hit = sweptBar(b, bd, b.r, b.px, b.py, cfg.BALL_RESTITUTION); if (hit) barEvent(b, hit); }
+      platformProject(bd, b.r);
       if (b.launch) {
         const spd = Math.hypot(bd.velocity.x, bd.velocity.y) * 60;
         if (spd > b.launch.best) { b.launch.best = spd; b.launch.vx = bd.velocity.x * 60; }
         if (step - b.launch.step0 >= Math.round(0.3 * cfg.HZ)) {
           launches.push({ gm: +(simT * cfg.GAME_MIN_PER_SEC).toFixed(2), v: Math.round(b.launch.best) });
-          // added-time shot: the first windmill contact decides "good hit" (cinematic) or miss
+          // added-time shot: first windmill contact stats (diagnostics only; oldRule = the pre-P5 trigger, which looked only at
+          // this peak speed and the sign of vx. P5: the cinematic is decided after the loop from the real trajectory, see below)
           if (mode === 'shots' && b === shotBall && !shotCineDone) {
             shotCineDone = true;
-            const good = b.launch.best >= cfg.GOOD_HIT_V && b.launch.vx > 0;
-            shotContacts.push({ k: shotIdx + 1, t: +b.launch.t0.toFixed(4), v: Math.round(b.launch.best), vx: Math.round(b.launch.vx), good });
-            if (good) { cineOpen = { k: shotIdx + 1, ball: b.id, tIn: b.launch.t0, tOut: null }; cines.push(cineOpen); }
+            shotContacts.push({ k: shotIdx + 1, t: +b.launch.t0.toFixed(4), v: Math.round(b.launch.best), vx: Math.round(b.launch.vx), oldRule: b.launch.best >= cfg.GOOD_HIT_V && b.launch.vx > 0 });
           }
           b.launch = null;
         }
@@ -534,7 +587,28 @@ function simulateMatch(seed, ctx, cfgOverride) {
     else if (step % stepsPerFrame === 0) { recordFrame(); if (mode === 'shots') { fineMode = true; fineStart = frames.length - 1; } }
   }
   if (!ended && !failed) failed = 'time_cap';
-  for (const c of cines) c.tOut = Math.min(c.tOut === null ? simT : c.tOut, c.tIn + cfg.CINE_MAX_SIM);
+  // P5 good hits (sim/good_hit.js): for every windmill contact of an added-time shot ball, the ball's own future in
+  // this deterministic run (every physics step is recorded from the first shot on) is the prediction: if it reaches
+  // the goal-mouth region (+ margin) within REACH_T s and before another windmill contact, the cinematic starts at
+  // the contact and eases out CINE_HOLD s after the ball reached the mouth (goal, save, post/bar or near miss).
+  // No other contact gets an effect. (Pre-P5 bug: peak speed + sign of vx of the first contact only, so balls hit
+  // hard downwards / over the goal got slow motion, and good second contacts got none.)
+  if (fineStart >= 0) {
+    const fine = frames.slice(fineStart);
+    for (const sh of shots) {
+      const path = [];
+      for (const f of fine) { if (f.t < sh.t0 - 1e-9) continue; if (f.t > sh.t1 + 1e-9) break; const q = f.b[sh.ball]; path.push([f.t, q[0], q[1], q[3] === 3 || q[3] === 4]); }
+      const g = sh.result === 'goal' ? goals.find((x) => x.shot === sh.k) : null;
+      let lastOut = -Infinity;
+      for (const row of GH.judgeShot(sh.contacts, path, sh.t1, g ? g.t : null)) {
+        if (!row.good || row.t < lastOut + cfg.SLOWMO_OUT) continue;
+        const c = { k: sh.k, ball: sh.ball, tIn: row.t, tOut: Math.min(row.tReach + cfg.CINE_HOLD, row.t + cfg.CINE_MAX_SIM, sh.t1 + cfg.CINE_HOLD) };
+        cines.push(c); lastOut = c.tOut; sh.cine = true;
+        break; // one cinematic per shot
+      }
+    }
+    cines.sort((a, b) => a.tIn - b.tIn);
+  }
   const outFrames = fineStart >= 0 ? CINE.resample(frames, fineStart, cines, cfg, stepsPerFrame) : frames;
   CINE.annotate(events, outFrames, cines, cfg);
 
@@ -545,6 +619,7 @@ function simulateMatch(seed, ctx, cfgOverride) {
     score, goals, events, frames: outFrames, stuckCount, safetyCount, failed,
     rA: ctx.rA, rB: ctx.rB, millPhase, omega: cfg.OMEGA, launches,
   };
+  if (cfg.KEEP_FINE && fineStart >= 0) res.fine = frames.slice(fineStart); // P5 tests: every physics step from the first shot on (not hashed)
   res.hash = crypto.createHash('sha256').update(JSON.stringify({ f: outFrames, e: events })).digest('hex');
   return res;
 }
@@ -604,4 +679,4 @@ function tossTest(n, seed, cfgOverride) {
   return out;
 }
 
-module.exports = { simulateMatch, tossTest, keeperPose, mulberry32, STATE, CAT, buildWorld, driveKinematic, sweptBar, barOverlap, barClosest, makeMillAngle };
+module.exports = { platformProject, simulateMatch, tossTest, keeperPose, mulberry32, STATE, CAT, buildWorld, driveKinematic, sweptBar, barOverlap, barClosest, makeMillAngle };

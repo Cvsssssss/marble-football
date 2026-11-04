@@ -8,7 +8,7 @@ const { execFileSync, spawn, spawnSync } = require('child_process');
 const L = require('./sim/config_loader');
 const TOUR = require('./sim/tournament');
 const { selectReels } = require('./sim/selectReels');
-const { buildReel } = require('./sim/reels');
+const { buildReel, TARGET_MAX } = require('./sim/reels');
 const ffmpeg = require('ffmpeg-static');
 
 const ROOT = __dirname;
@@ -17,6 +17,7 @@ const compFile = path.resolve(arg('--competition', path.join('config', 'competit
 const MAP = arg('--map', undefined);
 const ONLY = arg('--only', null);
 const FAST = process.argv.includes('--fast'); // quicker encode for tests
+const NO_RENDER = process.argv.includes('--no-render'); // P5: selection + suggestions + reel_info only (no video)
 const OUT = path.resolve(arg('--out-dir', path.join(ROOT, 'output', 'reels'))); // P4: run folder <run>/reels
 const BUILD = path.join(ROOT, 'build', 'reels');
 
@@ -51,7 +52,7 @@ function lintSuggestion(s, playerNames) {
 }
 function suggestionsTxt(s, r, why) {
   return [
-    'SUGESTII (opțional) — Max scrie titlul și descrierea lui. Regulă: fără nume de jucători, fără nume oficiale, menționează că e simulare.',
+    'SUGESTII (opțional) — Max scrie titlul și descrierea lui. Regulă: fără nume de jucători, fără nume oficiale, menționează că e simulare pe calculator, nu rezultate reale (pe ecran nu mai e etichetă). La încărcare verifică întrebarea YouTube despre conținut modificat/sintetic.',
     '', 'TITLU:', s.title, '', 'DESCRIERE:', s.description, '', 'TAGURI:', s.tags.join(', '), '',
     'ORDINE / ORĂ PUBLICARE:', s.publish, '', `De ce a fost ales meciul: ${why}`, `Meci în videoul lung: ${r.long_video.match_start_s}s – ${r.long_video.match_end_s}s`, '',
   ].join('\n');
@@ -91,8 +92,8 @@ async function main() {
   const showFile = path.join(BUILD, 'show.json');
   const { show } = TOUR.buildAll(compFile, showFile, { map: MAP });
   const index = TOUR.matchesIndex(show);
-  // only matches whose reel fits in 60 s are candidates (a long match with many goals may not fit even fast-forwarded)
-  const fitIndex = Object.assign({}, index, { matches: index.matches.filter((m) => !m.goals.length || buildReel(show, m.index).seconds <= 60) });
+  // only matches whose reel fits the 30..55 s spec are candidates (P5: was <= 60 s; a busy match may not fit even fast-forwarded)
+  const fitIndex = Object.assign({}, index, { matches: index.matches.filter((m) => !m.goals.length || buildReel(show, m.index).seconds <= TARGET_MAX + 1) });
   const sel = selectReels(fitIndex, 3);
   fs.writeFileSync(path.join(OUT, 'selection.json'), JSON.stringify(sel, null, 1));
   console.log(`selection: ${sel.reels.length} reels (candidates ${sel.candidates}${sel.shortfall ? ', SHORTFALL ' + sel.shortfall : ''})`);
@@ -104,6 +105,8 @@ async function main() {
     const dir = path.join(OUT, `reel${r.rank}_${r.id}`); fs.mkdirSync(dir, { recursive: true });
     const rj = path.join(BUILD, `reel${r.rank}.json`); fs.writeFileSync(rj, JSON.stringify(reel));
     const t0 = Date.now();
+    const out = path.join(dir, 'reel.mp4');
+    if (!NO_RENDER) {
     const vid = path.join(BUILD, `reel${r.rank}_noaudio.mp4`), wav = path.join(BUILD, `reel${r.rank}.wav`);
     // render cache: the silent video is reused when the reel timeline and the renderer are unchanged
     const key = require('crypto').createHash('sha256').update(JSON.stringify(reel)).update(fs.readFileSync(path.join(ROOT, 'render', 'draw.js'))).digest('hex').slice(0, 16);
@@ -111,15 +114,15 @@ async function main() {
     if (!(fs.existsSync(vid) && fs.existsSync(keyF) && fs.readFileSync(keyF, 'utf8') === key)) { await renderReel(show, reel, vid); fs.writeFileSync(keyF, key); }
     else console.log(`reel ${r.rank}: video unchanged, reused`);
     execFileSync(process.platform === 'win32' ? 'python' : 'python3', [path.join(ROOT, 'audio', 'make_audio.py'), rj, wav], { stdio: ['ignore', 'ignore', 'inherit'] });
-    const out = path.join(dir, 'reel.mp4');
     mux(vid, wav, out);
+    } else if (fs.existsSync(out)) fs.rmSync(out); // a stale video of another timeline must not stay next to new info
     const s = suggestions(conf, sel, r, show);
     const lint = lintSuggestion(s, playerNames);
     if (lint.length) throw new Error('suggestions lint: ' + lint.join('; '));
     fs.writeFileSync(path.join(dir, 'suggestions.txt'), suggestionsTxt(s, r, r.why));
-    fs.writeFileSync(path.join(dir, 'reel_info.json'), JSON.stringify({ rank: r.rank, id: r.id, seconds: reel.seconds, seed: reel.seed, timeline_hash: reel.timeline_hash,
+    fs.writeFileSync(path.join(dir, 'reel_info.json'), JSON.stringify({ rank: r.rank, id: r.id, rendered: !NO_RENDER, seconds: reel.seconds, seed: reel.seed, timeline_hash: reel.timeline_hash,
       ffStretches: reel.ffStretches, segments: reel.segments.map((x) => ({ type: x.type, start: x.start, len: x.len })) }, null, 1));
-    report.push(`${r.rank}. ${r.id} ${r.team_a} vs ${r.team_b} -> ${path.relative(ROOT, out)} (${reel.seconds}s, ${((Date.now() - t0) / 1000).toFixed(0)}s build)`);
+    report.push(`${r.rank}. ${r.id} ${r.team_a} vs ${r.team_b} -> ${NO_RENDER ? path.relative(ROOT, dir) + ' (info only, not rendered)' : path.relative(ROOT, out)} (${reel.seconds}s, ${((Date.now() - t0) / 1000).toFixed(0)}s build)`);
     console.log(report[report.length - 1]);
   }
   console.log('reels done');

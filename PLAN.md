@@ -15,7 +15,7 @@ Apeși START → alegi (sau lași recomandarea) → primești un folder cu:
 - **Toate mingile au aceeași mărime**, la ambele echipe. Avantajul favoritei nu se mai face prin mărime.
 - Nume proprii de competiții: **MARBLE CHAMPIONS** (UCL), **MARBLE CONTINENTAL** (Europa League), **MARBLE WORLD NATIONS**, **MARBLE EURO NATIONS** (alternativă: „MARBLE LEAGUE", ți-o schimb din configurare).
 - 16 echipe: primele 16 din cele 36 din faza ligii UCL 2026–27 (clasament curent, salvat cu sursă și dată); pentru țări, primele 16 din clasamentul FIFA (alegerea mea implicită).
-- Jocul ca în demo, plus corecturile: sunet de gol nou, culori pe mingi, bara reparată, bracket simetric cu finala la mijloc, golden ball cu ceasul înghețat la `90+N`, morișcă mai rapidă de la minutul 70, reluarea golului cu nume + minut, Man of the Match cu trofeu, ecran final cu câștigătoarea + podium cu top 3 marcatori.
+- Jocul ca în demo, plus corecturile: sunet de gol nou, culori pe mingi, bara reparată, bracket simetric cu finala la mijloc, golden ball cu ceasul înghețat la `90+N`, morișcă mai rapidă de la minutul 60 (P5; înainte 70), reluarea golului cu nume + minut, Man of the Match cu trofeu, ecran final cu câștigătoarea + podium cu top 3 marcatori.
 - Strategia de postare: întâi video lung (3 meciuri tari cu revenire din optimi/sferturi), apoi reel-uri cu acele secvențe. Cu o zi înainte de un meci real tare, videoul lung include acel meci (pereche forțată în optimi/sferturi) și postezi și un reel cu el. Fără meci tare: un video pe săptămână, rotind competiția și harta.
 
 ## 3. Regulile de postare (ghid; devin `plan/OPERATING_RULES.md` în P3, partea B)
@@ -23,7 +23,7 @@ Apeși START → alegi (sau lași recomandarea) → primești un folder cu:
 2. Meci real tare în ziua D → video lung publicat în **D−1 seara** (Copenhaga), reel-uri în D−1 și D.
 3. Fără meci tare: aleatoriu o dată pe săptămână din `content_plan.json`; nu aceeași hartă sau competiție de două ori la rând.
 4. Reel-uri doar din optimi/sferturi; niciodată semifinală sau finală (spoiler).
-5. Titlu descriptiv, cu „SIMULATION"; descriere care spune că e simulare pe calculator, nu rezultate reale; fără nume de jucători în titlu/descriere/taguri; fără clickbait care promite rezultate reale.
+5. Titlu descriptiv, cu „SIMULATION"; descriere care spune că e simulare pe calculator, nu rezultate reale (eticheta SIMULATION de pe ecran nu mai e obligatorie din P5: flag `show_simulation_label`, implicit false; la încărcare răspunzi corect la întrebarea YouTube despre conținut modificat/sintetic); fără nume de jucători în titlu/descriere/taguri; fără clickbait care promite rezultate reale.
 6. Încarci întâi **privat**, verifici, apoi publici. Tu răspunzi de ce publici.
 
 ## 4. Ce trebuie să știi despre YouTube (surse terțe, nu oficiale)

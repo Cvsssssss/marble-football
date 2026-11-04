@@ -1111,8 +1111,10 @@
   }
 
   // ---------- main entry ----------
-  // small SIMULATION label, always visible (project rule)
+  // small SIMULATION label: only if rules.show_simulation_label is true (P5: default off)
+  const simLabelOn = () => !!(show && show.cfg && show.cfg.SHOW_SIM_LABEL);
   function simLabel() {
+    if (!simLabelOn()) return;
     ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.scale(S, S); ctx.globalAlpha = 0.8;
     ctx.font = `700 11px ${FONT}`; const w = ctx.measureText('SIMULATION').width + 16;
     ctx.fillStyle = 'rgba(8,20,38,0.55)'; rrect(ctx, G.W - w - 10, G.H - 27, w, 18, 9); ctx.fill();
@@ -1281,6 +1283,7 @@
     text(c, label, RW / 2, 146, fitText(c, label, 560, 30), '#ffffff', 'center', 900);
   }
   function reelSimLabel(c) {
+    if (!simLabelOn()) return;
     c.font = `800 15px ${FONT}`; const w = c.measureText('SIMULATION').width + 22;
     c.fillStyle = 'rgba(8,20,38,0.78)'; rrect(c, RW / 2 - w / 2, 1112, w, 28, 10); c.fill();
     text(c, 'SIMULATION', RW / 2, 1126.5, 15, '#ffffff', 'center', 800);

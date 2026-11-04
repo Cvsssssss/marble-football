@@ -27,12 +27,11 @@ function check(name, ok, detail) {
 console.log('== bracket');
 {
   const ids = Array.from({ length: 16 }, (_, i) => 't' + (i + 1));
-  const b = buildBracket(ids);
+  const b = buildBracket(ids, [], { seed: 7 });
   const pairs = b.ties.map(([x, y]) => `${x + 1}v${y + 1}`);
-  const half = (i) => (b.slots.indexOf(i) < 8 ? 'L' : 'R');
   const quarter = (i) => b.slots.indexOf(i) >> 2;
-  check('buildBracket default: 1v16, 8v9, 4v13, 5v12 | 2v15, 7v10, 3v14, 6v11 (1st and 2nd only meet in the final, top 4 in different quarters)',
-    pairs.join(',') === '1v16,8v9,4v13,5v12,2v15,7v10,3v14,6v11' && half(0) !== half(1) && new Set([0, 1, 2, 3].map(quarter)).size === 4, pairs);
+  check('buildBracket (P5 balanced draw): top 4 in different quarters, every quarter one team of every pot (details: tests/p5_tests.js)',
+    new Set([0, 1, 2, 3].map(quarter)).size === 4 && require('../sim/bracket').drawOk(b.slots, b.pots), pairs);
   const f1 = buildBracket(ids, [{ a: 't1', b: 't5', round: 'R16' }]);
   const tie = f1.ties.find((t) => t.includes(0));
   check('buildBracket forced pair (R16): 1st vs 5th become a round-of-16 tie, every team still placed once', tie.includes(4) && new Set(f1.slots).size === 16, f1.ties.map(([x, y]) => `${x + 1}v${y + 1}`));
@@ -132,7 +131,7 @@ const S = built.show;
     cbOk && early.length >= 3 && early.some((m) => m.comeback_depth >= 2) && S.comebacks.every((c) => M[c.match].round <= 1), S.comebacks);
   // timeline / chapters / index
   const mins = S.totalFrames / 30 / 60;
-  check('video length 25-30 minutes', mins >= 25 && mins <= 30, { minutes: +mins.toFixed(2) });
+  check('video length 25-33 minutes (P5, Max: ~32 min accepted after the good-hit / pump fixes)', mins >= 25 && mins <= 33, { minutes: +mins.toFixed(2) });
   const ch = TOUR.chaptersText(S).trim().split('\n');
   const secs = ch.map((l) => { const p = l.split(' ')[0].split(':').map(Number); return p.length === 3 ? p[0] * 3600 + p[1] * 60 + p[2] : p[0] * 60 + p[1]; });
   check('chapters: start at 0:00, ascending, >= 10 s apart, one per match (+ intro + champion)', secs[0] === 0 && secs.every((x, i) => !i || x - secs[i - 1] >= 10) && ch.length === 29 + 2, { lines: ch.length });

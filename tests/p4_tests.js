@@ -92,14 +92,17 @@ const baseState = () => { const s = N.loadState([]); s.hist = []; return s; };
 console.log('== run folder + preflight');
 const runsDir = path.join(ROOT, 'output', 'runs');
 const runs = fs.existsSync(runsDir) ? fs.readdirSync(runsDir).filter((r) => fs.existsSync(path.join(runsDir, r, 'run.json'))) : [];
-const runDir = runs.length ? path.join(runsDir, runs.find((r) => r.endsWith('_preview')) || runs[0]) : null;
+// P5: runs whose videos still exist first (Max's own runs), else the newest dry run (`generate.js --dry-run`, no videos)
+const hasVideo = (r) => { try { const j = JSON.parse(fs.readFileSync(path.join(runsDir, r, 'run.json'), 'utf8')); return fs.existsSync(path.join(runsDir, r, j.long_video.file)); } catch (e) { return false; } };
+const pick = runs.find((r) => hasVideo(r) && r.endsWith('_preview')) || runs.find(hasVideo) || runs.filter((r) => r.endsWith('_dryrun')).sort().pop();
+const runDir = pick ? path.join(runsDir, pick) : null;
 if (!runDir) check('a generated run folder exists (npm run generate -- ... --preview)', false);
 else {
   const run = JSON.parse(fs.readFileSync(path.join(runDir, 'run.json'), 'utf8'));
   const need = [run.long_video.file, 'chapters.txt', 'run.json', 'PREFLIGHT.md', 'PUBLISH_CHECKLIST.md', 'LOGO_USAGE.md', 'thumbnails/thumbnail_1.png', 'thumbnails/thumbnail_2.png', 'thumbnails/thumbnail_3.png', 'reels/selection.json']
     .concat(run.reels.flatMap((r) => [`${r.dir}/reel.mp4`, `${r.dir}/suggestions.txt`]));
-  const miss = need.filter((p) => !fs.existsSync(path.join(runDir, p)));
-  check(`run folder structure (${path.basename(runDir)}): video, chapters, 3 reels, 3 thumbnails, PREFLIGHT, checklist, run.json`, miss.length === 0 && run.reels.length === 3 && /^\d{4}-\d{2}-\d{2}_[a-z0-9_]+_[a-z_]+(_preview)?$/.test(run.run), miss);
+  const miss = need.filter((p) => !(run.dry_run && /\.mp4$/.test(p)) && !fs.existsSync(path.join(runDir, p)));
+  check(`run folder structure (${path.basename(runDir)}): video, chapters, 3 reels, 3 thumbnails, PREFLIGHT, checklist, run.json`, miss.length === 0 && run.reels.length === 3 && /^\d{4}-\d{2}-\d{2}_[a-z0-9_]+_[a-z_]+(_preview|_dryrun)?$/.test(run.run), miss);
   check('run.json has seeds, config hash, timeline hashes, durations', run.configHash && run.matches.length === 29 && run.matches.every((m) => Number.isInteger(m.seed) && m.timeline_hash) && run.long_video.seconds > 0 && run.reels.every((r) => r.seconds > 0));
   const latest = path.join(ROOT, 'output', 'latest');
   check('output/latest points to the last run', fs.existsSync(latest) && (fs.existsSync(path.join(latest, 'run.json')) || fs.existsSync(path.join(latest, 'LATEST.txt'))));
@@ -131,17 +134,16 @@ else {
 console.log('== resume after interruption (render cache)');
 {
   const show = path.join(ROOT, 'build', 'show.json');
-  const prev = path.join(ROOT, 'build', 'video_noaudio_preview.mp4');
-  if (!fs.existsSync(show) || !fs.existsSync(prev)) check('resume test needs a preview build (build/show.json)', false);
+  // P5 (no full renders by Claude Code): the resume logic is checked with the render-cache plan, nothing is rendered.
+  // The full interrupted-render rehearsal of P4 is not repeated (it would render a whole preview).
+  if (!fs.existsSync(show)) check('resume test needs build/show.json', false);
   else {
-    const f = spawnSync(process.execPath, [path.join(ROOT, 'render', 'render.js'), 'forget', 'F', '--show', show, '--preview'], { encoding: 'utf8', cwd: ROOT });
-    const removed = +((f.stdout.match(/(\d+) cached block/) || [])[1] || 0);
-    // a half-written block (.tmp) from an interrupted render must be ignored
-    const tmp = path.join(ROOT, 'build', 'segcache', 'interrupted_test.tmp.mp4'); fs.writeFileSync(tmp, 'partial');
-    const v = spawnSync(process.execPath, [path.join(ROOT, 'render', 'render.js'), 'video', '4', '--show', show, '--preview'], { encoding: 'utf8', cwd: ROOT });
+    const plan = () => { const o = spawnSync(process.execPath, [path.join(ROOT, 'render', 'render.js'), 'plan', '--show', show, '--preview'], { encoding: 'utf8', cwd: ROOT }); const m = o.stdout.match(/blocks: (\d+), cached: (\d+), to render: (\d+)/); return m ? m.slice(1, 4).map(Number) : null; };
+    const p0 = plan();
+    const tmp = path.join(ROOT, 'build', 'segcache', 'interrupted_test.tmp.mp4'); fs.mkdirSync(path.dirname(tmp), { recursive: true }); fs.writeFileSync(tmp, 'partial');
+    const p1 = plan();
     fs.unlinkSync(tmp);
-    const m = v.stdout.match(/blocks: (\d+), cached: (\d+), to render: (\d+)/);
-    check('resume: after an interruption only the missing blocks render again (--rerender-match F removed the final\'s block)', v.status === 0 && removed >= 1 && m && +m[3] === removed && +m[2] === +m[1] - removed, m && m[0]);
+    check('resume (plan only): blocks = cached + to render, a half-written .tmp block is ignored', p0 && p1 && p0[0] === p0[1] + p0[2] && p0.join() === p1.join(), { p0, p1 });
   }
 }
 

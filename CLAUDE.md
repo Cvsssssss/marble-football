@@ -18,6 +18,9 @@ Owner: Max (Romanian speaker). Project: a **local generator** of marble-football
 - Reuse the render cache (key = config hash + seed); never re-render everything for a small fix.
 - Max starts a **new session per phase** (exit and run `claude` again, or `/clear`), so keep everything needed in files.
 
+## NO full videos by Claude Code (Max's rule, 4 Nov 2026)
+Max generates every full video himself with START.bat. In any session you **never** render a full-length video, a full reel set or a full-quality preview, unless Max writes explicitly in that same session "generate the video". For checks use tests, still frames and clips of at most ~10 seconds. A "rehearsal" or "end-to-end test" means a dry run with tiny inputs or stubs, never a real long render. If a phase file seems to ask for a full render, skip that step and say so in the report. Delete any full videos you created in `output/` that Max did not ask for.
+
 ## Safety rules
 - Secrets (only the optional `FOOTBALL_DATA_TOKEN`) live in `.env`. Never print, log or commit them.
 - Don't touch files outside the project folder. Install only what the phase needs (npm packages, numpy, ffmpeg if missing, Playwright Chromium).
@@ -28,7 +31,7 @@ Owner: Max (Romanian speaker). Project: a **local generator** of marble-football
 - **All balls have exactly the same size and the same visible look rules** (radius from `config/rules/base.json`, one value for every ball of every team). Team strength may never be expressed through visible size.
 - Competition names are our own: **MARBLE CHAMPIONS** (UEFA Champions League teams), **MARBLE CONTINENTAL** (Europa League teams), **MARBLE WORLD NATIONS**, **MARBLE EURO NATIONS**. Never official names or logos on screen. All are config values.
 - Real player names (format `L. Yamal`, 3 attackers per team) appear **only inside the video**: goal-replay caption, Man of the Match, winner screen, podium. **Never during play; never in file names, thumbnails, suggested titles/descriptions/tags.** No faces, photos or real shirt designs. Flag `real_names` can switch to fictional names.
-- A small `SIMULATION` label is always visible; every suggested title/description says it is a computer simulation, not real results.
+- The on-screen `SIMULATION` label is no longer required (Max, P5): config flag `show_simulation_label`, default **false**. Every suggested title/description, the `PUBLISH_CHECKLIST.md` and the reel suggestion notes must still say it is a computer simulation, not real results, and remind Max to answer YouTube's current altered/synthetic-content disclosure question when uploading.
 - Every video must be visibly different from the previous ones (map/theme, colours, competition, music seed). `plan/` rules and the uniqueness check enforce this.
 - Max reviews every video before publishing.
 

@@ -22,6 +22,7 @@ const shots = C.screenshots || 'output/screenshots_v2b';
 const outDir = C.output_dir || path.dirname(out);
 const base = path.basename(C.output || 'output/video_1080p.mp4').replace(/_1080p\.mp4$|\.mp4$/, '');
 const skipTests = process.argv.includes('--skip-tests');
+const SIM_ONLY = process.argv.includes('--sim-only'); // P5 dry run: tournament + text outputs only (no audio, no video)
 const run = (cmd, args) => { console.log('\n>>> ' + [cmd, ...args].join(' ')); execFileSync(cmd, args, { stdio: 'inherit', cwd: __dirname }); };
 const node = process.execPath;
 const py = process.platform === 'win32' ? 'python' : 'python3';
@@ -35,9 +36,9 @@ if (!process.argv.includes('--no-stills')) {
   run(node, ['render/render.js', 'brackets', shots, '--show', show]);
   run(node, ['render/render.js', 'balls', shots, '--show', show]);
 }
-run(py, ['audio/make_audio.py', show, path.join('build', 'audio_raw.wav')]);
-run(node, ['render/render.js', 'video', workers, '--show', show].concat(PREVIEW ? ['--preview'] : []));
-run(node, ['render/mux.js', '--out', out, '--shots', shots, '--video', path.join('build', PREVIEW ? 'video_noaudio_preview.mp4' : 'video_noaudio.mp4')].concat(PREVIEW ? ['--tag', 'preview'] : []));
+if (!SIM_ONLY) run(py, ['audio/make_audio.py', show, path.join('build', 'audio_raw.wav')]);
+if (!SIM_ONLY) run(node, ['render/render.js', 'video', workers, '--show', show].concat(PREVIEW ? ['--preview'] : []));
+if (!SIM_ONLY) run(node, ['render/mux.js', '--out', out, '--shots', shots, '--video', path.join('build', PREVIEW ? 'video_noaudio_preview.mp4' : 'video_noaudio.mp4')].concat(PREVIEW ? ['--tag', 'preview'] : []));
 // text outputs next to the video
 const TOUR = require('./sim/tournament');
 const LOGOS = require('./sim/logos');
