@@ -80,7 +80,8 @@ const S = {
       placeholder: { type: 'boolean' },                                 // true = team list is a placeholder, to be replaced by Max
       standings: { type: 'object', required: ['source_url', 'retrieved'], props: {
         source_url: { type: 'string', pattern: /^https?:\/\// }, retrieved: { type: 'string', pattern: /^\d{4}-\d{2}-\d{2}$/ }, note: { type: 'string' },
-        table: { type: 'array', items: { type: 'object', required: ['pos', 'team'], props: { pos: { type: 'integer', min: 1, max: 36 }, team: { type: 'string' }, club: { type: 'string' }, played: { type: 'integer', min: 0, max: 8 }, points: { type: 'integer', min: 0, max: 24 }, gd: { type: 'integer', min: -60, max: 60 } } } } } },
+        table: { type: 'array', items: { type: 'object', required: ['pos', 'team'], props: { pos: { type: 'integer', min: 1, max: 36 }, team: { type: 'string' }, fifa_rank: { type: 'integer', min: 1, max: 211 }, club: { type: 'string' }, played: { type: 'integer', min: 0, max: 8 }, points: { type: 'integer', min: 0, max: 24 }, gd: { type: 'integer', min: -60, max: 60 } } } } } },
+      seed_salt: { type: 'integer', min: 0, max: 999 }, // P3: offsets the seed search so different competitions never replay the same matches
       forced_pairs: { type: 'array', maxItems: 4, items: { type: 'object', required: ['a', 'b'], props: { a: { type: 'string' }, b: { type: 'string' }, round: { type: 'string', enum: ['R16', 'QF'] } } } },
     },
   },
@@ -211,7 +212,7 @@ function loadCompetition(compFile, opts) {
   if (comp.strength_from_position) teams.forEach((t, i) => { t.strength = 92 - i; });
   const logoDir = opts.logoDir || path.join(ROOT, 'assets', 'logos');
   teams.forEach((t) => { const f = path.join(logoDir, t.logo || t.id + '.png'); t.logoFile = fs.existsSync(f) ? f : null; });
-  const mapF = path.join(cfgDir, 'maps', comp.map + '.json');
+  const mapF = path.join(cfgDir, 'maps', (opts.map || comp.map) + '.json'); // --map overrides the competition's theme
   const map = check(readJson(mapF), 'map', mapF);
   const rulesF = path.join(cfgDir, 'rules', comp.rules + '.json');
   const rules = check(readJson(rulesF), 'rules', rulesF);
@@ -223,7 +224,7 @@ function loadCompetition(compFile, opts) {
   const all = { competition: comp, teams, map, rules, audio };
   // sim hash: only what changes the simulation (render cache key = simHash + seed)
   const simPart = { engine: require('./config').ENGINE_VERSION, rules: Object.assign({}, rules, { logos_on_balls: undefined }), pairing: comp.pairing, format: comp.format,
-    teams: comp.teams, forced: comp.forced_pairs || [], strength: teams.map((t) => t.strength) };
+    teams: comp.teams, forced: comp.forced_pairs || [], ...(comp.seed_salt ? { salt: comp.seed_salt } : {}), strength: teams.map((t) => t.strength) };
   all.simHash = crypto.createHash('sha256').update(JSON.stringify(simPart)).digest('hex').slice(0, 16);
   all.hash = crypto.createHash('sha256').update(JSON.stringify(all)).digest('hex').slice(0, 16);
   all.compFile = compFile;

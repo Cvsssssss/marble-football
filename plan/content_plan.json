@@ -1,0 +1,137 @@
+{
+ "_comment": "Next 12 long videos. week = target week counted from 2026-11-09 (week 1 = 9-15 Nov 2026). Rules: plan/OPERATING_RULES.md. Check: npm run plan:validate",
+ "start_week": "2026-11-09",
+ "history": [
+  {
+   "id": "P2_ucl",
+   "competition": "ucl_2026_top16",
+   "map": "sky_clean",
+   "accent": "#1F6FEB",
+   "week": 0,
+   "role": "weekly_random",
+   "note": "already generated in P2 (output/tournament16_1080p.mp4)"
+  }
+ ],
+ "videos": [
+  {
+   "id": "V01",
+   "competition": "uel_top16",
+   "map": "stadium_day",
+   "accent": "#2F80ED",
+   "week": 1,
+   "day": "any",
+   "role": "weekly_random",
+   "note": "weekly random pick"
+  },
+  {
+   "id": "V02",
+   "competition": "nations_world_16",
+   "map": "sunset",
+   "accent": "#F2994A",
+   "week": 2,
+   "day": "any",
+   "role": "weekly_random",
+   "note": "weekly random pick"
+  },
+  {
+   "id": "V03",
+   "competition": "nations_euro_16",
+   "map": "sky_clean",
+   "accent": "#9B51E0",
+   "week": 3,
+   "day": "any",
+   "role": "weekly_random",
+   "note": "weekly random pick"
+  },
+  {
+   "id": "V04",
+   "competition": "ucl_2026_top16",
+   "map": "stadium_night",
+   "accent": "#27AE60",
+   "week": 4,
+   "day": "any",
+   "role": "weekly_random",
+   "note": "weekly random pick"
+  },
+  {
+   "id": "V05",
+   "competition": "uel_top16",
+   "map": "sunset",
+   "accent": "#EB5757",
+   "week": 5,
+   "day": "any",
+   "role": "weekly_random",
+   "note": "weekly random pick"
+  },
+  {
+   "id": "V06",
+   "competition": "nations_world_16",
+   "map": "sky_clean",
+   "accent": "#00B8D9",
+   "week": 6,
+   "day": "any",
+   "role": "weekly_random",
+   "note": "weekly random pick"
+  },
+  {
+   "id": "V07",
+   "competition": "nations_euro_16",
+   "map": "stadium_night",
+   "accent": "#F2C94C",
+   "week": 6,
+   "day": "D-1 (evening, before the real match)",
+   "role": "real_match_slot",
+   "note": "example slot: the long video goes out the evening before a strong real match (PLAN.md §3 rule 2); swap in when such a match is announced"
+  },
+  {
+   "id": "V08",
+   "competition": "ucl_2026_top16",
+   "map": "stadium_day",
+   "accent": "#BB6BD9",
+   "week": 7,
+   "day": "any",
+   "role": "weekly_random",
+   "note": "weekly random pick"
+  },
+  {
+   "id": "V09",
+   "competition": "uel_top16",
+   "map": "sky_clean",
+   "accent": "#6FCF97",
+   "week": 8,
+   "day": "any",
+   "role": "weekly_random",
+   "note": "weekly random pick"
+  },
+  {
+   "id": "V10",
+   "competition": "nations_world_16",
+   "map": "stadium_night",
+   "accent": "#FF7A59",
+   "week": 9,
+   "day": "any",
+   "role": "weekly_random",
+   "note": "weekly random pick"
+  },
+  {
+   "id": "V11",
+   "competition": "nations_euro_16",
+   "map": "stadium_day",
+   "accent": "#56CCF2",
+   "week": 10,
+   "day": "any",
+   "role": "weekly_random",
+   "note": "weekly random pick"
+  },
+  {
+   "id": "V12",
+   "competition": "ucl_2026_top16",
+   "map": "sunset",
+   "accent": "#E0457B",
+   "week": 11,
+   "day": "any",
+   "role": "weekly_random",
+   "note": "weekly random pick"
+  }
+ ]
+}

@@ -446,7 +446,7 @@ mus_full = np.tile(loop, reps)[:N].astype(np.float32)
 lvl = np.full(N, 0.16, np.float32)
 for seg in show['segments']:
     a = int(seg['start'] / FPS * SR); b = int((seg['start'] + seg['len']) / FPS * SR)
-    if seg['type'] in ('intro', 'bracket', 'roundCard'): lvl[a:b] = 0.42  # P2: round title cards like bracket screens
+    if seg['type'] in ('intro', 'bracket', 'roundCard', 'hook', 'end'): lvl[a:b] = 0.42  # reels: hook + end card  # P2: round title cards like bracket screens
     elif seg['type'] == 'winner': lvl[a:b] = 0.30
     elif seg['type'] == 'replay': lvl[a:b] = 0.22
 # ducking under goals / whistles / fanfare
@@ -477,6 +477,7 @@ with wave.open(path, 'wb') as w:
     w.setnchannels(2); w.setsampwidth(2); w.setframerate(SR); w.writeframes(out.tobytes())
 print('audio written', path, 'seconds', end / SR, 'events', sum(cnt.values()), json.dumps(cnt))
 
+if show.get('reel'): sys.exit(0)  # reels: no goal-sample report (it belongs to the long video)
 # ---------------- goal sound samples + peak / loudness / masking report ----------------
 def write_wav(pth, x):
     x = np.clip(x, -1, 1)

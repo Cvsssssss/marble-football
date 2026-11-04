@@ -4,14 +4,17 @@
   "private": true,
   "type": "commonjs",
   "scripts": {
-    "test": "node tests/run_tests.js && node tests/p2_tests.js",
+    "test": "node tests/run_tests.js && node tests/p2_tests.js && node tests/p3_tests.js",
     "all": "node build_all.js --competition config/competitions/demo_4teams.json",
     "start": "node build_all.js --competition config/competitions/demo_4teams.json",
     "test:crossbar": "node tests/crossbar_test.js 5000 both",
     "test:boost": "node tests/windmill_boost.js 300",
     "test:p2": "node tests/p2_tests.js",
     "tournament": "node build_all.js --competition config/competitions/ucl_2026_top16.json",
-    "preview": "node build_all.js --competition config/competitions/ucl_2026_top16.json --preview"
+    "preview": "node build_all.js --competition config/competitions/ucl_2026_top16.json --preview",
+    "reels": "node build_reels.js",
+    "test:p3": "node tests/p3_tests.js",
+    "plan:validate": "node plan/validate.js"
   },
   "dependencies": {
     "ffmpeg-static": "^5.2.0",

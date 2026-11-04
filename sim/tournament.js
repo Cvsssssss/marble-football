@@ -14,7 +14,7 @@ const ROOT = path.join(__dirname, '..');
 const FPS = CFG.FPS;
 
 function teamsFromConf(conf) {
-  return conf.teams.map((t) => ({ id: t.id, name: t.name, short: t.short || t.name.slice(0, 3).toUpperCase(), short_name: t.short_name || t.name, primary: t.primary, secondary: t.secondary,
+  return conf.teams.map((t) => ({ id: t.id, name: t.name, short: t.short || t.name.slice(0, 3).toUpperCase(), short_name: t.short_name || t.name, national: !!t.national, primary: t.primary, secondary: t.secondary,
     rating: t.strength, hasLogo: !!t.logoFile, players: t.players.map((p) => ({ name: p.name, number: p.number })) }));
 }
 
@@ -102,14 +102,14 @@ function topScorers(T, n) {
 // Seed gate. prefs: list of predicates in priority order (prefs[0] = best). Scans up to `budget` seeds and returns
 // the first run that passes the hard rules AND prefs[0]; otherwise the run matching the best (lowest) priority found;
 // otherwise the first valid run. The winners always come out of the simulation (prefs only describe the match shape).
-function gate(matchKey, ctx, prefs, cfgOverride, log, cachedSeed, budget) {
+function gate(matchKey, ctx, prefs, cfgOverride, log, cachedSeed, budget, salt) {
   prefs = (prefs || []).filter(Boolean);
   budget = budget || 300;
   if (cachedSeed !== undefined && cachedSeed !== null) {
     const r = simulateMatch(cachedSeed, ctx, cfgOverride);
     if (!passesRules(r, cfgOverride)) { log.push({ matchKey, seed: cachedSeed, tried: 1, cached: true }); return r; }
   }
-  const base = 100000 + matchKey * 1000;
+  const base = 100000 + matchKey * 1000 + (salt || 0) * 1000000; // seed_salt: each competition plays different matches
   let best = null, bestLevel = Infinity, tried = 0;
   for (let k = 0; k < budget; k++) {
     const seed = base + k; tried++;
@@ -179,7 +179,7 @@ function buildTournament(conf, opts) {
   const matches = [];
   const niceGoals = (r) => { const g = r.score.A + r.score.B; const gi = pickReplayGoal(r); return g >= 2 && g <= 7 && gi !== null && (r.goals[gi].keeperAir || r.goals[gi].keeperCrouch || r.goals[gi].golden); };
   const run = (key, ctx, prefs, extra) => {
-    const r = gate(key, ctx, prefs, Object.assign({}, rc, extra || {}), log, cache[key], opts.budget);
+    const r = gate(key, ctx, prefs, Object.assign({}, rc, extra || {}), log, cache[key], opts.budget, comp.seed_salt || 0);
     if (r) usedSeeds[key] = r.seed;
     return r;
   };
@@ -474,7 +474,7 @@ if (require.main === module) {
   try {
     const comp = argVal('--competition', path.join(ROOT, 'config', 'competitions', 'demo_4teams.json'));
     const out = argVal('--out', path.join(ROOT, 'build', 'show.json'));
-    const { summary } = buildAll(comp, path.resolve(out));
+    const { summary } = buildAll(comp, path.resolve(out), { map: argVal('--map', undefined) });
     const s = Object.assign({}, summary); delete s.gateLog;
     console.log(JSON.stringify(s, null, 1));
   } catch (e) {

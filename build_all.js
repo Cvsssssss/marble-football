@@ -2,7 +2,7 @@
 // One command to rebuild everything for a competition:
 //   node build_all.js --competition config/competitions/ucl_2026_top16.json            (1080p final)
 //   node build_all.js --competition config/competitions/ucl_2026_top16.json --preview  (720p, fast)
-//   options: --skip-tests  --workers N  --no-stills
+//   options: --skip-tests  --workers N  --no-stills  --map <theme id>
 // config check -> tests -> tournament/show -> key-moment screenshots + bracket/ball sheets -> audio -> video (render cache)
 // -> mux + ffprobe + samples -> chapters.txt, matches_index.json, LOGO_USAGE.md
 const { execFileSync } = require('child_process');
@@ -13,7 +13,8 @@ const L = require('./sim/config_loader');
 const arg = (n, d) => { const i = process.argv.indexOf(n); return i > 0 ? process.argv[i + 1] : d; };
 const comp = path.resolve(arg('--competition', path.join('config', 'competitions', 'demo_4teams.json')));
 let conf;
-try { conf = L.loadCompetition(comp); } catch (e) { if (e instanceof L.ConfigError) { console.error(e.message); process.exit(2); } throw e; }
+const MAP = arg('--map', undefined); // optional theme override (config/maps/<id>.json)
+try { conf = L.loadCompetition(comp, { map: MAP }); } catch (e) { if (e instanceof L.ConfigError) { console.error(e.message); process.exit(2); } throw e; }
 const PREVIEW = process.argv.includes('--preview');
 const C = conf.competition;
 const out = PREVIEW ? (C.preview_output || 'output/preview_720p.mp4') : (C.output || 'output/demo_v2b_1080p.mp4');
@@ -28,7 +29,7 @@ const workers = arg('--workers', String(Math.max(2, Math.min(10, os.cpus().lengt
 const show = path.join('build', 'show.json');
 const t0 = Date.now();
 if (!skipTests) run(node, ['tests/run_tests.js']);
-run(node, ['sim/tournament.js', '--competition', comp, '--out', show]);
+run(node, ['sim/tournament.js', '--competition', comp, '--out', show].concat(MAP ? ['--map', MAP] : []));
 if (!process.argv.includes('--no-stills')) {
   run(node, ['render/render.js', 'stills', shots, '--show', show]);
   run(node, ['render/render.js', 'brackets', shots, '--show', show]);

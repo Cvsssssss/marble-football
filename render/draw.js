@@ -38,6 +38,7 @@
     const MAP = show.map;
     sky.addColorStop(0, MAP.sky[0]); sky.addColorStop(0.55, MAP.sky[1]); sky.addColorStop(1, MAP.sky[2]);
     c.fillStyle = sky; c.fillRect(0, 0, G.W, G.H);
+    drawScenery(c, MAP);
     // pipe (vertical part in the sky)
     drawPipeBase(c, 'sky');
     // platforms
@@ -47,6 +48,52 @@
     // spout hole + collar
     const sx = G.SPOUT_X, gy = G.GROUND_Y;
     c.fillStyle = '#2b2622'; c.beginPath(); c.ellipse(sx, gy + 1, G.BALL_R + 4, 5, 0, 0, Math.PI * 2); c.fill();
+  }
+  // P3 map themes: sparse background scenery behind the (identical) play layout
+  function drawScenery(c, MAP) {
+    const sc = MAP.scenery || 'none';
+    if (MAP.night) { // a few soft stars, fixed pattern
+      let z = 7; const rnd = () => ((z = (z * 16807) % 2147483647) / 2147483647);
+      c.fillStyle = 'rgba(255,255,255,0.55)';
+      for (let i = 0; i < 38; i++) { const x = rnd() * G.W, y = 130 + rnd() * 250, r = 0.6 + rnd() * 1.1; c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fill(); }
+    }
+    if (sc === 'sunset') {
+      const sx = 640, sy = 500;
+      const glow = c.createRadialGradient(sx, sy, 10, sx, sy, 330);
+      glow.addColorStop(0, 'rgba(255,236,190,0.55)'); glow.addColorStop(1, 'rgba(255,200,150,0)');
+      c.fillStyle = glow; c.fillRect(0, 0, G.W, G.H);
+      c.fillStyle = MAP.sun || '#fff0b8'; c.beginPath(); c.arc(sx, sy, 58, 0, Math.PI * 2); c.fill();
+      const H = MAP.hills || ['#b0668a', '#8e5276'];
+      [[H[0], 590, 0.0045, 26], [H[1], 640, 0.007, 20]].forEach(([col, base, f, amp], li) => {
+        c.fillStyle = col; c.beginPath(); c.moveTo(0, G.H);
+        for (let x = 0; x <= G.W; x += 8) c.lineTo(x, base - amp * (Math.sin(x * f + li * 2.1) * 0.6 + Math.sin(x * f * 2.3 + 1 + li) * 0.4));
+        c.lineTo(G.W, G.H); c.closePath(); c.fill();
+      });
+    }
+    if (sc === 'stadium') {
+      const st = MAP.stand || ['#a9bfd2', '#93abc1'];
+      // two low stands (tiers), clean silhouettes
+      c.fillStyle = st[0]; c.beginPath(); c.moveTo(0, G.H); c.lineTo(0, 520); c.lineTo(G.W, 520); c.lineTo(G.W, G.H); c.closePath(); c.fill();
+      // faint seat rows on the upper tier
+      c.fillStyle = MAP.night ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.16)';
+      for (let y = 532; y < 584; y += 13) c.fillRect(0, y, G.W, 2);
+      c.fillStyle = st[1]; c.fillRect(0, 585, G.W, G.H - 585);
+      c.fillStyle = MAP.night ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.35)'; c.fillRect(0, 518, G.W, 3); c.fillRect(0, 583, G.W, 2);
+      // two floodlight towers in the open middle
+      const FL = MAP.floodlight || '#e9eef3';
+      for (const x of [470, 810]) {
+        if (MAP.night) {
+          const g = c.createRadialGradient(x, 200, 4, x, 200, 112);
+          g.addColorStop(0, 'rgba(255,246,220,0.55)'); g.addColorStop(1, 'rgba(255,246,220,0)');
+          c.fillStyle = g; c.fillRect(x - 112, 88, 224, 224);
+        }
+        c.fillStyle = MAP.night ? '#2a3a55' : 'rgba(120,140,160,0.75)';
+        c.fillRect(x - 2.5, 210, 5, 310);
+        c.fillStyle = MAP.night ? '#2a3a55' : 'rgba(120,140,160,0.85)'; rrect(c, x - 26, 186, 52, 24, 4); c.fill();
+        c.fillStyle = FL;
+        for (let i = 0; i < 4; i++) for (let j = 0; j < 2; j++) { c.beginPath(); c.arc(x - 18 + i * 12, 193 + j * 10, 3.6, 0, Math.PI * 2); c.fill(); }
+      }
+    }
   }
   function drawPlatform(c, x0, x1, seed) {
     const gy = G.GROUND_Y;
@@ -131,7 +178,7 @@
       const p = kit.primary;
       styleCache[k] = { base: mixHex(p, '#ffffff', 0.35), mid: p, dark: mixHex(p, '#1a2433', 0.38), patch: kit.secondary,
         seam: mixHex(kit.secondary, p, 0.35), edge: lum(kit.secondary) > 0.75 && lum(p) > 0.75 ? 'rgba(40,50,60,0.55)' : 'rgba(10,20,30,0.28)', trail: logo ? ring : p,
-        logo, ring };
+        logo, ring, flag: !!(logo && show.teams.some((t) => t.id === team && t.national)) };
     }
     return styleCache[k];
   }
@@ -142,12 +189,17 @@
     c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.fillStyle = g; c.fill();
     c.save(); c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.clip();
     c.rotate(spin);
+    if (st.flag) { // national team: the flag covers the whole ball (printed), the ring keeps the team colour
+      const im = st.logo, k = Math.max(2 * r / im.width, 2 * r / im.height) * 1.04;
+      c.drawImage(im, -im.width * k / 2, -im.height * k / 2, im.width * k, im.height * k);
+    } else {
     // small accents in the team colour (rotate with the ball -> shows the roll)
     c.fillStyle = st.ring;
     for (let i = 0; i < 4; i++) { const a = i * Math.PI / 2 + Math.PI / 4; c.beginPath(); c.arc(Math.cos(a) * r * 0.79, Math.sin(a) * r * 0.79, r * 0.075, 0, Math.PI * 2); c.fill(); }
     // the crest decal (fit in a square of 1.42 r, aspect kept)
     const im = st.logo, s = r * 1.42, k = Math.min(s / im.width, s / im.height), w = im.width * k, h = im.height * k;
     c.drawImage(im, -w / 2, -h / 2, w, h);
+    }
     c.restore();
     // printed look: the decal darkens towards the edge together with the ball
     const pr = c.createRadialGradient(0, 0, r * 0.45, 0, 0, r);
@@ -213,7 +265,7 @@
   function drawWindmill(c, angle) {
     const hx = G.HUB_X, hy = G.HUB_Y;
     c.save(); c.translate(hx, hy); c.rotate(angle);
-    const col = '#e8553e', dark = '#a8321f';
+    const WM = (show.map && show.map.windmill) || ['#e8553e', '#a8321f'], col = WM[0], dark = WM[1];
     // soft shadow
     c.save(); c.translate(3, 4); c.globalAlpha = 0.18; c.fillStyle = '#000';
     rrect(c, -G.MILL_HALF, -G.MILL_THICK / 2, 2 * G.MILL_HALF, G.MILL_THICK, 6); c.fill(); c.restore();
@@ -225,7 +277,8 @@
       c.strokeStyle = col; c.lineWidth = G.HOOK_THICK; c.stroke();
     }
     const bg = c.createLinearGradient(0, -G.MILL_THICK / 2, 0, G.MILL_THICK / 2);
-    bg.addColorStop(0, '#ff8a6b'); bg.addColorStop(0.5, col); bg.addColorStop(1, '#c23f2a');
+    const v2 = col.toLowerCase() === '#e8553e'; // approved v2 look stays bit-identical
+    bg.addColorStop(0, v2 ? '#ff8a6b' : mixHex(col, '#ffffff', 0.32)); bg.addColorStop(0.5, col); bg.addColorStop(1, v2 ? '#c23f2a' : mixHex(col, dark, 0.6));
     rrect(c, -G.MILL_HALF - 1, -G.MILL_THICK / 2, 2 * G.MILL_HALF + 2, G.MILL_THICK, 6);
     c.fillStyle = bg; c.fill(); c.strokeStyle = dark; c.lineWidth = 1.2; c.stroke();
     c.restore();
@@ -271,7 +324,7 @@
     const footY = k[0], cr = k[1], arms = k[2];
     const sk = G.keeperSkeleton(G.KEEPER_X, footY, cr, arms);
     const j = sk.joints, x = G.KEEPER_X;
-    const KIT = '#f28a1c', KIT_D = '#c9690c', SHORTS = '#2f3a4a', SKIN = '#e7b08a', GLOVE = '#f5f7fa', BOOT = '#1f242b';
+    const KP = (show.map && show.map.keeper) || ['#f28a1c', '#c9690c'], KIT = KP[0], KIT_D = KP[1], SHORTS = '#2f3a4a', SKIN = '#e7b08a', GLOVE = '#f5f7fa', BOOT = '#1f242b';
     c.save(); c.lineCap = 'round'; c.lineJoin = 'round';
     // ground shadow
     const hAir = G.GROUND_Y - footY;
@@ -1169,6 +1222,178 @@
     }))).then(() => ({ total: show.totalFrames, logos: Object.keys(logoImgs).length }));
   };
   window.renderFrame = renderFrame;
+
+  // ================= P3 A: vertical reel (1080x1920, design space 720x1280) =================
+  // Same scene renderer, recomposed: header, bracket strip, big scoreboard, follow-camera playfield, lower third.
+  const RW = 720, RH = 1280, FIELD = { y: 490, h: 610 }, SAFE = { x0: 72, x1: 648, y0: 128, y1: 1152 };
+  let reel = null, RS = 1.5;
+  window.initReel = function (r) {
+    reel = r; RS = OUT_W / RW;
+    window.REEL_LAYOUT = { RW, RH, FIELD, SAFE, RS };
+    return { frames: reel.totalFrames };
+  };
+  function reelSeg(k) { let s = reel.segments[0]; for (const x of reel.segments) if (x.start <= k) s = x; return s; }
+  function fieldScene(c, m, fr, camX, opts) {
+    // draw the landscape scene into the vertical playfield box, scaled so the full scene height fits the box
+    const s = FIELD.h / G.H, halfW = RW / (2 * s);
+    const cx = clamp(camX, halfW, G.W - halfW);
+    c.save(); c.scale(RS, RS);
+    c.beginPath(); c.rect(0, FIELD.y, RW, FIELD.h); c.clip();
+    c.translate(RW / 2, FIELD.y + FIELD.h / 2); c.scale(s / S, s / S); c.translate(-cx * S, -G.H / 2 * S);
+    drawScene(c, m, fr, Object.assign({ noCam: true }, opts));
+    c.restore();
+  }
+  function reelScoreboard(c, m, sc, clock, extra) {
+    const y = 300, h = 170;
+    c.fillStyle = 'rgba(8,20,38,0.92)'; rrect(c, SAFE.x0, y, SAFE.x1 - SAFE.x0, h, 22); c.fill();
+    const L = SAFE.x0 + 24, R = SAFE.x1 - 24;
+    // team names (top row) with kit dots
+    kitDot(c, m.kits.A, L + 10, y + 34, 10); kitDot(c, m.kits.B, R - 10, y + 34, 10);
+    let z = fitText(c, teamName(m.ta), 220, 26); text(c, teamName(m.ta), L + 28, y + 35, z, '#ffffff', 'left', 800);
+    z = fitText(c, teamName(m.tb), 220, 26); text(c, teamName(m.tb), R - 28, y + 35, z, '#ffffff', 'right', 800);
+    // big score
+    c.fillStyle = '#ffffff'; rrect(c, RW / 2 - 120, y + 58, 240, 88, 16); c.fill();
+    text(c, `${sc[0]} – ${sc[1]}`, RW / 2, y + 104, 74, '#0b1a2e', 'center', 900);
+    // clock + leg / aggregate
+    c.fillStyle = 'rgba(255,255,255,0.12)'; rrect(c, L, y + 80, 110, 44, 12); c.fill();
+    text(c, clock, L + 55, y + 103, fitText(c, clock, 100, 28), '#ffffff', 'center', 800);
+    const legTxt = m.leg === 'FINAL' ? 'FINAL' : m.leg;
+    text(c, legTxt, R - 60, y + 92, 20, '#c9dcff', 'center', 800);
+    if (m.leg === 'LEG 2') text(c, `AGG ${m.prev[0] + sc[0]}–${m.prev[1] + sc[1]}`, R - 60, y + 120, 20, '#ffd84a', 'center', 800);
+    if (extra) text(c, extra, RW / 2, y + h - 14, 16, '#ffd84a', 'center', 800);
+  }
+  function reelBracketStrip(c, m) {
+    const ties = []; show.matches.forEach((x) => { if (x.round === m.round && !ties.some((t) => t.tie === x.tie)) ties.push(x); });
+    const y = 196, h = 84, n = ties.length, w = (SAFE.x1 - SAFE.x0) / n;
+    text(c, (m.roundName || m.stage).toUpperCase(), RW / 2, y - 12, 15, '#9fb6d6', 'center', 800);
+    ties.forEach((t, i) => {
+      const x = SAFE.x0 + i * w, cur = t.tie === m.tie;
+      c.fillStyle = cur ? 'rgba(255,216,74,0.95)' : 'rgba(255,255,255,0.10)'; rrect(c, x + 3, y, w - 6, h, 10); c.fill();
+      const col = cur ? '#0b1a2e' : '#dfe8f5';
+      const sa = show.teams[t.ta].short || '', sb = show.teams[t.tb].short || '';
+      text(c, sa, x + w / 2, y + 26, fitText(c, sa, w - 14, 18), col, 'center', 800);
+      text(c, 'v', x + w / 2, y + 43, 12, cur ? '#334' : '#8fa3bd', 'center', 700);
+      text(c, sb, x + w / 2, y + 60, fitText(c, sb, w - 14, 18), col, 'center', 800);
+    });
+  }
+  function reelHeader(c, m) {
+    const label = `${show.competition.name}`;
+    text(c, label, RW / 2, 146, fitText(c, label, 560, 30), '#ffffff', 'center', 900);
+  }
+  function reelSimLabel(c) {
+    c.font = `800 15px ${FONT}`; const w = c.measureText('SIMULATION').width + 22;
+    c.fillStyle = 'rgba(8,20,38,0.78)'; rrect(c, RW / 2 - w / 2, 1112, w, 28, 10); c.fill();
+    text(c, 'SIMULATION', RW / 2, 1126.5, 15, '#ffffff', 'center', 800);
+  }
+  function reelBG(c) {
+    const g = c.createLinearGradient(0, 0, 0, RH); g.addColorStop(0, '#0d2340'); g.addColorStop(1, '#081426');
+    c.fillStyle = g; c.fillRect(0, 0, RW, RH);
+  }
+  function lowerThird(c, title, sub, ti, a) {
+    c.save(); c.globalAlpha = a;
+    const x = SAFE.x0, y = 980, w = SAFE.x1 - SAFE.x0, h = 108;
+    c.fillStyle = 'rgba(8,20,38,0.92)'; rrect(c, x, y, w, h, 14); c.fill();
+    if (ti != null) teamBar(c, ti, x, y, 12, h);
+    text(c, title, x + 34, y + 44, fitText(c, title, w - 60, 44), '#ffffff', 'left', 900);
+    if (sub) text(c, sub, x + 34, y + 86, fitText(c, sub, w - 60, 22), '#9fc7ff', 'left', 700);
+    c.restore();
+  }
+  function scoreAt(m, t) { let a = 0, b = 0; for (const g of m.goals) { if (g.t > t + 1e-9) break; if (g.team === 'A') a++; else b++; } return [a, b]; }
+  window.renderReelFrame = function (k) {
+    const seg = reelSeg(k), lf = k - seg.start, m = show.matches[reel.matchIndex];
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.save(); ctx.scale(RS, RS); reelBG(ctx); reelHeader(ctx, m); reelBracketStrip(ctx, m); ctx.restore();
+    const CL = (t) => { const ck = clockText(m, t); return ck.main + (ck.plus && ck.phase !== 'shots' ? ` +${ck.plus}` : ''); };
+    const XT = (t) => { const ck = clockText(m, t); return ck.golden ? 'GOLDEN BALL' : ck.phase === 'shots' ? `ADDED-TIME SHOT ${ck.shot}/${ck.added}` : ''; };
+    if (seg.type === 'hook') {
+      const fr = matchFrame(m, seg.src);
+      fieldScene(ctx, m, fr, seg.cam, { frameIndex: seg.src, trail: false, noFx: true });
+      ctx.save(); ctx.scale(RS, RS);
+      reelScoreboard(ctx, m, seg.score, CL(fr.t));
+      ctx.fillStyle = 'rgba(5,12,25,0.55)'; ctx.fillRect(0, FIELD.y, RW, FIELD.h);
+      const p = easeOutBack(clamp(lf / 12, 0, 1));
+      ctx.save(); ctx.translate(RW / 2, FIELD.y + 250); ctx.scale(p, p);
+      text(ctx, `${seg.score[0]} – ${seg.score[1]}`, 0, 0, 150, '#ffffff', 'center', 900);
+      ctx.restore();
+      const behind = reel.winnerSide === 'A' ? teamName(m.ta) : teamName(m.tb);
+      text(ctx, `${behind} are behind…`, RW / 2, FIELD.y + 380, fitText(ctx, `${behind} are behind…`, 540, 34), '#ffd84a', 'center', 800);
+      reelSimLabel(ctx); ctx.restore(); fadeIn(lf, 6); return;
+    }
+    if (seg.type === 'match') {
+      const p = seg.plan[lf], fr = matchFrame(m, p.src), v = p.src / FPS;
+      fieldScene(ctx, m, fr, seg.camPath[lf], { frameIndex: p.src, v, trailStep: p.ff ? 2 : 1 });
+      ctx.save(); ctx.scale(RS, RS);
+      reelScoreboard(ctx, m, fr.sc || scoreAt(m, fr.t), CL(fr.t), XT(fr.t));
+      if (p.ff) { // fast-forward indicator (top-right of the field)
+        ctx.fillStyle = 'rgba(8,20,38,0.85)'; rrect(ctx, SAFE.x1 - 104, FIELD.y + 16, 104, 40, 12); ctx.fill();
+        text(ctx, '>> x2', SAFE.x1 - 52, FIELD.y + 36.5, 22, '#ffd84a', 'center', 900);
+      }
+      const lg = lastEventBeforeV(m, 'goal', v);
+      if (lg && v - evV(lg) < 1.8) { // goal: team only (no player names during play)
+        const u = v - evV(lg), a = smooth(u / 0.15) * (1 - smooth((u - 1.5) / 0.3));
+        const ti = lg.team === 'A' ? m.ta : m.tb;
+        ctx.save(); ctx.globalAlpha = a; const kit = m.kits[lg.team];
+        ctx.fillStyle = 'rgba(8,20,38,0.92)'; rrect(ctx, SAFE.x0 + 40, FIELD.y + 90, SAFE.x1 - SAFE.x0 - 80, 130, 18); ctx.fill();
+        ctx.fillStyle = kit.ring || kit.primary; ctx.fillRect(SAFE.x0 + 40, FIELD.y + 90, 14, 130);
+        text(ctx, lg.golden ? 'GOLDEN GOAL!' : 'GOAL!', RW / 2, FIELD.y + 145, 70, '#ffffff', 'center', 900);
+        text(ctx, `${teamName(ti)} · ${window.CLOCK.minuteLabel(m, lg.t, show.cfg.GAME_MIN_PER_SEC)}`, RW / 2, FIELD.y + 196, 24, '#ffd84a', 'center', 800);
+        ctx.restore();
+      }
+      reelSimLabel(ctx); ctx.restore(); if (lf < 6) fadeIn(lf, 6); return;
+    }
+    if (seg.type === 'replay') {
+      const at = frameAtTime(m, seg.t0 + (lf / FPS) * seg.speed);
+      fieldScene(ctx, m, at.fr, 1280, { frameIndex: at.i, noFx: true });
+      ctx.save(); ctx.scale(RS, RS);
+      reelScoreboard(ctx, m, scoreAt(m, at.fr.t), CL(at.fr.t), XT(at.fr.t));
+      ctx.fillStyle = 'rgba(20,30,50,0.10)'; ctx.fillRect(0, FIELD.y, RW, FIELD.h);
+      ctx.fillStyle = 'rgba(5,8,13,0.88)'; rrect(ctx, SAFE.x0, FIELD.y + 16, 190, 42, 12); ctx.fill();
+      if (Math.floor(lf / 15) % 2 === 0) { ctx.fillStyle = '#ff3b3b'; ctx.beginPath(); ctx.arc(SAFE.x0 + 24, FIELD.y + 37, 7, 0, Math.PI * 2); ctx.fill(); }
+      text(ctx, 'REPLAY', SAFE.x0 + 40, FIELD.y + 38, 22, '#ffffff', 'left', 900);
+      const gl = m.goals[seg.goal], ti = gl.team === 'A' ? m.ta : m.tb, P = show.teams[ti].players[gl.player];
+      lowerThird(ctx, `${P.name} · ${window.CLOCK.minuteLabel(m, gl.t, show.cfg.GAME_MIN_PER_SEC)}`, `#${P.number} · ${teamName(ti)} · decisive goal`, ti, smooth((lf - 6) / 10));
+      reelSimLabel(ctx); ctx.restore(); fadeIn(lf, 6); return;
+    }
+    const last = m.frames[m.frames.length - 1];
+    if (seg.type === 'motm') {
+      fieldScene(ctx, m, last, 640, { frameIndex: m.frames.length - 1, trail: false, noFx: true });
+      ctx.save(); ctx.scale(RS, RS);
+      reelScoreboard(ctx, m, m.score, 'FT');
+      ctx.fillStyle = 'rgba(5,12,25,0.62)'; ctx.fillRect(0, FIELD.y, RW, FIELD.h);
+      const mo = m.motm, ti = mo.team === 'A' ? m.ta : m.tb, TM = show.teams[ti], P = TM.players[mo.player];
+      const a = smooth(lf / 8);
+      ctx.globalAlpha = a;
+      ctx.fillStyle = 'rgba(8,20,38,0.96)'; rrect(ctx, SAFE.x0, FIELD.y + 120, SAFE.x1 - SAFE.x0, 340, 22); ctx.fill();
+      ctx.fillStyle = TM.primary; ctx.fillRect(SAFE.x0, FIELD.y + 120, SAFE.x1 - SAFE.x0, 10);
+      text(ctx, 'MAN OF THE MATCH', RW / 2, FIELD.y + 172, 28, '#ffd84a', 'center', 900);
+      drawStarAward(ctx, RW / 2, FIELD.y + 262, 0.85);
+      text(ctx, P.name, RW / 2, FIELD.y + 370, fitText(ctx, P.name, 520, 52), '#ffffff', 'center', 900);
+      text(ctx, `#${P.number} · ${TM.name}`, RW / 2, FIELD.y + 420, 24, '#c9dcff', 'center', 700);
+      ctx.globalAlpha = 1;
+      reelSimLabel(ctx); ctx.restore(); return;
+    }
+    // end card
+    ctx.save(); ctx.scale(RS, RS);
+    reelScoreboard(ctx, m, m.score, 'FT');
+    ctx.fillStyle = '#0a1830'; ctx.fillRect(0, FIELD.y, RW, FIELD.h);
+    const a = smooth(lf / 10); ctx.globalAlpha = a;
+    const wn = reel.winnerSide === 'A' ? teamName(m.ta) : teamName(m.tb);
+    text(ctx, `${wn} go through`, RW / 2, FIELD.y + 170, fitText(ctx, `${wn} go through`, 560, 44), '#ffd84a', 'center', 900);
+    text(ctx, 'Full simulation', RW / 2, FIELD.y + 300, 58, '#ffffff', 'center', 900);
+    text(ctx, 'on the channel', RW / 2, FIELD.y + 370, 58, '#ffffff', 'center', 900);
+    text(ctx, 'Computer simulation · not real results', RW / 2, FIELD.y + 470, 22, '#9fb6d6', 'center', 700);
+    ctx.globalAlpha = 1;
+    reelSimLabel(ctx); ctx.restore();
+  };
+  // P4 thumbnails: the play scene only (no HUD, no captions, no names, no text), zoomed on a goal moment
+  window.renderThumb = function (matchIndex, t, zoom) {
+    const m = show.matches[matchIndex];
+    const at = frameAtTime(m, t);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    drawScene(ctx, m, at.fr, { frameIndex: at.i, v: t, noCam: true, zoom: zoom || { z: 1.28, x: 1020, y: 440 } });
+    return canvas.toDataURL('image/png');
+  };
+  window.grabReelFrame = function (k, q) { window.renderReelFrame(k); return canvas.toDataURL('image/jpeg', q || 0.92); };
   window.renderEmptyBracket = function (n, title, style) {
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, OUT_W, OUT_H);
     darkBG(ctx, 0);

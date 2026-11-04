@@ -1,0 +1,172 @@
+{
+ "format": "knockout16",
+ "rules": "base",
+ "GAME_MIN_PER_SEC": 2.4,
+ "real_names": true,
+ "bracket_style": "symmetric",
+ "strength_from_position": true,
+ "forced_pairs": [],
+ "id": "uel_top16",
+ "seed_salt": 11,
+ "name": "MARBLE CONTINENTAL",
+ "subtitle": "MARBLE FOOTBALL TOURNAMENT · 16 TEAMS",
+ "_teams_note": "Top 16 of the 2026-27 Europa League league phase in table order. Snapshot below; replace by editing teams[] and standings.",
+ "standings": {
+  "source_url": "https://en.wikipedia.org/wiki/Template:2026%E2%80%9327_UEFA_Europa_League_league_phase_table",
+  "retrieved": "2026-11-04",
+  "note": "Wikipedia template, updated to matches played on 22 October 2026 (3 matchdays). Ties on points ordered as in the source.",
+  "table": [
+   {
+    "pos": 1,
+    "team": "benfica",
+    "club": "Benfica",
+    "played": 3,
+    "points": 9,
+    "gd": 8
+   },
+   {
+    "pos": 2,
+    "team": "leverkusen",
+    "club": "Bayer Leverkusen",
+    "played": 3,
+    "points": 9,
+    "gd": 8
+   },
+   {
+    "pos": 3,
+    "team": "bournemouth",
+    "club": "Bournemouth",
+    "played": 3,
+    "points": 9,
+    "gd": 7
+   },
+   {
+    "pos": 4,
+    "team": "ferencvaros",
+    "club": "Ferencváros",
+    "played": 3,
+    "points": 9,
+    "gd": 6
+   },
+   {
+    "pos": 5,
+    "team": "olympiacos",
+    "club": "Olympiacos",
+    "played": 3,
+    "points": 9,
+    "gd": 3
+   },
+   {
+    "pos": 6,
+    "team": "union_sg",
+    "club": "Union Saint-Gilloise",
+    "played": 3,
+    "points": 7,
+    "gd": 7
+   },
+   {
+    "pos": 7,
+    "team": "juventus",
+    "club": "Juventus",
+    "played": 3,
+    "points": 7,
+    "gd": 6
+   },
+   {
+    "pos": 8,
+    "team": "besiktas",
+    "club": "Beşiktaş",
+    "played": 3,
+    "points": 7,
+    "gd": 4
+   },
+   {
+    "pos": 9,
+    "team": "sunderland",
+    "club": "Sunderland",
+    "played": 3,
+    "points": 7,
+    "gd": 2
+   },
+   {
+    "pos": 10,
+    "team": "az",
+    "club": "AZ",
+    "played": 3,
+    "points": 6,
+    "gd": 4
+   },
+   {
+    "pos": 11,
+    "team": "omonia",
+    "club": "Omonia",
+    "played": 3,
+    "points": 6,
+    "gd": 1
+   },
+   {
+    "pos": 12,
+    "team": "lyon",
+    "club": "Lyon",
+    "played": 3,
+    "points": 6,
+    "gd": -1
+   },
+   {
+    "pos": 13,
+    "team": "rennes",
+    "club": "Rennes",
+    "played": 3,
+    "points": 5,
+    "gd": 1
+   },
+   {
+    "pos": 14,
+    "team": "real_sociedad",
+    "club": "Real Sociedad",
+    "played": 3,
+    "points": 4,
+    "gd": 5
+   },
+   {
+    "pos": 15,
+    "team": "crystal_palace",
+    "club": "Crystal Palace",
+    "played": 3,
+    "points": 4,
+    "gd": 3
+   },
+   {
+    "pos": 16,
+    "team": "sparta_praha",
+    "club": "Sparta Prague",
+    "played": 3,
+    "points": 4,
+    "gd": 2
+   }
+  ]
+ },
+ "teams": [
+  "benfica",
+  "leverkusen",
+  "bournemouth",
+  "ferencvaros",
+  "olympiacos",
+  "union_sg",
+  "juventus",
+  "besiktas",
+  "sunderland",
+  "az",
+  "omonia",
+  "lyon",
+  "rennes",
+  "real_sociedad",
+  "crystal_palace",
+  "sparta_praha"
+ ],
+ "map": "stadium_day",
+ "output": "output/continental16_1080p.mp4",
+ "preview_output": "output/continental16_preview_720p.mp4",
+ "screenshots": "output/screenshots_continental",
+ "output_dir": "output"
+}

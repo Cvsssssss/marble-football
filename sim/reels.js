@@ -9,7 +9,7 @@ const FPS = CFG.FPS;
 
 const FF_MAX_OUT = 1.5;       // s of output per fast-forward stretch (spec)
 const FF_SPEED = 2;
-const QUIET_BEFORE = 2.6, QUIET_AFTER = 2.4; // s around goals / shots / whistles that always play at normal speed
+const QUIET_BEFORE = 2.0, QUIET_AFTER = 1.8; // s around goals / shots / whistles that always play at normal speed
 const TARGET_MAX = 54, TARGET_MIN = 30;      // s total reel length
 
 function scoreAtT(m, t) { let a = 0, b = 0; for (const g of m.goals) { if (g.t > t + 1e-9) break; if (g.team === 'A') a++; else b++; } return [a, b]; }
@@ -36,7 +36,7 @@ function buildReel(show, matchIndex, opts) {
   const F = m.frames;
   // --- protected (normal speed) windows ---
   const keyT = [];
-  for (const e of m.events) if (['goal', 'shot', 'golden', 'added'].includes(e.type) || (e.type === 'whistle')) keyT.push(e.t);
+  for (const e of m.events) if (['goal', 'shot', 'golden', 'added'].includes(e.type) || (e.type === 'whistle' && e.kind !== 'half')) keyT.push(e.t); // half-time whistle may be fast-forwarded
   const prot = (t) => keyT.some((k) => t > k - QUIET_BEFORE && t < k + QUIET_AFTER) || (F[0] && t < 1.0);
   // frame list for the match part: each output frame -> source frame index (float), ff flag
   const quiet = F.map((f, i) => !prot(f.t) && !(f.ts !== undefined && f.ts < 1) && !f.cam);
@@ -70,9 +70,19 @@ function buildReel(show, matchIndex, opts) {
   const plan = [];
   for (let i = 0; i < F.length; i++) { if (ffMark[i]) { if ((i - (ffStart(i))) % FF_SPEED === 0) plan.push({ src: i, ff: 1 }); } else plan.push({ src: i, ff: 0 }); }
   function ffStart(i) { let s = i; while (s > 0 && ffMark[s - 1]) s--; return s; }
+  // still too long: start the match part later (only the quiet opening before the first goal is dropped; goals never cut)
+  let trimmedStart = 0;
+  {
+    const excess = Math.ceil((fixed + plan.length / FPS - TARGET_MAX + 0.3) * FPS);
+    const g0 = m.goals.length ? Math.round(m.goals[0].t * FPS) - Math.round(QUIET_BEFORE * FPS) - 15 : 0;
+    if (excess > 0 && g0 > 0) {
+      let cut = 0; while (cut < plan.length && plan[cut].src < g0 && cut < excess) cut++;
+      plan.splice(0, cut); trimmedStart = plan.length ? plan[0].src : 0;
+    }
+  }
   // follow camera (design x of the window centre), eased; zone = windmill side or goal side
-  const VIEW = opts.view || { w: 720, h: 660 };
-  const zoom = Math.max(VIEW.h / 720, 0.9);
+  const VIEW = opts.view || { w: 720, h: 610 }; // = render/draw.js reel FIELD (design px)
+  const zoom = VIEW.h / 720;
   const half = VIEW.w / (2 * zoom);
   const leftC = half, rightC = 1280 - half;
   let camX = leftC;
@@ -104,6 +114,7 @@ function buildReel(show, matchIndex, opts) {
   audio.push({ t: 0, type: 'swoosh' });
   for (const e of m.events) {
     if (['fanfare', 'cheer'].includes(e.type)) continue;
+    if ((e.vf !== undefined ? e.vf : e.t * FPS) < trimmedStart) continue; // dropped opening
     const x = Object.assign({}, e, { match: 0 }); delete x.t; delete x.vf;
     audio.push(Object.assign(x, { t: +((ms.start + srcToOut(e.vf !== undefined ? e.vf : e.t * FPS)) / FPS).toFixed(4), type: e.type }));
   }
@@ -114,10 +125,10 @@ function buildReel(show, matchIndex, opts) {
   const total = fo;
   const ti = (s) => (s === 'A' ? m.ta : m.tb);
   return {
-    reel: true, fps: FPS, totalFrames: total, seconds: +(total / FPS).toFixed(2), matchIndex, seed: m.seed, timeline_hash: m.hash,
+    reel: true, fps: FPS, totalFrames: total, winnerSide: m.winnerSide, map: show.map, audioCfg: show.audioCfg, seconds: +(total / FPS).toFixed(2), matchIndex, seed: m.seed, timeline_hash: m.hash,
     view: Object.assign({ zoom }, VIEW), segments: segs, audio,
     decisive: { goal: dg, team: ti(g.team), player: g.player, minute: CLOCK.minuteLabel(m, g.t, show.cfg.GAME_MIN_PER_SEC) },
-    ffStretches: chunks.filter(([a]) => ffMark[a]).length,
+    ffStretches: chunks.filter(([a]) => ffMark[a]).length, trimmedStartS: +(trimmedStart / FPS).toFixed(2),
   };
 }
 

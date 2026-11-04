@@ -1,0 +1,124 @@
+{
+ "format": "knockout16",
+ "rules": "base",
+ "GAME_MIN_PER_SEC": 2.4,
+ "real_names": true,
+ "bracket_style": "symmetric",
+ "strength_from_position": true,
+ "forced_pairs": [],
+ "id": "nations_euro_16",
+ "seed_salt": 37,
+ "name": "MARBLE EURO NATIONS",
+ "subtitle": "MARBLE FOOTBALL TOURNAMENT · 16 NATIONS",
+ "_teams_note": "Top 16 European national teams of the FIFA men's ranking. Russia (rank 35) is left out because it is suspended from UEFA competitions; Ukraine (36) takes the 16th place.",
+ "standings": {
+  "source_url": "https://www.espn.com/soccer/story/_/id/46664763/fifa-mens-top-50-world-rankings",
+  "retrieved": "2026-11-04",
+  "note": "FIFA/Coca-Cola men's world ranking of 7 October 2026 as listed by ESPN (FIFA.com did not render for the fetch tool).",
+  "table": [
+   {
+    "pos": 1,
+    "team": "nt_spain",
+    "fifa_rank": 1
+   },
+   {
+    "pos": 2,
+    "team": "nt_france",
+    "fifa_rank": 3
+   },
+   {
+    "pos": 3,
+    "team": "nt_england",
+    "fifa_rank": 4
+   },
+   {
+    "pos": 4,
+    "team": "nt_portugal",
+    "fifa_rank": 5
+   },
+   {
+    "pos": 5,
+    "team": "nt_belgium",
+    "fifa_rank": 8
+   },
+   {
+    "pos": 6,
+    "team": "nt_netherlands",
+    "fifa_rank": 9
+   },
+   {
+    "pos": 7,
+    "team": "nt_switzerland",
+    "fifa_rank": 12
+   },
+   {
+    "pos": 8,
+    "team": "nt_germany",
+    "fifa_rank": 13
+   },
+   {
+    "pos": 9,
+    "team": "nt_croatia",
+    "fifa_rank": 14
+   },
+   {
+    "pos": 10,
+    "team": "nt_italy",
+    "fifa_rank": 15
+   },
+   {
+    "pos": 11,
+    "team": "nt_norway",
+    "fifa_rank": 19
+   },
+   {
+    "pos": 12,
+    "team": "nt_denmark",
+    "fifa_rank": 21
+   },
+   {
+    "pos": 13,
+    "team": "nt_austria",
+    "fifa_rank": 22
+   },
+   {
+    "pos": 14,
+    "team": "nt_turkiye",
+    "fifa_rank": 31
+   },
+   {
+    "pos": 15,
+    "team": "nt_sweden",
+    "fifa_rank": 34
+   },
+   {
+    "pos": 16,
+    "team": "nt_ukraine",
+    "fifa_rank": 36
+   }
+  ]
+ },
+ "teams": [
+  "nt_spain",
+  "nt_france",
+  "nt_england",
+  "nt_portugal",
+  "nt_belgium",
+  "nt_netherlands",
+  "nt_switzerland",
+  "nt_germany",
+  "nt_croatia",
+  "nt_italy",
+  "nt_norway",
+  "nt_denmark",
+  "nt_austria",
+  "nt_turkiye",
+  "nt_sweden",
+  "nt_ukraine"
+ ],
+ "map": "stadium_night",
+ "output": "output/euro16_1080p.mp4",
+ "preview_output": "output/euro16_preview_720p.mp4",
+ "screenshots": "output/screenshots_euro",
+ "output_dir": "output"
+}

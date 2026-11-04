@@ -1,0 +1,556 @@
+{
+ "threshold": 0.6,
+ "formula": "0.30 map + 0.30 competition + 0.15 accent closeness + 0.10 music profile + 0.15 bracket overlap",
+ "videos": [
+  {
+   "id": "P2_ucl",
+   "competition": "ucl_2026_top16",
+   "competition_name": "MARBLE CHAMPIONS",
+   "map": "sky_clean",
+   "accent": "#1F6FEB",
+   "colours": [
+    "#1F6FEB",
+    "#6db9f5",
+    "#e8553e"
+   ],
+   "music": "v2/up/0/112/seed1234",
+   "bracket": [
+    "dortmund-psg",
+    "arsenal-bayern",
+    "club_brugge-liverpool",
+    "man_city-real_madrid",
+    "barcelona-lask",
+    "real_betis-stuttgart",
+    "aston_villa-inter",
+    "como-sporting"
+   ],
+   "history": true,
+   "vs_previous_5": [],
+   "max_similarity": 0
+  },
+  {
+   "id": "V01",
+   "competition": "uel_top16",
+   "competition_name": "MARBLE CONTINENTAL",
+   "map": "stadium_day",
+   "accent": "#2F80ED",
+   "colours": [
+    "#2F80ED",
+    "#8cc4ee",
+    "#2f6fd1"
+   ],
+   "music": "stride/up/2/116/seed1234",
+   "bracket": [
+    "benfica-sparta_praha",
+    "besiktas-sunderland",
+    "ferencvaros-rennes",
+    "lyon-olympiacos",
+    "crystal_palace-leverkusen",
+    "az-juventus",
+    "bournemouth-real_sociedad",
+    "omonia-union_sg"
+   ],
+   "history": false,
+   "vs_previous_5": [
+    {
+     "id": "P2_ucl",
+     "similarity": 0.119
+    }
+   ],
+   "max_similarity": 0.119
+  },
+  {
+   "id": "V02",
+   "competition": "nations_world_16",
+   "competition_name": "MARBLE WORLD NATIONS",
+   "map": "sunset",
+   "accent": "#F2994A",
+   "colours": [
+    "#F2994A",
+    "#e98a6a",
+    "#2e3a66"
+   ],
+   "music": "warm/down/5/108/seed1234",
+   "bracket": [
+    "nt_spain-nt_usa",
+    "nt_belgium-nt_netherlands",
+    "nt_england-nt_germany",
+    "nt_portugal-nt_switzerland",
+    "nt_argentina-nt_italy",
+    "nt_mexico-nt_morocco",
+    "nt_croatia-nt_france",
+    "nt_brazil-nt_colombia"
+   ],
+   "history": false,
+   "vs_previous_5": [
+    {
+     "id": "P2_ucl",
+     "similarity": 0
+    },
+    {
+     "id": "V01",
+     "similarity": 0
+    }
+   ],
+   "max_similarity": 0
+  },
+  {
+   "id": "V03",
+   "competition": "nations_euro_16",
+   "competition_name": "MARBLE EURO NATIONS",
+   "map": "sky_clean",
+   "accent": "#9B51E0",
+   "colours": [
+    "#9B51E0",
+    "#6db9f5",
+    "#e8553e"
+   ],
+   "music": "v2/up/0/112/seed1234",
+   "bracket": [
+    "nt_spain-nt_ukraine",
+    "nt_croatia-nt_germany",
+    "nt_austria-nt_portugal",
+    "nt_belgium-nt_denmark",
+    "nt_france-nt_sweden",
+    "nt_italy-nt_switzerland",
+    "nt_england-nt_turkiye",
+    "nt_netherlands-nt_norway"
+   ],
+   "history": false,
+   "vs_previous_5": [
+    {
+     "id": "P2_ucl",
+     "similarity": 0.464
+    },
+    {
+     "id": "V01",
+     "similarity": 0.044
+    },
+    {
+     "id": "V02",
+     "similarity": 0
+    }
+   ],
+   "max_similarity": 0.464
+  },
+  {
+   "id": "V04",
+   "competition": "ucl_2026_top16",
+   "competition_name": "MARBLE CHAMPIONS",
+   "map": "stadium_night",
+   "accent": "#27AE60",
+   "colours": [
+    "#27AE60",
+    "#1a3358",
+    "#f2f2f2"
+   ],
+   "music": "open/wave/-3/104/seed1234",
+   "bracket": [
+    "dortmund-psg",
+    "arsenal-bayern",
+    "club_brugge-liverpool",
+    "man_city-real_madrid",
+    "barcelona-lask",
+    "real_betis-stuttgart",
+    "aston_villa-inter",
+    "como-sporting"
+   ],
+   "history": false,
+   "vs_previous_5": [
+    {
+     "id": "P2_ucl",
+     "similarity": 0.45
+    },
+    {
+     "id": "V01",
+     "similarity": 0
+    },
+    {
+     "id": "V02",
+     "similarity": 0
+    },
+    {
+     "id": "V03",
+     "similarity": 0
+    }
+   ],
+   "max_similarity": 0.45
+  },
+  {
+   "id": "V05",
+   "competition": "uel_top16",
+   "competition_name": "MARBLE CONTINENTAL",
+   "map": "sunset",
+   "accent": "#EB5757",
+   "colours": [
+    "#EB5757",
+    "#e98a6a",
+    "#2e3a66"
+   ],
+   "music": "warm/down/5/108/seed1234",
+   "bracket": [
+    "benfica-sparta_praha",
+    "besiktas-sunderland",
+    "ferencvaros-rennes",
+    "lyon-olympiacos",
+    "crystal_palace-leverkusen",
+    "az-juventus",
+    "bournemouth-real_sociedad",
+    "omonia-union_sg"
+   ],
+   "history": false,
+   "vs_previous_5": [
+    {
+     "id": "P2_ucl",
+     "similarity": 0
+    },
+    {
+     "id": "V01",
+     "similarity": 0.45
+    },
+    {
+     "id": "V02",
+     "similarity": 0.449
+    },
+    {
+     "id": "V03",
+     "similarity": 0
+    },
+    {
+     "id": "V04",
+     "similarity": 0
+    }
+   ],
+   "max_similarity": 0.45
+  },
+  {
+   "id": "V06",
+   "competition": "nations_world_16",
+   "competition_name": "MARBLE WORLD NATIONS",
+   "map": "sky_clean",
+   "accent": "#00B8D9",
+   "colours": [
+    "#00B8D9",
+    "#6db9f5",
+    "#e8553e"
+   ],
+   "music": "v2/up/0/112/seed1234",
+   "bracket": [
+    "nt_spain-nt_usa",
+    "nt_belgium-nt_netherlands",
+    "nt_england-nt_germany",
+    "nt_portugal-nt_switzerland",
+    "nt_argentina-nt_italy",
+    "nt_mexico-nt_morocco",
+    "nt_croatia-nt_france",
+    "nt_brazil-nt_colombia"
+   ],
+   "history": false,
+   "vs_previous_5": [
+    {
+     "id": "V01",
+     "similarity": 0.011
+    },
+    {
+     "id": "V02",
+     "similarity": 0.45
+    },
+    {
+     "id": "V03",
+     "similarity": 0.4
+    },
+    {
+     "id": "V04",
+     "similarity": 0
+    },
+    {
+     "id": "V05",
+     "similarity": 0
+    }
+   ],
+   "max_similarity": 0.45
+  },
+  {
+   "id": "V07",
+   "competition": "nations_euro_16",
+   "competition_name": "MARBLE EURO NATIONS",
+   "map": "stadium_night",
+   "accent": "#F2C94C",
+   "colours": [
+    "#F2C94C",
+    "#1a3358",
+    "#f2f2f2"
+   ],
+   "music": "open/wave/-3/104/seed1234",
+   "bracket": [
+    "nt_spain-nt_ukraine",
+    "nt_croatia-nt_germany",
+    "nt_austria-nt_portugal",
+    "nt_belgium-nt_denmark",
+    "nt_france-nt_sweden",
+    "nt_italy-nt_switzerland",
+    "nt_england-nt_turkiye",
+    "nt_netherlands-nt_norway"
+   ],
+   "history": false,
+   "vs_previous_5": [
+    {
+     "id": "V02",
+     "similarity": 0.076
+    },
+    {
+     "id": "V03",
+     "similarity": 0.45
+    },
+    {
+     "id": "V04",
+     "similarity": 0.4
+    },
+    {
+     "id": "V05",
+     "similarity": 0
+    },
+    {
+     "id": "V06",
+     "similarity": 0
+    }
+   ],
+   "max_similarity": 0.45
+  },
+  {
+   "id": "V08",
+   "competition": "ucl_2026_top16",
+   "competition_name": "MARBLE CHAMPIONS",
+   "map": "stadium_day",
+   "accent": "#BB6BD9",
+   "colours": [
+    "#BB6BD9",
+    "#8cc4ee",
+    "#2f6fd1"
+   ],
+   "music": "stride/up/2/116/seed1234",
+   "bracket": [
+    "dortmund-psg",
+    "arsenal-bayern",
+    "club_brugge-liverpool",
+    "man_city-real_madrid",
+    "barcelona-lask",
+    "real_betis-stuttgart",
+    "aston_villa-inter",
+    "como-sporting"
+   ],
+   "history": false,
+   "vs_previous_5": [
+    {
+     "id": "V03",
+     "similarity": 0.099
+    },
+    {
+     "id": "V04",
+     "similarity": 0.45
+    },
+    {
+     "id": "V05",
+     "similarity": 0
+    },
+    {
+     "id": "V06",
+     "similarity": 0
+    },
+    {
+     "id": "V07",
+     "similarity": 0
+    }
+   ],
+   "max_similarity": 0.45
+  },
+  {
+   "id": "V09",
+   "competition": "uel_top16",
+   "competition_name": "MARBLE CONTINENTAL",
+   "map": "sky_clean",
+   "accent": "#6FCF97",
+   "colours": [
+    "#6FCF97",
+    "#6db9f5",
+    "#e8553e"
+   ],
+   "music": "v2/up/0/112/seed1234",
+   "bracket": [
+    "benfica-sparta_praha",
+    "besiktas-sunderland",
+    "ferencvaros-rennes",
+    "lyon-olympiacos",
+    "crystal_palace-leverkusen",
+    "az-juventus",
+    "bournemouth-real_sociedad",
+    "omonia-union_sg"
+   ],
+   "history": false,
+   "vs_previous_5": [
+    {
+     "id": "V04",
+     "similarity": 0.098
+    },
+    {
+     "id": "V05",
+     "similarity": 0.45
+    },
+    {
+     "id": "V06",
+     "similarity": 0.427
+    },
+    {
+     "id": "V07",
+     "similarity": 0
+    },
+    {
+     "id": "V08",
+     "similarity": 0
+    }
+   ],
+   "max_similarity": 0.45
+  },
+  {
+   "id": "V10",
+   "competition": "nations_world_16",
+   "competition_name": "MARBLE WORLD NATIONS",
+   "map": "stadium_night",
+   "accent": "#FF7A59",
+   "colours": [
+    "#FF7A59",
+    "#1a3358",
+    "#f2f2f2"
+   ],
+   "music": "open/wave/-3/104/seed1234",
+   "bracket": [
+    "nt_spain-nt_usa",
+    "nt_belgium-nt_netherlands",
+    "nt_england-nt_germany",
+    "nt_portugal-nt_switzerland",
+    "nt_argentina-nt_italy",
+    "nt_mexico-nt_morocco",
+    "nt_croatia-nt_france",
+    "nt_brazil-nt_colombia"
+   ],
+   "history": false,
+   "vs_previous_5": [
+    {
+     "id": "V05",
+     "similarity": 0.108
+    },
+    {
+     "id": "V06",
+     "similarity": 0.45
+    },
+    {
+     "id": "V07",
+     "similarity": 0.413
+    },
+    {
+     "id": "V08",
+     "similarity": 0
+    },
+    {
+     "id": "V09",
+     "similarity": 0
+    }
+   ],
+   "max_similarity": 0.45
+  },
+  {
+   "id": "V11",
+   "competition": "nations_euro_16",
+   "competition_name": "MARBLE EURO NATIONS",
+   "map": "stadium_day",
+   "accent": "#56CCF2",
+   "colours": [
+    "#56CCF2",
+    "#8cc4ee",
+    "#2f6fd1"
+   ],
+   "music": "stride/up/2/116/seed1234",
+   "bracket": [
+    "nt_spain-nt_ukraine",
+    "nt_croatia-nt_germany",
+    "nt_austria-nt_portugal",
+    "nt_belgium-nt_denmark",
+    "nt_france-nt_sweden",
+    "nt_italy-nt_switzerland",
+    "nt_england-nt_turkiye",
+    "nt_netherlands-nt_norway"
+   ],
+   "history": false,
+   "vs_previous_5": [
+    {
+     "id": "V06",
+     "similarity": 0.126
+    },
+    {
+     "id": "V07",
+     "similarity": 0.45
+    },
+    {
+     "id": "V08",
+     "similarity": 0.4
+    },
+    {
+     "id": "V09",
+     "similarity": 0.021
+    },
+    {
+     "id": "V10",
+     "similarity": 0
+    }
+   ],
+   "max_similarity": 0.45
+  },
+  {
+   "id": "V12",
+   "competition": "ucl_2026_top16",
+   "competition_name": "MARBLE CHAMPIONS",
+   "map": "sunset",
+   "accent": "#E0457B",
+   "colours": [
+    "#E0457B",
+    "#e98a6a",
+    "#2e3a66"
+   ],
+   "music": "warm/down/5/108/seed1234",
+   "bracket": [
+    "dortmund-psg",
+    "arsenal-bayern",
+    "club_brugge-liverpool",
+    "man_city-real_madrid",
+    "barcelona-lask",
+    "real_betis-stuttgart",
+    "aston_villa-inter",
+    "como-sporting"
+   ],
+   "history": false,
+   "vs_previous_5": [
+    {
+     "id": "V07",
+     "similarity": 0
+    },
+    {
+     "id": "V08",
+     "similarity": 0.474
+    },
+    {
+     "id": "V09",
+     "similarity": 0
+    },
+    {
+     "id": "V10",
+     "similarity": 0.044
+    },
+    {
+     "id": "V11",
+     "similarity": 0
+    }
+   ],
+   "max_similarity": 0.474
+  }
+ ]
+}
