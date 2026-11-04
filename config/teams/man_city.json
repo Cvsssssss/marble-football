@@ -2,6 +2,7 @@
  "id": "man_city",
  "name": "Manchester City",
  "short": "MCI",
+ "short_name": "Man City",
  "primary": "#6CABDD",
  "secondary": "#FFFFFF",
  "strength": 90,
@@ -44,5 +45,6 @@
    "name": "D. Okafor",
    "number": 7
   }
- ]
+ ],
+ "colours_verified": true
 }

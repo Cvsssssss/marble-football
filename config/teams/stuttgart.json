@@ -1,0 +1,50 @@
+{
+ "id": "stuttgart",
+ "name": "Stuttgart",
+ "short": "STU",
+ "short_name": "Stuttgart",
+ "primary": "#FFFFFF",
+ "secondary": "#E32219",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "D. Undav",
+   "number": 26,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefachampionsleague/clubs/50107--stuttgart/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "J. Leweling",
+   "number": 18,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefachampionsleague/clubs/50107--stuttgart/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "T. Tomás",
+   "number": 8,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefachampionsleague/clubs/50107--stuttgart/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "A. Valcourt",
+   "number": 26
+  },
+  {
+   "name": "B. Ibarra",
+   "number": 18
+  },
+  {
+   "name": "C. Ashdown",
+   "number": 8
+  }
+ ]
+}

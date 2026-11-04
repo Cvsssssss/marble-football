@@ -231,6 +231,7 @@ function simulateMatch(seed, ctx, cfgOverride) {
   extendKeeperSchedule(ksched, xrng, cfg, tMaxAll + 2);
   const millPhase = rng() * Math.PI * 2;
   let shotTeam = xrng() < 0.5 ? 'A' : 'B'; // team of the first added-time shot (seeded)
+  const srng = mulberry32((seed ^ 0x2c1b3c6d) >>> 0); // P2 strength lever
   const MA = makeMillAngle(cfg, millPhase);
   const millAngle = MA.angle;
 
@@ -388,7 +389,11 @@ function simulateMatch(seed, ctx, cfgOverride) {
       if (inPipe.length && inPipe[0].s >= L - 0.5 && spoutClear) {
         // queued = balls resting in the final queue zone
         const queued = inPipe.filter((b, k) => b.s >= L - k * spacingOf(b) - 0.5);
-        const pick = shotFlow ? queued.find((b) => b.team === shotTeam) : (queued.find((b) => b.team === turn) || queued[0]);
+        // P2 strength (invisible): in regular play the favourite sometimes takes the release turn (ctx.edge = probability,
+        // ctx.fav = 'A'|'B'); own rng so the main sequence is unchanged. Ball size is identical for every team.
+        let want = turn;
+        if (!shotFlow && ctx.fav && ctx.edge > 0 && turn !== ctx.fav && srng() < ctx.edge) want = ctx.fav;
+        const pick = shotFlow ? queued.find((b) => b.team === shotTeam) : (queued.find((b) => b.team === want) || queued[0]);
         if (pick) {
         pick.state = 'emerge'; pick.t = 0; pick.x = G.SPOUT_X; pick.y = G.GROUND_Y + pick.r;
         turn = pick.team === 'A' ? 'B' : 'A';

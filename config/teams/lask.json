@@ -1,0 +1,50 @@
+{
+ "id": "lask",
+ "name": "LASK",
+ "short": "LAS",
+ "short_name": "LASK",
+ "primary": "#000000",
+ "secondary": "#FFFFFF",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "S. Kalajdzic",
+   "number": 11,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefachampionsleague/clubs/63405--lask/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "M. Usor",
+   "number": 8,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefachampionsleague/clubs/63405--lask/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "S. Adeniran",
+   "number": 7,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefachampionsleague/clubs/63405--lask/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "N. Marchetti",
+   "number": 11
+  },
+  {
+   "name": "O. Oyelaran",
+   "number": 8
+  },
+  {
+   "name": "P. Fenwick",
+   "number": 7
+  }
+ ]
+}

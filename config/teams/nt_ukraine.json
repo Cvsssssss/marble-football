@@ -1,0 +1,51 @@
+{
+ "id": "nt_ukraine",
+ "name": "Ukraine",
+ "short": "UKR",
+ "short_name": "Ukraine",
+ "national": true,
+ "primary": "#FFD500",
+ "secondary": "#005BBB",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "R. Yaremchuk",
+   "number": 9,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Ukraine_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "A. Yarmolenko",
+   "number": 7,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Ukraine_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "V. Vanat",
+   "number": 11,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Ukraine_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "K. Orrin",
+   "number": 9
+  },
+  {
+   "name": "L. Pryce",
+   "number": 7
+  },
+  {
+   "name": "M. Quill",
+   "number": 11
+  }
+ ]
+}

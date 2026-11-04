@@ -1,0 +1,54 @@
+{
+ "id": "nt_argentina",
+ "name": "Argentina",
+ "short": "ARG",
+ "short_name": "Argentina",
+ "national": true,
+ "primary": "#75AADB",
+ "secondary": "#FFFFFF",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "J. Álvarez",
+   "number": 9,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Argentina_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true,
+   "number_note": "unnumbered in source (recent call-up / no squad number); number set by us"
+  },
+  {
+   "name": "T. Almada",
+   "number": 16,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Argentina_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true,
+   "number_note": "unnumbered in source (recent call-up / no squad number); number set by us"
+  },
+  {
+   "name": "G. Simeone",
+   "number": 20,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Argentina_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true,
+   "number_note": "unnumbered in source (recent call-up / no squad number); number set by us"
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "D. Delmar",
+   "number": 9
+  },
+  {
+   "name": "E. Evrard",
+   "number": 16
+  },
+  {
+   "name": "F. Forsyth",
+   "number": 20
+  }
+ ]
+}

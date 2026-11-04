@@ -1,0 +1,51 @@
+{
+ "id": "nt_colombia",
+ "name": "Colombia",
+ "short": "COL",
+ "short_name": "Colombia",
+ "national": true,
+ "primary": "#FCD116",
+ "secondary": "#003893",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "L. Suárez",
+   "number": 9,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Colombia_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "K. Viveros",
+   "number": 20,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Colombia_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "Ó. Perea",
+   "number": 7,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Colombia_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "N. Gaspard",
+   "number": 9
+  },
+  {
+   "name": "O. Hollis",
+   "number": 20
+  },
+  {
+   "name": "P. Ingram",
+   "number": 7
+  }
+ ]
+}

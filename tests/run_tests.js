@@ -200,8 +200,12 @@ check('tie logic: synthetic cases', decideTie([2, 1], [0, 1], 'B') === 'B' && de
 
 // release order alternates A,B,A,B (FIFO)
 let alt = 0, tot = 0;
-T.matches.forEach((m) => { const pops = m.events.filter((e) => e.type === 'pop'); for (let i = 1; i < pops.length; i++) { tot++; if (pops[i].team !== pops[i - 1].team) alt++; } });
-check('outlet order alternates A,B,A,B (>= 95% of consecutive releases)', alt / tot >= 0.95, { alternatingPct: +(100 * alt / tot).toFixed(1) });
+// P2: with equal strength the order alternates; the favourite's invisible edge lets it take the underdog's turn sometimes
+{ const eq = []; for (let i = 0; i < (QUICK ? 6 : 12); i++) eq.push(eng.simulateMatch(830000 + i, { kind: 'final' }));
+  eq.forEach((m) => { const pops = m.events.filter((e) => e.type === 'pop' && !m.events.some((x) => x.type === 'shot' && x.t === e.t)); for (let i = 1; i < pops.length; i++) { tot++; if (pops[i].team !== pops[i - 1].team) alt++; } }); }
+let altF = 0, totF = 0;
+T.matches.forEach((m) => { const pops = m.events.filter((e) => e.type === 'pop'); for (let i = 1; i < pops.length; i++) { totF++; if (pops[i].team !== pops[i - 1].team) altF++; } });
+check('outlet order alternates A,B,A,B (>= 95% with equal strength; >= 80% when the favourite edge is on)', alt / tot >= 0.95 && altF / totF >= 0.8, { equalPct: +(100 * alt / tot).toFixed(1), withEdgePct: +(100 * altF / totF).toFixed(1) });
 // release interval
 let intOk = true; T.matches.forEach((m) => { const pops = m.events.filter((e) => e.type === 'pop'); for (let i = 1; i < pops.length; i++) { const d = pops[i].t - pops[i - 1].t; if (d < CFG.RELEASE_INTERVAL[0] - 0.35 - 0.01) intOk = false; } });
 check('release interval ~1.6-2.4 s (min gap respected)', intOk);
@@ -230,7 +234,7 @@ console.log('== determinism');
   const a = eng.simulateMatch(424242, { kind: 'final' }), b = eng.simulateMatch(424242, { kind: 'final' });
   check('determinism: same seed -> identical timeline hash (same process)', a.hash === b.hash, a.hash.slice(0, 16));
   const m0 = T.matches[0];
-  const out = execFileSync(process.execPath, ['-e', `const e=require(${JSON.stringify(path.join(__dirname, '..', 'sim', 'engine.js'))});const r=e.simulateMatch(${m0.seed},${JSON.stringify({ kind: m0.kind, rA: m0.rA, rB: m0.rB, prevA: m0.prev[0], prevB: m0.prev[1] })});process.stdout.write(r.hash)`]).toString();
+  const out = execFileSync(process.execPath, ['-e', `const e=require(${JSON.stringify(path.join(__dirname, '..', 'sim', 'engine.js'))});const r=e.simulateMatch(${m0.seed},${JSON.stringify({ kind: m0.kind, rA: m0.rA, rB: m0.rB, prevA: m0.prev[0], prevB: m0.prev[1], fav: m0.strength.fav || undefined, edge: m0.strength.edge })},${JSON.stringify(L.rulesToCfg(L.loadCompetition().rules))});process.stdout.write(r.hash)`]).toString();
   check('determinism: identical hash in a fresh process', out === m0.hash, out.slice(0, 16));
 }
 
@@ -281,26 +285,24 @@ function oneBall(x, y, vx, vy, steps) {
   check('crossbar: every bar contact in the tournament happens from above', barEv.every((e) => e.y < G.BAR_TOP), { barContacts: barEv.length });
 }
 
-// ---------- 5. strength / win rate ----------
+// ---------- 5. strength / win rate (P2: equal balls, invisible release-turn edge) ----------
 console.log('== strength');
 {
-  // every seed is played twice (favourite as team A, then as team B) to cancel seed/position noise
-  const n = QUICK ? 300 : 1200;
-  let fav = 0, dec = 0;
-  const s = CFG.STRENGTH_PCT;
-  for (let i = 0; i < n; i++) {
-    const favIsA = i % 2 === 0;
-    const ctx = favIsA ? { kind: 'final', rA: G.BALL_R * (1 + s), rB: G.BALL_R * (1 - s) } : { kind: 'final', rA: G.BALL_R * (1 - s), rB: G.BALL_R * (1 + s) };
-    const r = eng.simulateMatch(500000 + (i >> 1), ctx);
-    if (r.failed) continue;
-    dec++;
-    const w = r.goldenWinner || (r.score.A > r.score.B ? 'A' : 'B');
-    if ((w === 'A') === favIsA) fav++;
-  }
-  const pct = 100 * fav / dec;
-  // P1b (Max's decision): added-time shots alternate and are equal for both teams, so the favourite edge drops ~2 points
-  check('strength: favourite win rate in 53-62% (single matches, golden ball decides; P1b range)', pct >= 53 && pct <= 62, { favouriteWinPct: +pct.toFixed(1), matches: dec, sizeDiff: `+-${(100 * s).toFixed(0)}% radius` });
+  // every seed is played twice (favourite as team A, then as team B); 1200 matches in 4 parallel processes
+  const edge = L.rulesToCfg(require('../config/rules/base.json')).STRENGTH_EDGE;
+  const n = QUICK ? 400 : 1200, parts = 4;
+  const script = `const { spawn } = require('child_process');
+    Promise.all(Array.from({ length: ${parts} }, (_, k) => new Promise((res) => { let o = ''; const c = spawn(process.execPath, [${JSON.stringify(path.join(__dirname, 'calibrate_strength.js'))}, '${edge}', '${n / parts}', String(500000 + k * 10000)]);
+      c.stdout.on('data', (d) => (o += d)); c.on('close', () => res(JSON.parse(o))); }))).then((r) => console.log(JSON.stringify(r)));`;
+  const res = execFileSync(process.execPath, ['-e', script]).toString();
+  const parts_ = JSON.parse(res);
+  const dec = parts_.reduce((a, x) => a + x.decided, 0), favW = parts_.reduce((a, x) => a + Math.round(x.favouriteWinPct * x.decided / 100), 0);
+  const pct = 100 * favW / dec;
+  check('strength: favourite win rate in 53-62% with identical ball size (release-turn edge, golden ball decides)', pct >= 53 && pct <= 62, { favouriteWinPct: +pct.toFixed(1), matches: dec, edge });
+  const r1 = eng.simulateMatch(4242, { kind: 'final', fav: 'A', edge }), r0 = eng.simulateMatch(4242, { kind: 'final' });
+  check('strength: never visible - every ball has the same radius in every match (with and without favourite)', r1.rA === r1.rB && r1.rA === G.BALL_R && r0.rA === r0.rB && T.matches.every((m) => m.rA === m.rB && m.rA === G.BALL_R));
 }
+
 
 // ---------- 6. golden ball resolution statistics ----------
 {
@@ -385,7 +387,8 @@ console.log('== colours');
   check('colours: Bayern vs Arsenal (dE 21) -> one team swapped to secondary, new dE >= 30, recorded', (k1.A.swapped || k1.B.swapped) && dE(k1.A, k1.B) >= 30 && !!k1.note, { note: k1.note });
   check('colours: Man City vs Real Madrid (dE >= 30) -> no swap', !k2.A.swapped && !k2.B.swapped && k2.dE >= 30, { dE: k2.dE });
   check('colours: both-white case -> resolved with a swap', (k3.A.swapped || k3.B.swapped) && dE(k3.A, k3.B) >= 30, { note: k3.note });
-  check('colours: every tournament match has contrasting ball colours (dE >= 30)', T.matches.every((m) => L.deltaE76(m.kits.A.primary, m.kits.B.primary) >= 30), T.matches.map((m) => +L.deltaE76(m.kits.A.primary, m.kits.B.primary).toFixed(0)));
+  // P2: the identifying ball colour is kit.ring (crest balls: ring colour; colour balls: ring == primary)
+  check('colours: every tournament match has contrasting ball colours (dE >= 30, ring colour)', T.matches.every((m) => L.deltaE76(m.kits.A.ring, m.kits.B.ring) >= 30), T.matches.map((m) => +L.deltaE76(m.kits.A.ring, m.kits.B.ring).toFixed(0)));
   // schema: clear error messages
   const errs = []; L.validate({ id: 'x', name: 'X', primary: 'red', secondary: '#FFFFFF', strength: 50, players: [] }, L.SCHEMAS.team, 'teams/x.json', errs);
   check('config schema: invalid team file gives clear messages', errs.some((e) => e.includes('primary') && e.includes('#1A2B3C')) && errs.some((e) => e.includes('players') && e.includes('at least 3')), errs);
@@ -445,11 +448,16 @@ if (!QUICK) {
   const tmp = path.join(ROOT, 'build', 'tmp_config');
   fs.rmSync(tmp, { recursive: true, force: true });
   fs.cpSync(path.join(ROOT, 'config'), tmp, { recursive: true });
+  // P2: this test is about kit colours -> colour-only balls (logos_on_balls false) in both configs
+  const tmpB = path.join(ROOT, 'build', 'tmp_config_base');
+  fs.rmSync(tmpB, { recursive: true, force: true });
+  for (const d of [tmp]) { const rf = path.join(d, 'rules', 'base.json'); const ru = JSON.parse(fs.readFileSync(rf, 'utf8')); ru.logos_on_balls = false; fs.writeFileSync(rf, JSON.stringify(ru)); }
+  fs.cpSync(tmp, tmpB, { recursive: true });
   const tf = path.join(tmp, 'teams', 'man_city.json');
   const team = JSON.parse(fs.readFileSync(tf, 'utf8')); team.primary = '#00C853'; fs.writeFileSync(tf, JSON.stringify(team));
   const mf = path.join(tmp, 'maps', 'default.json');
   const map = JSON.parse(fs.readFileSync(mf, 'utf8')); map.sky = ['#ff7a00', '#ffa64d', '#ffd9b3']; fs.writeFileSync(mf, JSON.stringify(map));
-  const base = TOUR.buildAll(path.join(ROOT, 'config', 'competitions', 'demo_4teams.json'), path.join(ROOT, 'build', 'test_show_base.json'));
+  const base = TOUR.buildAll(path.join(tmpB, 'competitions', 'demo_4teams.json'), path.join(ROOT, 'build', 'test_show_base.json'), { configDir: tmpB });
   const chg = TOUR.buildAll(path.join(tmp, 'competitions', 'demo_4teams.json'), path.join(ROOT, 'build', 'test_show_changed.json'), { configDir: tmp });
   execFileSync(process.execPath, [path.join(ROOT, 'render', 'render.js'), 'brackets', 'build/test_brackets', '--show', 'build/test_show_base.json'], { cwd: ROOT, stdio: 'ignore', timeout: 180000 });
   const bfiles = ['bracket4_left_to_right.png', 'bracket4_symmetric.png', 'bracket16_left_to_right.png', 'bracket16_symmetric.png'];
@@ -475,7 +483,7 @@ if (!QUICK) {
   check('config change: team primary colour edited in a temp config -> ball pixels change, closer to the new colour', dist(px.base.ball, px.changed.ball) > 40 && dist(px.changed.ball, green) < dist(px.base.ball, green), px);
   check('config change: map sky colour edited -> sky pixels change', dist(px.base.sky, px.changed.sky) > 60, { base: px.base.sky, changed: px.changed.sky });
   check('config change: simulation unchanged by a colour edit (same seeds -> same hashes)', base.show.matches.every((m, i) => m.hash === chg.show.matches[i].hash));
-  fs.rmSync(tmp, { recursive: true, force: true });
+  fs.rmSync(tmp, { recursive: true, force: true }); fs.rmSync(tmpB, { recursive: true, force: true });
 }
 
 // ---------- screenshots present (only when they exist) ----------

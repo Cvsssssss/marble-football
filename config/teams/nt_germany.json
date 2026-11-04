@@ -1,0 +1,51 @@
+{
+ "id": "nt_germany",
+ "name": "Germany",
+ "short": "GER",
+ "short_name": "Germany",
+ "national": true,
+ "primary": "#FFFFFF",
+ "secondary": "#000000",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "N. Woltemade",
+   "number": 11,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Germany_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "J. Burkardt",
+   "number": 10,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Germany_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "D. Scherhant",
+   "number": 9,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Germany_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "A. Merrick",
+   "number": 11
+  },
+  {
+   "name": "B. Norland",
+   "number": 10
+  },
+  {
+   "name": "C. Oakes",
+   "number": 9
+  }
+ ]
+}

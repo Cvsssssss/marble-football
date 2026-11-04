@@ -1,0 +1,50 @@
+{
+ "id": "besiktas",
+ "name": "Beşiktaş",
+ "short": "BJK",
+ "short_name": "Beşiktaş",
+ "primary": "#FFFFFF",
+ "secondary": "#000000",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "D. Vlahović",
+   "number": 28,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/50157--besiktas/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "E. Poku",
+   "number": 17,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/50157--besiktas/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "S. Kılıçsoy",
+   "number": 90,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/50157--besiktas/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "D. Vantor",
+   "number": 28
+  },
+  {
+   "name": "E. Wardell",
+   "number": 17
+  },
+  {
+   "name": "F. Yarden",
+   "number": 90
+  }
+ ]
+}

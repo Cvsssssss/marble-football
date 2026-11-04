@@ -1,0 +1,50 @@
+{
+ "id": "rennes",
+ "name": "Rennes",
+ "short": "REN",
+ "short_name": "Rennes",
+ "primary": "#E2001A",
+ "secondary": "#000000",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "E. Lepaul",
+   "number": 9,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/55031--rennes/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "B. Dia",
+   "number": 22,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/55031--rennes/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "M. Al-Taamari",
+   "number": 11,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/55031--rennes/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "A. Leandro",
+   "number": 9
+  },
+  {
+   "name": "B. Morrow",
+   "number": 22
+  },
+  {
+   "name": "C. Nevers",
+   "number": 11
+  }
+ ]
+}

@@ -1,0 +1,51 @@
+{
+ "id": "nt_denmark",
+ "name": "Denmark",
+ "short": "DEN",
+ "short_name": "Denmark",
+ "national": true,
+ "primary": "#C8102E",
+ "secondary": "#FFFFFF",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "R. Højlund",
+   "number": 9,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Denmark_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "G. Isaksen",
+   "number": 8,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Denmark_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "A. Skov Olsen",
+   "number": 11,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Denmark_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "R. Crane",
+   "number": 9
+  },
+  {
+   "name": "S. Darrow",
+   "number": 8
+  },
+  {
+   "name": "T. Ellery",
+   "number": 11
+  }
+ ]
+}

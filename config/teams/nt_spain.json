@@ -1,0 +1,51 @@
+{
+ "id": "nt_spain",
+ "name": "Spain",
+ "short": "ESP",
+ "short_name": "Spain",
+ "national": true,
+ "primary": "#C60B1E",
+ "secondary": "#FFC400",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "L. Yamal",
+   "number": 19,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Spain_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "M. Oyarzabal",
+   "number": 21,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Spain_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "Y. Pino",
+   "number": 11,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Spain_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "A. Aldane",
+   "number": 19
+  },
+  {
+   "name": "B. Brevik",
+   "number": 21
+  },
+  {
+   "name": "C. Castor",
+   "number": 11
+  }
+ ]
+}

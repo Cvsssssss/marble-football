@@ -1,0 +1,54 @@
+{
+ "id": "nt_croatia",
+ "name": "Croatia",
+ "short": "CRO",
+ "short_name": "Croatia",
+ "national": true,
+ "primary": "#E1000F",
+ "secondary": "#FFFFFF",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "A. Kramarić",
+   "number": 9,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Croatia_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true,
+   "number_note": "unnumbered in source (recent call-up / no squad number); number set by us"
+  },
+  {
+   "name": "I. Perišić",
+   "number": 4,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Croatia_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true,
+   "number_note": "unnumbered in source (recent call-up / no squad number); number set by us"
+  },
+  {
+   "name": "A. Budimir",
+   "number": 17,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Croatia_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true,
+   "number_note": "unnumbered in source (recent call-up / no squad number); number set by us"
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "D. Penrose",
+   "number": 9
+  },
+  {
+   "name": "E. Quint",
+   "number": 4
+  },
+  {
+   "name": "F. Rowan",
+   "number": 17
+  }
+ ]
+}

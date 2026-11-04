@@ -2,6 +2,7 @@
  "id": "bayern",
  "name": "Bayern Munich",
  "short": "BAY",
+ "short_name": "Bayern",
  "primary": "#DC052D",
  "secondary": "#FFFFFF",
  "strength": 87,
@@ -44,5 +45,6 @@
    "name": "R. Albrecht",
    "number": 17
   }
- ]
+ ],
+ "colours_verified": true
 }

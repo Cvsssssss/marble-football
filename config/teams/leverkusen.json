@@ -1,0 +1,50 @@
+{
+ "id": "leverkusen",
+ "name": "Bayer Leverkusen",
+ "short": "B04",
+ "short_name": "Leverkusen",
+ "primary": "#E32221",
+ "secondary": "#000000",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "P. Schick",
+   "number": 14,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/50109--leverkusen/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "M. Diaby",
+   "number": 19,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/50109--leverkusen/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "C. Kofane",
+   "number": 35,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/50109--leverkusen/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "D. Dunmore",
+   "number": 14
+  },
+  {
+   "name": "E. Esparza",
+   "number": 19
+  },
+  {
+   "name": "F. Falkner",
+   "number": 35
+  }
+ ]
+}

@@ -1,0 +1,51 @@
+{
+ "id": "nt_netherlands",
+ "name": "Netherlands",
+ "short": "NED",
+ "short_name": "Netherlands",
+ "national": true,
+ "primary": "#F36C21",
+ "secondary": "#21468B",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "J. Zirkzee",
+   "number": 9,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Netherlands_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "C. Summerville",
+   "number": 7,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Netherlands_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "N. Lang",
+   "number": 10,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Netherlands_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "G. Ambry",
+   "number": 9
+  },
+  {
+   "name": "H. Belvoir",
+   "number": 7
+  },
+  {
+   "name": "J. Cordell",
+   "number": 10
+  }
+ ]
+}

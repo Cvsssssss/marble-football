@@ -1,0 +1,50 @@
+{
+ "id": "aston_villa",
+ "name": "Aston Villa",
+ "short": "AVL",
+ "short_name": "Aston Villa",
+ "primary": "#670E36",
+ "secondary": "#95BFE5",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "A. Garnacho",
+   "number": 17,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefachampionsleague/clubs/52683--aston-villa/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "N. Jackson",
+   "number": 11,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefachampionsleague/clubs/52683--aston-villa/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "T. Abraham",
+   "number": 18,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefachampionsleague/clubs/52683--aston-villa/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "G. Halvorsen",
+   "number": 17
+  },
+  {
+   "name": "H. Duarte",
+   "number": 11
+  },
+  {
+   "name": "J. Kessler",
+   "number": 18
+  }
+ ]
+}

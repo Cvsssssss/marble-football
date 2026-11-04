@@ -1,0 +1,50 @@
+{
+ "id": "sporting",
+ "name": "Sporting CP",
+ "short": "SCP",
+ "short_name": "Sporting",
+ "primary": "#008057",
+ "secondary": "#FFFFFF",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "L. Suárez",
+   "number": 97,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefachampionsleague/clubs/50149--sporting-cp/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "G. Catamo",
+   "number": 10,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefachampionsleague/clubs/50149--sporting-cp/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "F. Ioannidis",
+   "number": 7,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefachampionsleague/clubs/50149--sporting-cp/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "N. Ferrand",
+   "number": 97
+  },
+  {
+   "name": "O. Ostrova",
+   "number": 10
+  },
+  {
+   "name": "P. Quillon",
+   "number": 7
+  }
+ ]
+}

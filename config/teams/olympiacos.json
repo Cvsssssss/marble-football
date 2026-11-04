@@ -1,0 +1,50 @@
+{
+ "id": "olympiacos",
+ "name": "Olympiacos",
+ "short": "OLY",
+ "short_name": "Olympiacos",
+ "primary": "#D0021B",
+ "secondary": "#FFFFFF",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "R. Yaremchuk",
+   "number": 11,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/2610--olympiacos/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "L. Bailey",
+   "number": 17,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/2610--olympiacos/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "G. Martins",
+   "number": 10,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/2610--olympiacos/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "N. Mavrin",
+   "number": 11
+  },
+  {
+   "name": "O. Nolden",
+   "number": 17
+  },
+  {
+   "name": "P. Orsini",
+   "number": 10
+  }
+ ]
+}

@@ -1,0 +1,50 @@
+{
+ "id": "dortmund",
+ "name": "Dortmund",
+ "short": "BVB",
+ "short_name": "Dortmund",
+ "primary": "#FDE100",
+ "secondary": "#000000",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "S. Guirassy",
+   "number": 9,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefachampionsleague/clubs/52758--b-dortmund/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "M. Beier",
+   "number": 14,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefachampionsleague/clubs/52758--b-dortmund/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "F. Silva",
+   "number": 21,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefachampionsleague/clubs/52758--b-dortmund/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "R. Arrieta",
+   "number": 9
+  },
+  {
+   "name": "S. Grosvenor",
+   "number": 14
+  },
+  {
+   "name": "T. Tiberi",
+   "number": 21
+  }
+ ]
+}

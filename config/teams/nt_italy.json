@@ -1,0 +1,51 @@
+{
+ "id": "nt_italy",
+ "name": "Italy",
+ "short": "ITA",
+ "short_name": "Italy",
+ "national": true,
+ "primary": "#0066B2",
+ "secondary": "#FFFFFF",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "P. Esposito",
+   "number": 9,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Italy_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "G. Scamacca",
+   "number": 11,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Italy_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "D. Maldini",
+   "number": 17,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Italy_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "G. Sterling",
+   "number": 9
+  },
+  {
+   "name": "H. Thorne",
+   "number": 11
+  },
+  {
+   "name": "J. Ulric",
+   "number": 17
+  }
+ ]
+}

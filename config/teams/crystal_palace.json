@@ -1,0 +1,50 @@
+{
+ "id": "crystal_palace",
+ "name": "Crystal Palace",
+ "short": "CRY",
+ "short_name": "Crystal Palace",
+ "primary": "#1B458F",
+ "secondary": "#C4122E",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "J. Mateta",
+   "number": 14,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/52916--crystal-palace/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "I. Sarr",
+   "number": 7,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/52916--crystal-palace/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "Y. Pino",
+   "number": 10,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/52916--crystal-palace/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "G. Sauvage",
+   "number": 14
+  },
+  {
+   "name": "H. Tolland",
+   "number": 7
+  },
+  {
+   "name": "J. Umberto",
+   "number": 10
+  }
+ ]
+}

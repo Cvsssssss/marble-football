@@ -11,7 +11,8 @@ Apeși START → alegi (sau lași recomandarea) → primești un folder cu:
 
 ## 2. Deciziile tale (finale)
 - 3 mingi pe echipă. Mingile = jucători: **3 atacanți reali per echipă**, scriși `L. Yamal`, afișați **doar în video** (reluarea golului, Man of the Match, câștigătoare, podium). Nu în timpul jocului. Nu în fișiere, miniaturi sau texte sugerate.
-- Doar culorile echipamentului (două culori), fără modele/embleme. Țările pot avea steaguri.
+- Culorile echipamentului (două culori) pentru inelul mingii și interfață. **Sigla echipei apare pe minge** (decizia ta din 4 noiembrie; opțiune `logos_on_balls`, o poți opri). Sigle doar pe mingi, nu în alte părți. Țările pot avea steaguri. Siglele sunt mărci/pot fi protejate de drepturi de autor: riscul e al tău, nu sunt avocat. Le pui tu în `assets\logos\` (sau îi spui lui Claude Code explicit să le caute).
+- **Toate mingile au aceeași mărime**, la ambele echipe. Avantajul favoritei nu se mai face prin mărime.
 - Nume proprii de competiții: **MARBLE CHAMPIONS** (UCL), **MARBLE CONTINENTAL** (Europa League), **MARBLE WORLD NATIONS**, **MARBLE EURO NATIONS** (alternativă: „MARBLE LEAGUE", ți-o schimb din configurare).
 - 16 echipe: primele 16 din cele 36 din faza ligii UCL 2026–27 (clasament curent, salvat cu sursă și dată); pentru țări, primele 16 din clasamentul FIFA (alegerea mea implicită).
 - Jocul ca în demo, plus corecturile: sunet de gol nou, culori pe mingi, bara reparată, bracket simetric cu finala la mijloc, golden ball cu ceasul înghețat la `90+N`, morișcă mai rapidă de la minutul 70, reluarea golului cu nume + minut, Man of the Match cu trofeu, ecran final cu câștigătoarea + podium cu top 3 marcatori.
@@ -53,5 +54,6 @@ Estimările sunt ale mele și nemăsurate. Server, bot Telegram, YouTube prin AP
 | YouTube: „inauthentic content" | Mare | variație, ritm moderat, titluri tu, revizuire umană; fără garanție |
 | Prag YPP crescut din feb. 2027 | Mare | planifici pe pragul nou |
 | Nume reale de jucători | Mediu | doar în video; opțiune de oprire |
+| Sigle de echipe pe mingi | Mediu-mare | pot atrage reclamații de drepturi sau de marcă; opțiune `logos_on_balls`; `LOGO_USAGE.md` cu surse; nu folosi siglele în miniaturi dacă vrei risc mai mic [?] |
 | Nișă saturată | Necunoscut | verifici manual 20 de canale similare |
 | Limita Claude Code | Operațional | sesiune nouă pe fază, prompturi mici |

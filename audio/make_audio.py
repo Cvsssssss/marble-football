@@ -381,11 +381,28 @@ for seg in show['segments']:
         place(amb, seg['start'] / FPS, 0.06, 0.0)
 
 # ---------------- music (original, synthesised) ----------------
-BPM = 112.0; beat = 60.0 / BPM; bar = 4 * beat
-def midi(n): return 440.0 * 2 ** ((n - 69) / 12)
-# D major: D - A - Bm - G | D - A - G - A
-prog = [(50, [62, 66, 69]), (45, [61, 64, 69]), (47, [62, 66, 71]), (43, [62, 67, 71]),
-        (50, [62, 66, 69]), (45, [61, 64, 69]), (43, [62, 67, 71]), (45, [61, 64, 69])]
+# P3: per-theme music variant from the map (config/maps/<theme>.json "music": {transpose, bpm, progression, arp});
+# no "music" field = the approved v2 track, bit-identical.
+MUS = (show.get('map') or {}).get('music') or {}
+BPM = float(MUS.get('bpm', 112.0)); beat = 60.0 / BPM; bar = 4 * beat
+TRANS = int(MUS.get('transpose', 0))
+def midi(n): return 440.0 * 2 ** ((n + TRANS - 69) / 12)
+PROGS = {
+    # D major: D - A - Bm - G | D - A - G - A (v2)
+    'v2': [(50, [62, 66, 69]), (45, [61, 64, 69]), (47, [62, 66, 71]), (43, [62, 67, 71]),
+           (50, [62, 66, 69]), (45, [61, 64, 69]), (43, [62, 67, 71]), (45, [61, 64, 69])],
+    # D - Bm - G - A (calm, open)
+    'open': [(50, [62, 66, 69]), (47, [62, 66, 71]), (43, [62, 67, 71]), (45, [61, 64, 69]),
+             (50, [62, 66, 69]), (47, [62, 66, 71]), (43, [62, 67, 71]), (45, [61, 64, 69])],
+    # D - G - D - A | Bm - G - A - A (anthem-like, still soft)
+    'stride': [(50, [62, 66, 69]), (43, [62, 67, 71]), (50, [62, 66, 69]), (45, [61, 64, 69]),
+               (47, [62, 66, 71]), (43, [62, 67, 71]), (45, [61, 64, 69]), (45, [61, 64, 69])],
+    # Bm - G - D - A (warm, slightly minor)
+    'warm': [(47, [62, 66, 71]), (43, [62, 67, 71]), (50, [62, 66, 69]), (45, [61, 64, 69]),
+             (47, [62, 66, 71]), (43, [62, 67, 71]), (50, [62, 66, 69]), (45, [61, 64, 69])],
+}
+prog = PROGS[MUS.get('progression', 'v2')]
+ARP = MUS.get('arp', 'up')
 loop_len = int(len(prog) * bar * SR)
 loop = np.zeros(loop_len)
 def addm(sig, t, g):
@@ -407,6 +424,8 @@ for bi, (root, ch) in enumerate(prog):
         addm(b, t0 + off * beat, 0.32)
     # arpeggio (8ths)
     arp = [ch[0] + 12, ch[1] + 12, ch[2] + 12, ch[1] + 12, ch[0] + 24, ch[2] + 12, ch[1] + 12, ch[2] + 12]
+    if ARP == 'down': arp = [ch[2] + 12, ch[1] + 12, ch[0] + 12, ch[1] + 12, ch[2] + 12, ch[0] + 24, ch[2] + 12, ch[1] + 12]
+    elif ARP == 'wave': arp = [ch[0] + 12, ch[2] + 12, ch[1] + 12, ch[2] + 12, ch[0] + 24, ch[1] + 12, ch[2] + 12, ch[0] + 24]
     for k, n in enumerate(arp):
         addm(tone(midi(n), 0.5, 4, 1.2, 0.003, 0.16), t0 + k * beat / 2, 0.07)
     # drums
@@ -427,7 +446,7 @@ mus_full = np.tile(loop, reps)[:N].astype(np.float32)
 lvl = np.full(N, 0.16, np.float32)
 for seg in show['segments']:
     a = int(seg['start'] / FPS * SR); b = int((seg['start'] + seg['len']) / FPS * SR)
-    if seg['type'] in ('intro', 'bracket'): lvl[a:b] = 0.42
+    if seg['type'] in ('intro', 'bracket', 'roundCard'): lvl[a:b] = 0.42  # P2: round title cards like bracket screens
     elif seg['type'] == 'winner': lvl[a:b] = 0.30
     elif seg['type'] == 'replay': lvl[a:b] = 0.22
 # ducking under goals / whistles / fanfare

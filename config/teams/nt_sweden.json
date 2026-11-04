@@ -1,0 +1,52 @@
+{
+ "id": "nt_sweden",
+ "name": "Sweden",
+ "short": "SWE",
+ "short_name": "Sweden",
+ "national": true,
+ "primary": "#FECC02",
+ "secondary": "#006AA7",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "V. Gyökeres",
+   "number": 17,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Sweden_men's_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "P. Abraham",
+   "number": 9,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Sweden_men's_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "A. Isak",
+   "number": 18,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Sweden_men's_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true,
+   "number_note": "unnumbered in source (recent call-up / no squad number); number set by us"
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "G. Lowell",
+   "number": 17
+  },
+  {
+   "name": "H. Mayne",
+   "number": 9
+  },
+  {
+   "name": "J. Nash",
+   "number": 18
+  }
+ ]
+}

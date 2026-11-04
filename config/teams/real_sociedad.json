@@ -1,0 +1,50 @@
+{
+ "id": "real_sociedad",
+ "name": "Real Sociedad",
+ "short": "RSO",
+ "short_name": "Real Sociedad",
+ "primary": "#0067B1",
+ "secondary": "#FFFFFF",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "T. Kubo",
+   "number": 14,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/50123--real-sociedad/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "O. Óskarsson",
+   "number": 9,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/50123--real-sociedad/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "G. Guedes",
+   "number": 11,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/50123--real-sociedad/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "D. Ostrander",
+   "number": 14
+  },
+  {
+   "name": "E. Pradel",
+   "number": 9
+  },
+  {
+   "name": "F. Rennick",
+   "number": 11
+  }
+ ]
+}

@@ -2,6 +2,7 @@
  "id": "arsenal",
  "name": "Arsenal",
  "short": "ARS",
+ "short_name": "Arsenal",
  "primary": "#EF0107",
  "secondary": "#FFFFFF",
  "strength": 86,
@@ -44,5 +45,6 @@
    "name": "C. Marlow",
    "number": 9
   }
- ]
+ ],
+ "colours_verified": true
 }

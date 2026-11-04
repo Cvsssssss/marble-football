@@ -1,0 +1,51 @@
+{
+ "id": "nt_austria",
+ "name": "Austria",
+ "short": "AUT",
+ "short_name": "Austria",
+ "national": true,
+ "primary": "#ED2939",
+ "secondary": "#FFFFFF",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "S. Kalajdžić",
+   "number": 9,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Austria_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "M. Gregoritsch",
+   "number": 11,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Austria_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "M. Grüll",
+   "number": 19,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Austria_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "A. Fairley",
+   "number": 9
+  },
+  {
+   "name": "B. Garnet",
+   "number": 11
+  },
+  {
+   "name": "C. Hale",
+   "number": 19
+  }
+ ]
+}

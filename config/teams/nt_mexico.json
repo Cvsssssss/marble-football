@@ -1,0 +1,51 @@
+{
+ "id": "nt_mexico",
+ "name": "Mexico",
+ "short": "MEX",
+ "short_name": "Mexico",
+ "national": true,
+ "primary": "#006847",
+ "secondary": "#FFFFFF",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "S. Giménez",
+   "number": 11,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Mexico_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "G. Berterame",
+   "number": 9,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Mexico_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "R. Alvarado",
+   "number": 25,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Mexico_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "K. Dunstan",
+   "number": 11
+  },
+  {
+   "name": "L. Elric",
+   "number": 9
+  },
+  {
+   "name": "M. Fenner",
+   "number": 25
+  }
+ ]
+}

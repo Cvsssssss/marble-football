@@ -1,0 +1,14 @@
+{
+  "id": "sunset",
+  "name": "Sunset",
+  "sky": ["#5b4a9e", "#e98a6a", "#ffd39a"],
+  "rock": ["#a0603e", "#7f462c", "#5a301f"],
+  "grass": ["#9bd45a", "#73b23e", "#4c862c"],
+  "grass_blades": "#8fcb52",
+  "scenery": "sunset",
+  "sun": "#fff0b8",
+  "hills": ["#b0668a", "#8e5276"],
+  "windmill": ["#2e3a66", "#1b2444"],
+  "keeper": ["#3b82e0", "#2559a6"],
+  "music": { "transpose": 5, "bpm": 108, "progression": "warm", "arp": "down" }
+}

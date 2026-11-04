@@ -1,0 +1,50 @@
+{
+ "id": "como",
+ "name": "Como",
+ "short": "COM",
+ "short_name": "Como",
+ "primary": "#1E4FA0",
+ "secondary": "#FFFFFF",
+ "colours_verified": false,
+ "strength": 80,
+ "players": [
+  {
+   "name": "M. Kean",
+   "number": 90,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefachampionsleague/clubs/79946--como/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "A. Diao",
+   "number": 11,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefachampionsleague/clubs/79946--como/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "T. Douvikas",
+   "number": 9,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefachampionsleague/clubs/79946--como/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "D. Reinholt",
+   "number": 90
+  },
+  {
+   "name": "E. Corvino",
+   "number": 11
+  },
+  {
+   "name": "F. Lemaire",
+   "number": 9
+  }
+ ]
+}

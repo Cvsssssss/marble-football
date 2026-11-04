@@ -1,0 +1,50 @@
+{
+ "id": "benfica",
+ "name": "Benfica",
+ "short": "BEN",
+ "short_name": "Benfica",
+ "primary": "#E2231A",
+ "secondary": "#FFFFFF",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "V. Pavlidis",
+   "number": 14,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/50147--benfica/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "D. Lukébakio",
+   "number": 11,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/50147--benfica/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "J. Durán",
+   "number": 22,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/50147--benfica/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "A. Arvel",
+   "number": 14
+  },
+  {
+   "name": "B. Bostrom",
+   "number": 11
+  },
+  {
+   "name": "C. Calder",
+   "number": 22
+  }
+ ]
+}

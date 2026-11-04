@@ -1,0 +1,50 @@
+{
+ "id": "club_brugge",
+ "name": "Club Brugge",
+ "short": "BRU",
+ "short_name": "Club Brugge",
+ "primary": "#0067CE",
+ "secondary": "#000000",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "C. Forbs",
+   "number": 9,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefachampionsleague/clubs/50043--club-brugge/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "N. Tresoldi",
+   "number": 7,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefachampionsleague/clubs/50043--club-brugge/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "R. Vermant",
+   "number": 17,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefachampionsleague/clubs/50043--club-brugge/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "G. Sotto",
+   "number": 9
+  },
+  {
+   "name": "H. Wexley",
+   "number": 7
+  },
+  {
+   "name": "J. Batista",
+   "number": 17
+  }
+ ]
+}

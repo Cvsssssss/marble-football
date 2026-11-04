@@ -1,0 +1,54 @@
+{
+ "id": "nt_brazil",
+ "name": "Brazil",
+ "short": "BRA",
+ "short_name": "Brazil",
+ "national": true,
+ "primary": "#FFDF00",
+ "secondary": "#009C3B",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "Vinícius Jr.",
+   "number": 7,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Brazil_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true,
+   "number_note": "unnumbered in source (recent call-up / no squad number); number set by us"
+  },
+  {
+   "name": "Raphinha",
+   "number": 11,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Brazil_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true,
+   "number_note": "unnumbered in source (recent call-up / no squad number); number set by us"
+  },
+  {
+   "name": "Estêvão",
+   "number": 20,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Brazil_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true,
+   "number_note": "unnumbered in source (recent call-up / no squad number); number set by us"
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "R. Pavane",
+   "number": 7
+  },
+  {
+   "name": "S. Rask",
+   "number": 11
+  },
+  {
+   "name": "T. Solano",
+   "number": 20
+  }
+ ]
+}

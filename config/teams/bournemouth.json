@@ -1,0 +1,50 @@
+{
+ "id": "bournemouth",
+ "name": "Bournemouth",
+ "short": "BOU",
+ "short_name": "Bournemouth",
+ "primary": "#B50E12",
+ "secondary": "#000000",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "Evanilson",
+   "number": 9,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/2601124--bournemouth/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "J. Kluivert",
+   "number": 19,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/2601124--bournemouth/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "A. Adli",
+   "number": 21,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/2601124--bournemouth/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "G. Garrow",
+   "number": 9
+  },
+  {
+   "name": "H. Hensley",
+   "number": 19
+  },
+  {
+   "name": "J. Ilves",
+   "number": 21
+  }
+ ]
+}

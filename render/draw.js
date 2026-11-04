@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   const G = window.GEOM;
-  const OUT_W = 1920, OUT_H = 1080, S = OUT_W / G.W;
+  let OUT_W = 1920, OUT_H = 1080, S = OUT_W / G.W; // preview: 1280x720 (set in initRenderer)
   const BG_SS = 2; // static background cached at 2x design (2560x1440) and downsampled = supersampling
   const FONT = '"Bahnschrift", "Segoe UI", "Arial", sans-serif';
   let show, canvas, ctx, bgCanvas, segIndex = [];
@@ -118,19 +118,48 @@
 
   // ---------- ball ----------
   // Ball style from a kit: body = primary (with realistic shading), pentagons/patches = secondary.
+  // P2: with logos_on_balls the ball is a light neutral ball with the team crest printed on it, a thin ring and
+  // small accents in the team colour (kit.ring); the crest never changes the ball size.
   const styleCache = {};
+  const logoImgs = {};
   function kitStyle(kit) {
-    const k = kit.primary + kit.secondary;
+    const team = kit.team || kit.id;
+    const ring = kit.ring || (lum(kit.primary) > 0.8 ? kit.secondary : kit.primary);
+    const logo = show && show.logosOnBalls && logoImgs[team] ? logoImgs[team] : null;
+    const k = kit.primary + kit.secondary + ring + (logo ? team : '');
     if (!styleCache[k]) {
       const p = kit.primary;
       styleCache[k] = { base: mixHex(p, '#ffffff', 0.35), mid: p, dark: mixHex(p, '#1a2433', 0.38), patch: kit.secondary,
-        seam: mixHex(kit.secondary, p, 0.35), edge: lum(kit.secondary) > 0.75 && lum(p) > 0.75 ? 'rgba(40,50,60,0.55)' : 'rgba(10,20,30,0.28)', trail: p };
+        seam: mixHex(kit.secondary, p, 0.35), edge: lum(kit.secondary) > 0.75 && lum(p) > 0.75 ? 'rgba(40,50,60,0.55)' : 'rgba(10,20,30,0.28)', trail: logo ? ring : p,
+        logo, ring };
     }
     return styleCache[k];
+  }
+  function drawLogoBall(c, r, spin, st) {
+    // light neutral base with realistic shading
+    const g = c.createRadialGradient(-r * 0.35, -r * 0.4, r * 0.1, 0, 0, r * 1.05);
+    g.addColorStop(0, '#ffffff'); g.addColorStop(0.62, '#eef1f5'); g.addColorStop(1, '#b4bdc8');
+    c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.fillStyle = g; c.fill();
+    c.save(); c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.clip();
+    c.rotate(spin);
+    // small accents in the team colour (rotate with the ball -> shows the roll)
+    c.fillStyle = st.ring;
+    for (let i = 0; i < 4; i++) { const a = i * Math.PI / 2 + Math.PI / 4; c.beginPath(); c.arc(Math.cos(a) * r * 0.79, Math.sin(a) * r * 0.79, r * 0.075, 0, Math.PI * 2); c.fill(); }
+    // the crest decal (fit in a square of 1.42 r, aspect kept)
+    const im = st.logo, s = r * 1.42, k = Math.min(s / im.width, s / im.height), w = im.width * k, h = im.height * k;
+    c.drawImage(im, -w / 2, -h / 2, w, h);
+    c.restore();
+    // printed look: the decal darkens towards the edge together with the ball
+    const pr = c.createRadialGradient(0, 0, r * 0.45, 0, 0, r);
+    pr.addColorStop(0, 'rgba(0,0,0,0)'); pr.addColorStop(1, 'rgba(20,30,45,0.22)');
+    c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.fillStyle = pr; c.fill();
+    // thin ring in the team colour
+    c.strokeStyle = st.ring; c.lineWidth = r * 0.17; c.beginPath(); c.arc(0, 0, r - r * 0.085, 0, Math.PI * 2); c.stroke();
   }
   function drawBall(c, x, y, r, spin, st, alpha) {
     c.save(); c.globalAlpha = alpha == null ? 1 : alpha;
     c.translate(x, y);
+    if (st.logo) { drawLogoBall(c, r, spin, st); ballLight(c, r); c.restore(); return; }
     const g = c.createRadialGradient(-r * 0.35, -r * 0.4, r * 0.1, 0, 0, r * 1.05);
     g.addColorStop(0, st.base); g.addColorStop(0.6, st.mid); g.addColorStop(1, st.dark);
     c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.fillStyle = g; c.fill();
@@ -149,13 +178,16 @@
       pent(Math.cos(b) * r * 0.98, Math.sin(b) * r * 0.98, r * 0.33, b + Math.PI);
     }
     c.restore();
+    ballLight(c, r);
+    c.restore();
+  }
+  function ballLight(c, r) {
     // fixed lighting on top (does not rotate)
     const sh = c.createRadialGradient(-r * 0.3, -r * 0.35, r * 0.2, 0, 0, r);
     sh.addColorStop(0, 'rgba(255,255,255,0)'); sh.addColorStop(0.75, 'rgba(0,0,0,0.05)'); sh.addColorStop(1, 'rgba(0,10,30,0.32)');
     c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.fillStyle = sh; c.fill();
     c.fillStyle = 'rgba(255,255,255,0.75)'; c.beginPath(); c.ellipse(-r * 0.38, -r * 0.45, r * 0.22, r * 0.13, -0.6, 0, Math.PI * 2); c.fill();
     c.strokeStyle = 'rgba(10,25,45,0.45)'; c.lineWidth = 1.1; c.beginPath(); c.arc(0, 0, r - 0.5, 0, Math.PI * 2); c.stroke();
-    c.restore();
   }
   function groundYAt(x) {
     if (x >= G.LEFT_PLAT[0] && x <= G.LEFT_PLAT[1]) return G.GROUND_Y;
@@ -445,17 +477,26 @@
     const CN = show.competition.name;
     const label = m.leg === 'FINAL' ? `${CN} · FINAL` : `${CN} · ${m.stage} · ${m.leg}`;
     c.font = `700 15px ${FONT}`; const lw = c.measureText(label).width + 26;
-    c.fillStyle = 'rgba(8,20,38,0.72)'; rrect(c, 16, 14, lw, 30, 15); c.fill();
-    text(c, label, 16 + lw / 2, 29.5, 15, '#ffffff');
+    const maxLW = G.W / 2 - 270 - 16 - 12; // never reach the scoreboard
+    if (lw <= maxLW) {
+      c.fillStyle = 'rgba(8,20,38,0.72)'; rrect(c, 16, 14, lw, 30, 15); c.fill();
+      text(c, label, 16 + lw / 2, 29.5, 15, '#ffffff');
+    } else { // long stage names (QUARTER-FINAL n · LEG n): two lines
+      const l1 = CN, l2 = m.leg === 'FINAL' ? 'FINAL' : `${m.stage} · ${m.leg}`;
+      c.font = `700 14px ${FONT}`; const w2 = Math.min(maxLW, Math.max(c.measureText(l1).width, c.measureText(l2).width) + 26);
+      c.fillStyle = 'rgba(8,20,38,0.72)'; rrect(c, 16, 12, w2, 46, 14); c.fill();
+      text(c, l1, 16 + w2 / 2, 25.5, fitText(c, l1, w2 - 20, 13), 'rgba(255,255,255,0.78)');
+      text(c, l2, 16 + w2 / 2, 44, fitText(c, l2, w2 - 20, 14), '#ffffff');
+    }
     // scoreboard (top centre)
     const cx = G.W / 2, y = 16, h = 52, half = 270;
     c.fillStyle = 'rgba(8,20,38,0.80)'; rrect(c, cx - half, y, 2 * half, h, 14); c.fill();
     const sc = fr.sc;
     // team A
     kitDot(c, m.kits.A, cx - half + 24, y + h / 2 - 9, 8);
-    let z = fitText(c, teamName(m.ta), 170, 22); text(c, teamName(m.ta), cx - half + 40, y + h / 2 - 9, z, '#ffffff', 'left');
+    let z = fitText(c, teamName(m.ta), 158, 22); text(c, teamName(m.ta), cx - half + 40, y + h / 2 - 9, z, '#ffffff', 'left');
     kitDot(c, m.kits.B, cx + half - 24, y + h / 2 - 9, 8);
-    z = fitText(c, teamName(m.tb), 170, 22); text(c, teamName(m.tb), cx + half - 40, y + h / 2 - 9, z, '#ffffff', 'right');
+    z = fitText(c, teamName(m.tb), 158, 22); text(c, teamName(m.tb), cx + half - 40, y + h / 2 - 9, z, '#ffffff', 'right');
     // per-team balls indicator: filled = on the pitch, hollow = in pipe / queue
     const N = show.cfg.BALLS_PER_TEAM;
     for (let q = 0; q < N; q++) {
@@ -514,9 +555,10 @@
     c.restore();
   }
 
+  // P2 rule fix (CLAUDE.md): real player names never during play -> the in-play goal banner shows only the minute;
+  // the scorer's name appears in the replay caption, MOTM card and podium.
   function scorerLine(m, e) {
-    const ti = e.team === 'A' ? m.ta : m.tb, P = show.teams[ti].players[e.player];
-    return `${P.name} · ${window.CLOCK.minuteLabel(m, e.t, show.cfg.GAME_MIN_PER_SEC)}`;
+    return window.CLOCK.minuteLabel(m, e.t, show.cfg.GAME_MIN_PER_SEC);
   }
   // GOAL moment banner (~2 s): slides in with a soft bounce, team colours, scorer + minute; slides out.
   function goalBanner(c, m, e, u, golden) {
@@ -599,7 +641,8 @@
       else if (u < 2.0) { colourWash(c, m.kits[lg.team].primary, u); goalBanner(c, m, lg, u, false); }
     }
     const half = lastEventBeforeV(m, 'whistle', v, (e) => e.kind === 'half');
-    if (half && v - evV(half) < 1.3) banner(c, 'HALF-TIME', null, (v - evV(half)) / 1.3);
+    const goalShowing = lg && v - evV(lg) < (lg.golden ? 3.0 : 2.0);
+    if (half && v - evV(half) < 1.3 && !goalShowing) banner(c, 'HALF-TIME', null, (v - evV(half)) / 1.3); // P2 fix: never on top of a goal banner
     const reg = lastEventBeforeV(m, 'whistle', v, (e) => e.kind === 'reg');
     if (reg && v - evV(reg) < 1.4) banner(c, "90'", 'Added time next', (v - evV(reg)) / 1.4);
     // +N banner: N added-time shots
@@ -665,13 +708,17 @@
     c.save(); c.scale(S, S);
     const t = lf / FPS;
     // rolling decorative balls
-    for (let i = 0; i < 2; i++) { const x = ((t * 180 + i * 640) % 1480) - 100; const T = show.teams[i]; drawBall(c, x, 640, 22, x / 22, kitStyle(T), 0.9); }
-    c.fillStyle = 'rgba(255,255,255,0.08)'; c.fillRect(0, 662, G.W, 2);
+    const big = show.teams.length > 4;
+    if (!big) {
+      for (let i = 0; i < 2; i++) { const x = ((t * 180 + i * 640) % 1480) - 100; const T = show.teams[i]; drawBall(c, x, 640, 22, x / 22, kitStyle(T), 0.9); }
+      c.fillStyle = 'rgba(255,255,255,0.08)'; c.fillRect(0, 662, G.W, 2);
+    }
     const a = easeOut(t / 0.8);
     c.globalAlpha = a;
     text(c, show.competition.name, G.W / 2, 170 - 30 * (1 - a), 96, '#ffffff', 'center', 800);
     text(c, show.competition.subtitle, G.W / 2, 240, 24, '#9fc7ff', 'center', 600);
     c.globalAlpha = 1;
+    if (big) { drawIntroGrid(c, t); c.restore(); return; }
     show.teams.forEach((T, i) => {
       const u = easeOutBack((t - 1.0 - i * 0.35) / 0.5);
       if (u <= 0) return;
@@ -688,37 +735,60 @@
     c.globalAlpha = u2; text(c, 'Semifinals over two legs · Golden ball decides ties', G.W / 2, 560, 22, '#d6e4ff', 'center', 600);
     c.restore();
   }
-  // bracket
-  function bracketState(step) {
-    const T = show;
-    const st = { sf: [{ l1: null, l2: null, agg: null, win: null, golden: false }, { l1: null, l2: null, agg: null, win: null, golden: false }], finalists: [null, null], finalShown: false };
-    if (step >= 1) st.sf[0].l1 = T.sf[0].l1;
-    if (step >= 2) { st.sf[0].l2 = T.sf[0].l2; st.sf[0].agg = T.sf[0].agg; st.sf[0].win = T.sf[0].winner; st.sf[0].golden = T.sf[0].golden; st.finalists[0] = T.sf[0].winner; }
-    if (step >= 3) st.sf[1].l1 = T.sf[1].l1;
-    if (step >= 4) { st.sf[1].l2 = T.sf[1].l2; st.sf[1].agg = T.sf[1].agg; st.sf[1].win = T.sf[1].winner; st.sf[1].golden = T.sf[1].golden; st.finalists[1] = T.sf[1].winner; }
-    if (step >= 5) st.finalShown = true;
-    return st;
+  function drawIntroGrid(c, t) {
+    const a = smooth((t - 0.6) / 0.5);
+    c.globalAlpha = a; text(c, `${show.teams.length} teams · two-legged ties · golden ball decides level ties`, G.W / 2, 286, 20, '#d6e4ff', 'center', 600); c.globalAlpha = 1;
+    const cw = 282, ch = 78, gx = 16, gy = 14, x0 = (G.W - 4 * cw - 3 * gx) / 2, y0 = 330;
+    show.teams.forEach((T, i) => {
+      const col = i % 4, row = Math.floor(i / 4);
+      const u = easeOutBack((t - 1.0 - i * 0.12) / 0.45);
+      if (u <= 0) return;
+      const x = x0 + col * (cw + gx), y = y0 + row * (ch + gy);
+      c.save(); c.globalAlpha = clamp(u, 0, 1); c.translate(x + cw / 2, y + ch / 2); c.scale(0.85 + 0.15 * u, 0.85 + 0.15 * u); c.translate(-(x + cw / 2), -(y + ch / 2));
+      c.fillStyle = 'rgba(255,255,255,0.08)'; rrect(c, x, y, cw, ch, 14); c.fill();
+      teamBar(c, i, x, y, 7, ch);
+      drawBall(c, x + 50, y + ch / 2, 26, 0.0, kitStyle(T), 1);
+      const z = fitText(c, T.name, cw - 100, 23); text(c, T.name, x + 90, y + ch / 2 - 8, z, '#ffffff', 'left');
+      text(c, `${i + 1}${['st', 'nd', 'rd'][i] || 'th'} in the league phase`, x + 90, y + ch / 2 + 17, 13, '#9fb6d6', 'left', 600);
+      c.restore();
+    });
   }
+  function drawRoundCard(c, seg, lf, g) {
+    darkBG(c, g);
+    const t = lf / FPS, rd = show.rounds[seg.round];
+    c.save(); c.scale(S, S);
+    const a = easeOut(t / 0.5);
+    c.globalAlpha = a; text(c, show.competition.name, G.W / 2, 110, 26, '#8fb0dc', 'center', 800);
+    const sc = 0.85 + 0.15 * clamp(easeOutBack(t / 0.6), 0, 1.1);
+    c.save(); c.translate(G.W / 2, 190); c.scale(sc, sc); text(c, rd.name, 0, 0, 82, '#ffffff', 'center', 800); c.restore();
+    const sub = rd.twoLegs ? `${rd.ties.length} TIES · TWO LEGS · GOLDEN BALL DECIDES A LEVEL AGGREGATE` : 'ONE MATCH · GOLDEN BALL IF LEVEL';
+    text(c, sub, G.W / 2, 258, 19, '#ffd84a', 'center', 700);
+    c.globalAlpha = 1;
+    const n = rd.ties.length, cols = n >= 4 ? 2 : 1, rows = Math.ceil(n / cols);
+    const w = cols === 2 ? 540 : 620, h = n >= 8 ? 66 : 80, gx = 30, gy = 14;
+    const x0 = (G.W - cols * w - (cols - 1) * gx) / 2, y0 = 300 + (n >= 8 ? 0 : (4 - rows) * (h + gy) / 2);
+    rd.ties.forEach((tie, i) => {
+      const col = cols === 2 ? (i < rows ? 0 : 1) : 0, row = cols === 2 ? i % rows : i;
+      const u = smooth((t - 0.5 - i * 0.12) / 0.35); if (u <= 0) return;
+      const x = x0 + col * (w + gx), y = y0 + row * (h + gy);
+      c.save(); c.globalAlpha = u; c.translate(0, 10 * (1 - u));
+      c.fillStyle = 'rgba(255,255,255,0.08)'; rrect(c, x, y, w, h, 12); c.fill();
+      teamBar(c, tie.ta, x, y, 7, h); teamBar(c, tie.tb, x + w - 7, y, 7, h);
+      const fz = n >= 8 ? 23 : 27, half = w / 2 - 44;
+      const za = fitText(c, show.teams[tie.ta].name, half, fz); text(c, show.teams[tie.ta].name, x + w / 2 - 30, y + h / 2 + 1, za, '#ffffff', 'right');
+      const zb = fitText(c, show.teams[tie.tb].name, half, fz); text(c, show.teams[tie.tb].name, x + w / 2 + 30, y + h / 2 + 1, zb, '#ffffff', 'left');
+      text(c, 'vs', x + w / 2, y + h / 2 + 1, 18, '#9fb6d6', 'center', 700);
+      c.restore();
+    });
+    c.restore();
+  }
+  // bracket
   // Demo data (4 teams, two-legged semis) mapped onto the generic symmetric layout:
   // semifinal 1 = left half, semifinal 2 = right half, final in the centre.
   const BL_OPTS4 = { top: 300, bottom: 420, maxBoxW: 380, maxRowH: 58 };
   const BL_LTR4 = { top: 175, bottom: 560, maxBoxW: 400, maxRowH: 58 };
   function bracketStyle(st) { return st || show.bracketStyle || 'left_to_right'; }
   function demoLayout(style) { return style === 'symmetric' ? window.BRACKET.bracketLayout(4, BL_OPTS4) : window.BRACKET.bracketLayoutLTR(4, BL_LTR4); }
-  function demoBracketData(step, style) {
-    const cur = bracketState(step), prev = bracketState(step - 1);
-    const sfBox = (si) => {
-      const s = show.sf[si], cs = cur.sf[si], ps = prev.sf[si];
-      return { label: `SEMIFINAL ${si + 1}`, rows: [s.ta, s.tb], cols: ['L1', 'L2', 'AGG'],
-        vals: [cs.l1, cs.l2, cs.agg], newVals: [!!(cs.l1 && !ps.l1), !!(cs.l2 && !ps.l2), !!(cs.agg && !ps.agg)],
-        win: cs.win, newWin: cs.win !== null && ps.win === null, golden: cs.golden };
-    };
-    const d = { '0L0': sfBox(0),
-      F: { label: style === 'symmetric' ? 'FINAL' : null, rows: cur.finalists, newRows: cur.finalists.map((x, r) => x !== null && prev.finalists[r] === null),
-        placeholders: ['Winner SF1', 'Winner SF2'], glow: step === 5 }, CH: { team: null } };
-    d[style === 'symmetric' ? '0R0' : '0L1'] = sfBox(1);
-    return d;
-  }
   function drawPolyPrefix(c, poly, u) {
     let tot = 0; for (let i = 1; i < poly.length; i++) tot += Math.hypot(poly[i][0] - poly[i - 1][0], poly[i][1] - poly[i - 1][1]);
     let d = clamp(u, 0, 1) * tot;
@@ -733,10 +803,11 @@
   }
   function drawBracketBox(c, b, d, t) {
     d = d || {};
-    const rowH = b.rowH, small = b.w < 260;
-    const fs = Math.min(23, rowH * 0.5);
-    const nc = d.cols ? d.cols.length : 0, cw = small ? 30 : 44;
-    const colX = (k) => b.x + b.w - cw * (nc - k) + cw / 2 - 6;
+    const rowH = b.rowH, small = b.w < 260, compact = b.w < 200;
+    const fs = Math.min(compact ? 21 : 23, rowH * 0.5);
+    const nc = d.cols ? d.cols.length : 0, cw = compact ? 30 : small ? 30 : 44;
+    const colX = (k) => b.x + b.w - cw * (nc - k) + cw / 2 - (compact ? 3 : 6);
+    if (d.cur) { c.save(); c.strokeStyle = 'rgba(255,216,74,0.95)'; c.lineWidth = 2.5; rrect(c, b.x - 3, b.y - 1, b.w + 6, 2 * rowH + 2, 9); c.stroke(); c.restore(); }
     if (d.label) text(c, d.label, b.x, b.y - 16, small ? 11 : 14, '#8fb0dc', 'left', 700);
     if (d.cols) d.cols.forEach((h, k) => text(c, h, colX(k), b.y - 16, 13, '#8fb0dc', 'center', 700));
     const rows = d.rows || [null, null];
@@ -747,6 +818,21 @@
       const wA = d.newWin ? smooth((t - 0.6) / 0.5) : 1;
       c.fillStyle = isWin ? `rgba(255,216,74,${0.16 * wA})` : 'rgba(255,255,255,0.07)'; rrect(c, b.x, yy + 2, b.w, rowH - 4, Math.min(8, rowH * 0.15)); c.fill();
       if (!has) { text(c, d.placeholders ? d.placeholders[r] : '—', b.x + (small ? 14 : 30), yy + rowH / 2, Math.min(19, fs), 'rgba(255,255,255,0.35)', 'left', 600); continue; }
+      if (compact) {
+        const ap = d.newRows && d.newRows[r] ? smooth((t - 1.85) / 0.3) : 1;
+        c.save(); c.globalAlpha = ap * (isOut ? 1 - 0.5 * wA : 1);
+        teamBar(c, ti, b.x, yy + 2, 6, rowH - 4);
+        const nm = show.teams[ti].short_name || show.teams[ti].name;
+        const z = fitText(c, nm, b.w - 16 - nc * cw - 4, fs); text(c, nm, b.x + 13, yy + rowH / 2 + 1, z, '#ffffff', 'left');
+        for (let k = 0; k < nc; k++) {
+          const v = d.vals && d.vals[k] ? d.vals[k][r] : null, x = colX(k);
+          if (v === null || v === undefined) continue;
+          const a2 = d.newVals && d.newVals[k] ? easeOutBack((t - 0.2) / 0.45) : 1;
+          c.save(); c.globalAlpha *= clamp(a2, 0, 1); text(c, String(v), x, yy + rowH / 2 + 1, 22 * (0.6 + 0.4 * clamp(a2, 0, 1.2)), isWin ? '#ffd84a' : '#ffffff', 'center', 800); c.restore();
+        }
+        c.restore();
+        continue;
+      }
       if (d.glow) { const gl = 0.5 + 0.5 * Math.sin(t * 5); c.fillStyle = `rgba(255,216,74,${0.12 + 0.12 * gl})`; rrect(c, b.x, yy + 2, b.w, rowH - 4, 8); c.fill(); }
       const ap = d.newRows && d.newRows[r] ? smooth((t - 1.85) / 0.3) : 1;
       c.save(); c.globalAlpha = ap * (isOut ? 1 - 0.5 * wA : 1);
@@ -763,9 +849,9 @@
       c.restore();
     }
     if (d.golden) {
-      const ap = d.newWin ? smooth((t - 0.5) / 0.4) : 1;
-      c.save(); c.globalAlpha = ap; c.fillStyle = '#ffc400'; rrect(c, b.x + b.w - 150, b.y + 2 * rowH + 6, 150, 22, 7); c.fill();
-      text(c, 'GOLDEN BALL', b.x + b.w - 75, b.y + 2 * rowH + 17.5, 13, '#2a1a00', 'center', 800); c.restore();
+      const ap = d.newWin ? smooth((t - 0.5) / 0.4) : 1, pw = compact ? Math.min(104, b.w) : 150, ph = compact ? 17 : 22;
+      c.save(); c.globalAlpha = ap; c.fillStyle = '#ffc400'; rrect(c, b.x + b.w - pw, b.y + 2 * rowH + 4, pw, ph, 6); c.fill();
+      text(c, 'GOLDEN BALL', b.x + b.w - pw / 2, b.y + 2 * rowH + 4 + ph / 2 + 0.5, compact ? 11 : 13, '#2a1a00', 'center', 800); c.restore();
     }
   }
   // generic symmetric bracket: L = BRACKET.bracketLayout(n), data = { boxId: {rows, cols, vals, win, newWin, ...} }
@@ -797,23 +883,37 @@
       const start = [b.side === 'L' ? b.x + b.w : b.x, b.y + b.rowH * (r + 0.5)];
       const poly = [start].concat(B.connector(L, b.id));
       const p = B.pointAlong(poly, u);
-      const w = Math.min(240, b.w * 0.66), h = b.rowH * 0.72;
+      const cmp = b.w < 200, w = cmp ? Math.max(130, b.w * 0.9) : Math.min(240, b.w * 0.66), h = b.rowH * 0.72;
+      const nm = cmp ? (show.teams[d.win].short_name || show.teams[d.win].name) : show.teams[d.win].name;
       c.save(); c.shadowColor = 'rgba(0,0,0,0.45)'; c.shadowBlur = 14;
       c.fillStyle = 'rgba(30,52,90,0.97)'; rrect(c, p[0] - w / 2, p[1] - h / 2, w, h, 8); c.fill(); c.restore();
       c.strokeStyle = '#ffd84a'; c.lineWidth = 2; rrect(c, p[0] - w / 2, p[1] - h / 2, w, h, 8); c.stroke();
       teamBar(c, d.win, p[0] - w / 2, p[1] - h / 2, 8, h);
-      const z = fitText(c, show.teams[d.win].name, w - 30, 21); text(c, show.teams[d.win].name, p[0] + 4, p[1] + 1, z, '#ffffff', 'center');
+      const z = fitText(c, nm, w - 30, 21); text(c, nm, p[0] + 4, p[1] + 1, z, '#ffffff', 'center');
     }
   }
-  function drawBracket(c, step, lf, g) {
+  const BL_SYM16 = { top: 165, bottom: 690, margin: 22, gap: 24 };
+  const BL_LTR16 = { top: 160, bottom: 700, headerY: 132 };
+  function layoutFor(style, n) {
+    if (n <= 4) return demoLayout(style);
+    return style === 'symmetric' ? window.BRACKET.bracketLayout(n, BL_SYM16) : window.BRACKET.bracketLayoutLTR(n, BL_LTR16);
+  }
+  // steps: show.bracket (style + per-step box data computed in sim/tournament.js bracketSteps)
+  function drawBracket(c, step, lf, g, seg, over) {
     darkBG(c, g);
     const t = lf / FPS;
+    const B = over || show.bracket, style = B.style;
     c.save(); c.scale(S, S);
     text(c, show.competition.name, G.W / 2, 62, 50, '#ffffff', 'center', 800);
-    const style = bracketStyle(drawBracket.style);
-    const L = demoLayout(style);
-    drawBracketGeneric(c, L, demoBracketData(step, style), t);
-    if (step === 5) { const a = smooth((t - 0.4) / 0.6); c.globalAlpha = a; text(c, 'THE FINALISTS', G.W / 2, style === 'symmetric' ? 600 : 650, 30, '#ffd84a', 'center', 800); c.globalAlpha = 1; }
+    const L = layoutFor(style, show.teams.length);
+    // 16 teams: the per-match bracket update is short (1.6 s) -> the same animations run 1.6x faster (done by ~1.3 s)
+    drawBracketGeneric(c, L, B.steps[clamp(step, 0, B.steps.length - 1)] || {}, show.teams.length > 4 ? t / 0.62 : t);
+    const cap = seg && seg.caption;
+    if (cap) {
+      const a = smooth((t - 0.4) / 0.6); c.globalAlpha = a;
+      const y = show.teams.length > 4 ? (style === 'symmetric' ? 560 : 712) : (style === 'symmetric' ? 600 : 650);
+      text(c, cap, G.W / 2, y, show.teams.length > 4 ? 24 : 30, '#ffd84a', 'center', 800); c.globalAlpha = 1;
+    }
     c.restore();
   }
   function drawTrophy(c, x, y, s, alpha) {
@@ -837,7 +937,7 @@
   }
   function drawWinner(c, lf, g) {
     const t = lf / FPS;
-    darkBG(c, g);
+    darkBG(c, lf);
     const ti = show.champion, TM = show.teams[ti];
     c.save(); c.scale(S, S);
     const LX = 330, RX = 940;
@@ -856,7 +956,7 @@
     drawTrophy(c, LX, 300 + 200 * (1 - clamp(u, 0, 1.2)), 1.25 * clamp(0.4 + 0.6 * u, 0, 1.15), clamp(t / 0.4, 0, 1));
     const a = smooth((t - 0.9) / 0.5);
     c.globalAlpha = a;
-    text(c, `${show.competition.name} CHAMPIONS`, LX, 80, 32, '#ffd84a', 'center', 800);
+    { const CN = show.competition.name, ttl = /CHAMPIONS/.test(CN) ? `${CN} WINNERS` : `${CN} CHAMPIONS`; const zt = fitText(c, ttl, 600, 32); text(c, ttl, LX, 80, zt, '#ffd84a', 'center', 800); }
     const nm = TM.name.toUpperCase();
     const z = fitText(c, nm, 580, 62); text(c, nm, LX, 525, z, '#ffffff', 'center', 800);
     // team colours stripe
@@ -972,8 +1072,9 @@
     const lf = g - seg.start;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, OUT_W, OUT_H);
-    if (seg.type === 'intro') { drawIntro(ctx, lf, g); fadeIn(lf); return; }
-    if (seg.type === 'bracket') { drawBracket(ctx, seg.step, lf, g); fadeIn(lf, 8); return; }
+    if (seg.type === 'intro') { drawIntro(ctx, lf, lf); fadeIn(lf); return; } // darkBG streaks follow the local frame (render cache)
+    if (seg.type === 'bracket') { drawBracket(ctx, seg.step, lf, lf, seg); fadeIn(lf, 8); return; }
+    if (seg.type === 'roundCard') { drawRoundCard(ctx, seg, lf, lf); fadeIn(lf, 8); return; }
     if (seg.type === 'winner') { drawWinner(ctx, lf, g); return; }
     const m = show.matches[seg.match];
     const names = `${teamName(m.ta)}  vs  ${teamName(m.tb)}`;
@@ -1012,7 +1113,7 @@
         const ag = [m.prev[0] + sc[0], m.prev[1] + sc[1]];
         lines.push({ s: `Aggregate ${ag[0]}–${ag[1]}`, size: 26, w: 700, color: '#ffd84a' });
         const w = m.goldenWinner ? (m.goldenWinner === 'A' ? m.ta : m.tb) : (ag[0] > ag[1] ? m.ta : m.tb);
-        lines.push({ s: `${teamName(w)} advance to the final${m.goldenWinner ? ' (golden ball)' : ''}`, size: 24, w: 600, color: '#ffffff' });
+        lines.push({ s: `${teamName(w)} advance to ${m.nextName || 'the final'}${m.goldenWinner ? ' (golden ball)' : ''}`, size: 24, w: 600, color: '#ffffff' });
       } else if (m.leg === 'FINAL') {
         const w = m.goldenWinner ? (m.goldenWinner === 'A' ? m.ta : m.tb) : (sc[0] > sc[1] ? m.ta : m.tb);
         lines.push({ s: `${teamName(w)} win the ${show.competition.name}${m.goldenWinner ? ' (golden ball)' : ''}`, size: 26, w: 700, color: '#ffd84a' });
@@ -1055,12 +1156,17 @@
   window.initRenderer = function (data) {
     show = data;
     segIndex = show.segments;
+    if (show.outSize) { OUT_W = show.outSize[0]; OUT_H = show.outSize[1]; S = OUT_W / G.W; }
     canvas = document.getElementById('c');
     canvas.width = OUT_W; canvas.height = OUT_H;
     ctx = canvas.getContext('2d', { alpha: false });
     ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
     buildBackground();
-    return { total: show.totalFrames };
+    for (const k of Object.keys(styleCache)) delete styleCache[k];
+    const L = show.logos || {};
+    return Promise.all(Object.keys(L).map((id) => new Promise((res) => {
+      const im = new Image(); im.onload = () => { logoImgs[id] = im; res(); }; im.onerror = () => res(); im.src = L[id];
+    }))).then(() => ({ total: show.totalFrames, logos: Object.keys(logoImgs).length }));
   };
   window.renderFrame = renderFrame;
   window.renderEmptyBracket = function (n, title, style) {
@@ -1074,11 +1180,23 @@
     return canvas.toDataURL('image/png');
   };
   // demo bracket at a given step in a given style (screenshots / tests); lf = local frame in the segment
-  window.renderDemoBracket = function (step, style, lf) {
+  // bracket at a given step; over = { style, steps } (another style than the show's, computed in Node)
+  window.renderDemoBracket = function (step, style, lf, over, caption) {
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, OUT_W, OUT_H);
-    drawBracket.style = style; drawBracket(ctx, step, lf === undefined ? 90 : lf, 0); drawBracket.style = null; simLabel();
+    drawBracket(ctx, step, lf === undefined ? 90 : lf, 0, { caption: caption || null }, over && over.style === style ? over : (show.bracket.style === style ? show.bracket : over));
+    simLabel();
     return canvas.toDataURL('image/png');
   };
+  // close-up of balls (decal readability check): kits = [{team, primary, secondary, ring}], r in design px, zoom
+  window.renderBallSheet = function (kits, r, zoom, spin) {
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#5aa0e0'; ctx.fillRect(0, 0, OUT_W, OUT_H);
+    ctx.save(); ctx.scale(S * zoom, S * zoom);
+    const gap = r * 3, per = Math.max(1, Math.min(kits.length, 8, Math.floor((G.W / zoom - r) / gap)));
+    kits.forEach((k, i) => { const x = r * 2 + (i % per) * gap, y = r * 2 + Math.floor(i / per) * gap; drawBall(ctx, x, y, r, spin || 0, kitStyle(k), 1); });
+    ctx.restore();
+    return canvas.toDataURL('image/png');
+  };
+  window.ballStyleInfo = function (kit) { const st = kitStyle(kit); return { logo: !!st.logo, ring: st.ring }; };
   window.grabFrame = function (g, q) { renderFrame(g); return canvas.toDataURL('image/jpeg', q || 0.92); };
   window.grabPNG = function (g) { renderFrame(g); return canvas.toDataURL('image/png'); };
 })();

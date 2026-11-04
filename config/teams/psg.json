@@ -1,0 +1,50 @@
+{
+ "id": "psg",
+ "name": "Paris Saint-Germain",
+ "short": "PSG",
+ "short_name": "PSG",
+ "primary": "#004170",
+ "secondary": "#DA291C",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "O. Dembélé",
+   "number": 10,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefachampionsleague/clubs/52747--paris/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "K. Kvaratskhelia",
+   "number": 7,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefachampionsleague/clubs/52747--paris/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "D. Doué",
+   "number": 14,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefachampionsleague/clubs/52747--paris/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "A. Varin",
+   "number": 10
+  },
+  {
+   "name": "B. Okoro",
+   "number": 7
+  },
+  {
+   "name": "C. Lindqvist",
+   "number": 14
+  }
+ ]
+}

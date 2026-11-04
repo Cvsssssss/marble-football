@@ -1,0 +1,50 @@
+{
+ "id": "lyon",
+ "name": "Lyon",
+ "short": "OL",
+ "short_name": "Lyon",
+ "primary": "#FFFFFF",
+ "secondary": "#14387F",
+ "colours_verified": false,
+ "strength": 80,
+ "players": [
+  {
+   "name": "L. Openda",
+   "number": 17,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/5312--lyon/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "E. Nuamah",
+   "number": 7,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/5312--lyon/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "K. Nakamura",
+   "number": 11,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/5312--lyon/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "R. Isarde",
+   "number": 17
+  },
+  {
+   "name": "S. Joubel",
+   "number": 7
+  },
+  {
+   "name": "T. Kastner",
+   "number": 11
+  }
+ ]
+}

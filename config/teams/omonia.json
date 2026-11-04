@@ -1,0 +1,50 @@
+{
+ "id": "omonia",
+ "name": "Omonia",
+ "short": "OMO",
+ "short_name": "Omonia",
+ "primary": "#00843D",
+ "secondary": "#FFFFFF",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "F. Tănase",
+   "number": 17,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/50077--omonia/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "A. Kakoullis",
+   "number": 9,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/50077--omonia/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "M. Tankovic",
+   "number": 22,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/50077--omonia/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "N. Fontane",
+   "number": 17
+  },
+  {
+   "name": "O. Gilroy",
+   "number": 9
+  },
+  {
+   "name": "P. Harlan",
+   "number": 22
+  }
+ ]
+}

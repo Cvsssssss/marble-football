@@ -1,0 +1,50 @@
+{
+ "id": "juventus",
+ "name": "Juventus",
+ "short": "JUV",
+ "short_name": "Juventus",
+ "primary": "#000000",
+ "secondary": "#FFFFFF",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "K. Yıldız",
+   "number": 10,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/50139--juventus/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "R. Kolo Muani",
+   "number": 9,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/50139--juventus/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "F. Conceição",
+   "number": 7,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/50139--juventus/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "A. Selwyn",
+   "number": 10
+  },
+  {
+   "name": "B. Torvik",
+   "number": 9
+  },
+  {
+   "name": "C. Ulloa",
+   "number": 7
+  }
+ ]
+}

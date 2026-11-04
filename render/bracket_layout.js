@@ -124,7 +124,15 @@
     return poly[poly.length - 1];
   }
 
-  const api = { bracketLayout, bracketLayoutLTR, layoutFor, connector, pointAlong };
+  // Box id of tie i (bracket order) in round r (0 = first round) of a layout. Tie 2k and 2k+1 feed tie k of round r+1.
+  function tieBoxId(L, r, i) {
+    if (r === L.rounds - 1) return 'F';
+    if (L.style === 'left_to_right') return `${r}L${i}`;
+    const n = L.nTeams / Math.pow(2, r + 1), half = n / 2;
+    return i < half ? `${r}L${i}` : `${r}R${i - half}`;
+  }
+
+  const api = { bracketLayout, bracketLayoutLTR, layoutFor, connector, pointAlong, tieBoxId };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.BRACKET = api;
 })(typeof self !== 'undefined' ? self : this);

@@ -1,0 +1,51 @@
+{
+ "id": "nt_morocco",
+ "name": "Morocco",
+ "short": "MAR",
+ "short_name": "Morocco",
+ "national": true,
+ "primary": "#C1272D",
+ "secondary": "#006233",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "B. Díaz",
+   "number": 10,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Morocco_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "S. Rahimi",
+   "number": 9,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Morocco_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "A. Ezzalzouli",
+   "number": 17,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Morocco_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "A. Tarrant",
+   "number": 10
+  },
+  {
+   "name": "B. Udell",
+   "number": 9
+  },
+  {
+   "name": "C. Varro",
+   "number": 17
+  }
+ ]
+}

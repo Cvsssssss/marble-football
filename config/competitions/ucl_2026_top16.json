@@ -1,0 +1,171 @@
+{
+ "id": "ucl_2026_top16",
+ "name": "MARBLE CHAMPIONS",
+ "subtitle": "MARBLE FOOTBALL TOURNAMENT · 16 TEAMS",
+ "format": "knockout16",
+ "_teams_note": "Top 16 of the 2026-27 league phase in table order (position 1..16). Snapshot below; replace by editing teams[] and standings.",
+ "standings": {
+  "source_url": "https://en.wikipedia.org/wiki/Template:2026%E2%80%9327_UEFA_Champions_League_league_phase_table",
+  "retrieved": "2026-11-04",
+  "note": "Wikipedia template, \"updated to matches played on 3 November 2026\" (matchday 4 partly played: some teams on 3 games). UEFA.com standings page did not render for the fetch tool.",
+  "table": [
+   {
+    "pos": 1,
+    "team": "psg",
+    "club": "Paris Saint-Germain",
+    "played": 4,
+    "points": 12,
+    "gd": 15
+   },
+   {
+    "pos": 2,
+    "team": "barcelona",
+    "club": "Barcelona",
+    "played": 4,
+    "points": 9,
+    "gd": 8
+   },
+   {
+    "pos": 3,
+    "team": "aston_villa",
+    "club": "Aston Villa",
+    "played": 4,
+    "points": 9,
+    "gd": 6
+   },
+   {
+    "pos": 4,
+    "team": "liverpool",
+    "club": "Liverpool",
+    "played": 3,
+    "points": 9,
+    "gd": 5
+   },
+   {
+    "pos": 5,
+    "team": "real_madrid",
+    "club": "Real Madrid",
+    "played": 3,
+    "points": 9,
+    "gd": 5
+   },
+   {
+    "pos": 6,
+    "team": "sporting",
+    "club": "Sporting CP",
+    "played": 4,
+    "points": 9,
+    "gd": 4
+   },
+   {
+    "pos": 7,
+    "team": "real_betis",
+    "club": "Real Betis",
+    "played": 3,
+    "points": 9,
+    "gd": 3
+   },
+   {
+    "pos": 8,
+    "team": "bayern",
+    "club": "Bayern Munich",
+    "played": 4,
+    "points": 8,
+    "gd": 7
+   },
+   {
+    "pos": 9,
+    "team": "arsenal",
+    "club": "Arsenal",
+    "played": 3,
+    "points": 7,
+    "gd": 4
+   },
+   {
+    "pos": 10,
+    "team": "stuttgart",
+    "club": "VfB Stuttgart",
+    "played": 4,
+    "points": 7,
+    "gd": 3
+   },
+   {
+    "pos": 11,
+    "team": "como",
+    "club": "Como",
+    "played": 3,
+    "points": 6,
+    "gd": 5
+   },
+   {
+    "pos": 12,
+    "team": "man_city",
+    "club": "Manchester City",
+    "played": 3,
+    "points": 6,
+    "gd": 4
+   },
+   {
+    "pos": 13,
+    "team": "club_brugge",
+    "club": "Club Brugge",
+    "played": 3,
+    "points": 6,
+    "gd": 3
+   },
+   {
+    "pos": 14,
+    "team": "inter",
+    "club": "Inter Milan",
+    "played": 4,
+    "points": 6,
+    "gd": 2
+   },
+   {
+    "pos": 15,
+    "team": "lask",
+    "club": "LASK",
+    "played": 4,
+    "points": 6,
+    "gd": 1
+   },
+   {
+    "pos": 16,
+    "team": "dortmund",
+    "club": "Borussia Dortmund",
+    "played": 3,
+    "points": 6,
+    "gd": 1
+   }
+  ]
+ },
+ "teams": [
+  "psg",
+  "barcelona",
+  "aston_villa",
+  "liverpool",
+  "real_madrid",
+  "sporting",
+  "real_betis",
+  "bayern",
+  "arsenal",
+  "stuttgart",
+  "como",
+  "man_city",
+  "club_brugge",
+  "inter",
+  "lask",
+  "dortmund"
+ ],
+ "strength_from_position": true,
+ "forced_pairs": [],
+ "map": "default",
+ "rules": "base",
+ "GAME_MIN_PER_SEC": 2.4,
+ "real_names": true,
+ "bracket_style": "symmetric",
+ "output": "output/tournament16_1080p.mp4",
+ "preview_output": "output/tournament16_preview_720p.mp4",
+ "screenshots": "output/screenshots_p2",
+ "output_dir": "output"
+}

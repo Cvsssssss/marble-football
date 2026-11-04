@@ -1,0 +1,51 @@
+{
+ "id": "nt_france",
+ "name": "France",
+ "short": "FRA",
+ "short_name": "France",
+ "national": true,
+ "primary": "#002654",
+ "secondary": "#FFFFFF",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "O. Dembélé",
+   "number": 7,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/France_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "M. Olise",
+   "number": 11,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/France_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "D. Doué",
+   "number": 20,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/France_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "G. Galen",
+   "number": 7
+  },
+  {
+   "name": "H. Holmar",
+   "number": 11
+  },
+  {
+   "name": "J. Isbert",
+   "number": 20
+  }
+ ]
+}

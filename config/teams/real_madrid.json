@@ -2,6 +2,7 @@
  "id": "real_madrid",
  "name": "Real Madrid",
  "short": "RMA",
+ "short_name": "Real Madrid",
  "primary": "#FFFFFF",
  "secondary": "#FEBE10",
  "strength": 89,
@@ -44,5 +45,6 @@
    "name": "J. Belmonte",
    "number": 11
   }
- ]
+ ],
+ "colours_verified": true
 }

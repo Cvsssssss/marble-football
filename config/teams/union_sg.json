@@ -1,0 +1,50 @@
+{
+ "id": "union_sg",
+ "name": "Union Saint-Gilloise",
+ "short": "USG",
+ "short_name": "Union SG",
+ "primary": "#FFD200",
+ "secondary": "#0033A0",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "K. Rodriguez",
+   "number": 13,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/64125--union-sg/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "M. Biondic",
+   "number": 9,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/64125--union-sg/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "R. Florucz",
+   "number": 30,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/64125--union-sg/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "R. Prowse",
+   "number": 13
+  },
+  {
+   "name": "S. Quarry",
+   "number": 9
+  },
+  {
+   "name": "T. Rustad",
+   "number": 30
+  }
+ ]
+}

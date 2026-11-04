@@ -1,0 +1,491 @@
+{
+ "_comment": "Team crests (clubs) and flags (national teams) used ONLY as ball decals (logos_on_balls). Downloaded on Max explicit request in session 2026-11-04.",
+ "logos": {
+  "psg": {
+   "file": "psg.png",
+   "source_url": "https://en.wikipedia.org/wiki/File:Paris_Saint-Germain_F.C..svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/a/a7/Paris_Saint-Germain_F.C..svg/960px-Paris_Saint-Germain_F.C..svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "PD",
+   "note": "Non-free file on English Wikipedia (fair-use rationale for the article only); club crest is a trademark of the club. Usage risk accepted by Max (decision 2026-11-04).",
+   "kind": "crest"
+  },
+  "barcelona": {
+   "file": "barcelona.png",
+   "source_url": "https://en.wikipedia.org/wiki/File:FC_Barcelona_(crest).svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/4/47/FC_Barcelona_%28crest%29.svg/960px-FC_Barcelona_%28crest%29.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "PD",
+   "note": "Non-free file on English Wikipedia (fair-use rationale for the article only); club crest is a trademark of the club. Usage risk accepted by Max (decision 2026-11-04).",
+   "kind": "crest"
+  },
+  "aston_villa": {
+   "file": "aston_villa.png",
+   "source_url": "https://en.wikipedia.org/wiki/File:Aston_Villa_FC_new_crest.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/9/9a/Aston_Villa_FC_new_crest.svg/960px-Aston_Villa_FC_new_crest.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Fair use",
+   "note": "Non-free file on English Wikipedia (fair-use rationale for the article only); club crest is a trademark of the club. Usage risk accepted by Max (decision 2026-11-04).",
+   "kind": "crest"
+  },
+  "liverpool": {
+   "file": "liverpool.png",
+   "source_url": "https://en.wikipedia.org/wiki/File:Liverpool_FC.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/0/0c/Liverpool_FC.svg/960px-Liverpool_FC.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Fair use",
+   "note": "Non-free file on English Wikipedia (fair-use rationale for the article only); club crest is a trademark of the club. Usage risk accepted by Max (decision 2026-11-04).",
+   "kind": "crest"
+  },
+  "real_madrid": {
+   "file": "real_madrid.png",
+   "source_url": "https://en.wikipedia.org/wiki/File:Real_Madrid_CF.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/960px-Real_Madrid_CF.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Fair use",
+   "note": "Non-free file on English Wikipedia (fair-use rationale for the article only); club crest is a trademark of the club. Usage risk accepted by Max (decision 2026-11-04).",
+   "kind": "crest"
+  },
+  "sporting": {
+   "file": "sporting.png",
+   "source_url": "https://en.wikipedia.org/wiki/File:Sporting_Clube_de_Portugal_logo_(2026).svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/9/97/Sporting_Clube_de_Portugal_logo_%282026%29.svg/960px-Sporting_Clube_de_Portugal_logo_%282026%29.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Fair use",
+   "note": "Non-free file on English Wikipedia (fair-use rationale for the article only); club crest is a trademark of the club. Usage risk accepted by Max (decision 2026-11-04).",
+   "kind": "crest"
+  },
+  "real_betis": {
+   "file": "real_betis.png",
+   "source_url": "https://en.wikipedia.org/wiki/File:Real_Betis_2022_logo.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/2/2f/Real_Betis_2022_logo.svg/960px-Real_Betis_2022_logo.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Fair use",
+   "note": "Non-free file on English Wikipedia (fair-use rationale for the article only); club crest is a trademark of the club. Usage risk accepted by Max (decision 2026-11-04).",
+   "kind": "crest"
+  },
+  "bayern": {
+   "file": "bayern.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:FC_Bayern_M%C3%BCnchen_logo_(2024).svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8d/FC_Bayern_M%C3%BCnchen_logo_%282024%29.svg/960px-FC_Bayern_M%C3%BCnchen_logo_%282024%29.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Public domain",
+   "note": "Hosted on Wikimedia Commons; club crest is a trademark of the club. Usage risk accepted by Max (decision 2026-11-04).",
+   "kind": "crest"
+  },
+  "arsenal": {
+   "file": "arsenal.png",
+   "source_url": "https://en.wikipedia.org/wiki/File:Arsenal_FC.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/5/53/Arsenal_FC.svg/960px-Arsenal_FC.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Fair use",
+   "note": "Non-free file on English Wikipedia (fair-use rationale for the article only); club crest is a trademark of the club. Usage risk accepted by Max (decision 2026-11-04).",
+   "kind": "crest"
+  },
+  "stuttgart": {
+   "file": "stuttgart.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:VfB_Stuttgart_1893_Logo.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/eb/VfB_Stuttgart_1893_Logo.svg/960px-VfB_Stuttgart_1893_Logo.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Public domain",
+   "note": "Hosted on Wikimedia Commons; club crest is a trademark of the club. Usage risk accepted by Max (decision 2026-11-04).",
+   "kind": "crest"
+  },
+  "como": {
+   "file": "como.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Calcio_Como_-_logo_(Italy,_2019-).svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/99/Calcio_Como_-_logo_%28Italy%2C_2019-%29.svg/960px-Calcio_Como_-_logo_%28Italy%2C_2019-%29.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Public domain",
+   "note": "Hosted on Wikimedia Commons; club crest is a trademark of the club. Usage risk accepted by Max (decision 2026-11-04).",
+   "kind": "crest"
+  },
+  "man_city": {
+   "file": "man_city.png",
+   "source_url": "https://en.wikipedia.org/wiki/File:Manchester_City_FC_badge.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/e/eb/Manchester_City_FC_badge.svg/960px-Manchester_City_FC_badge.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Fair use",
+   "note": "Non-free file on English Wikipedia (fair-use rationale for the article only); club crest is a trademark of the club. Usage risk accepted by Max (decision 2026-11-04).",
+   "kind": "crest"
+  },
+  "club_brugge": {
+   "file": "club_brugge.png",
+   "source_url": "https://en.wikipedia.org/wiki/File:Club_Brugge_KV_logo.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/d/d0/Club_Brugge_KV_logo.svg/960px-Club_Brugge_KV_logo.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Fair use",
+   "note": "Non-free file on English Wikipedia (fair-use rationale for the article only); club crest is a trademark of the club. Usage risk accepted by Max (decision 2026-11-04).",
+   "kind": "crest"
+  },
+  "inter": {
+   "file": "inter.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:FC_Internazionale_Milano_2021.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/05/FC_Internazionale_Milano_2021.svg/960px-FC_Internazionale_Milano_2021.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Public domain",
+   "note": "Hosted on Wikimedia Commons; club crest is a trademark of the club. Usage risk accepted by Max (decision 2026-11-04).",
+   "kind": "crest"
+  },
+  "lask": {
+   "file": "lask.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:LASK-Logo_2023.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a2/LASK-Logo_2023.svg/960px-LASK-Logo_2023.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Public domain",
+   "note": "Hosted on Wikimedia Commons; club crest is a trademark of the club. Usage risk accepted by Max (decision 2026-11-04).",
+   "kind": "crest"
+  },
+  "dortmund": {
+   "file": "dortmund.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Borussia_Dortmund_logo.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/67/Borussia_Dortmund_logo.svg/960px-Borussia_Dortmund_logo.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Public domain",
+   "note": "Hosted on Wikimedia Commons; club crest is a trademark of the club. Usage risk accepted by Max (decision 2026-11-04).",
+   "kind": "crest"
+  },
+  "benfica": {
+   "file": "benfica.png",
+   "kind": "crest",
+   "source_url": "https://en.wikipedia.org/wiki/File:SL_Benfica_logo.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/a/a2/SL_Benfica_logo.svg/960px-SL_Benfica_logo.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Fair use",
+   "note": "Non-free file on English Wikipedia (fair-use rationale for the article only); club crest is a trademark of the club. Usage risk accepted by Max (decision 2026-11-04)."
+  },
+  "leverkusen": {
+   "file": "leverkusen.png",
+   "kind": "crest",
+   "source_url": "https://en.wikipedia.org/wiki/File:Bayer_04_Leverkusen_logo.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/5/59/Bayer_04_Leverkusen_logo.svg/960px-Bayer_04_Leverkusen_logo.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Fair use",
+   "note": "Non-free file on English Wikipedia (fair-use rationale for the article only); club crest is a trademark of the club. Usage risk accepted by Max (decision 2026-11-04)."
+  },
+  "bournemouth": {
+   "file": "bournemouth.png",
+   "kind": "crest",
+   "source_url": "https://en.wikipedia.org/wiki/File:AFC_Bournemouth_(2013).svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/e/e5/AFC_Bournemouth_%282013%29.svg/960px-AFC_Bournemouth_%282013%29.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Fair use",
+   "note": "Non-free file on English Wikipedia (fair-use rationale for the article only); club crest is a trademark of the club. Usage risk accepted by Max (decision 2026-11-04)."
+  },
+  "ferencvaros": {
+   "file": "ferencvaros.png",
+   "kind": "crest",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ferencvarosi_TC.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/37/Ferencvarosi_TC.svg/960px-Ferencvarosi_TC.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Public domain",
+   "note": "Hosted on Wikimedia Commons; club crest is a trademark of the club. Usage risk accepted by Max (decision 2026-11-04)."
+  },
+  "olympiacos": {
+   "file": "olympiacos.png",
+   "kind": "crest",
+   "source_url": "https://en.wikipedia.org/wiki/File:Olympiacos_FC_crest.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/a/a2/Olympiacos_FC_crest.svg/960px-Olympiacos_FC_crest.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Fair use",
+   "note": "Non-free file on English Wikipedia (fair-use rationale for the article only); club crest is a trademark of the club. Usage risk accepted by Max (decision 2026-11-04)."
+  },
+  "union_sg": {
+   "file": "union_sg.png",
+   "kind": "crest",
+   "source_url": "https://en.wikipedia.org/wiki/File:Royale_Union_Saint-Gilloise_logo.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/1/11/Royale_Union_Saint-Gilloise_logo.svg/960px-Royale_Union_Saint-Gilloise_logo.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Fair use",
+   "note": "Non-free file on English Wikipedia (fair-use rationale for the article only); club crest is a trademark of the club. Usage risk accepted by Max (decision 2026-11-04)."
+  },
+  "juventus": {
+   "file": "juventus.png",
+   "kind": "crest",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Juventus_FC_-_logo_black_(Italy,_2020).svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ed/Juventus_FC_-_logo_black_%28Italy%2C_2020%29.svg/960px-Juventus_FC_-_logo_black_%28Italy%2C_2020%29.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Public domain",
+   "note": "Hosted on Wikimedia Commons; club crest is a trademark of the club. Usage risk accepted by Max (decision 2026-11-04)."
+  },
+  "besiktas": {
+   "file": "besiktas.png",
+   "kind": "crest",
+   "source_url": "https://commons.wikimedia.org/wiki/File:BesiktasJK-Logo.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/da/BesiktasJK-Logo.svg/960px-BesiktasJK-Logo.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Public domain",
+   "note": "Hosted on Wikimedia Commons; club crest is a trademark of the club. Usage risk accepted by Max (decision 2026-11-04)."
+  },
+  "sunderland": {
+   "file": "sunderland.png",
+   "kind": "crest",
+   "source_url": "https://en.wikipedia.org/wiki/File:Logo_Sunderland.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/7/77/Logo_Sunderland.svg/960px-Logo_Sunderland.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Fair use",
+   "note": "Non-free file on English Wikipedia (fair-use rationale for the article only); club crest is a trademark of the club. Usage risk accepted by Max (decision 2026-11-04)."
+  },
+  "az": {
+   "file": "az.png",
+   "kind": "crest",
+   "source_url": "https://commons.wikimedia.org/wiki/File:AZ_Alkmaar.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e0/AZ_Alkmaar.svg/960px-AZ_Alkmaar.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Public domain",
+   "note": "Hosted on Wikimedia Commons; club crest is a trademark of the club. Usage risk accepted by Max (decision 2026-11-04)."
+  },
+  "omonia": {
+   "file": "omonia.png",
+   "kind": "crest",
+   "source_url": "https://en.wikipedia.org/wiki/File:AC_Omonia_logo.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/3/3d/AC_Omonia_logo.svg/960px-AC_Omonia_logo.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Fair use",
+   "note": "Non-free file on English Wikipedia (fair-use rationale for the article only); club crest is a trademark of the club. Usage risk accepted by Max (decision 2026-11-04)."
+  },
+  "lyon": {
+   "file": "lyon.png",
+   "kind": "crest",
+   "source_url": "https://en.wikipedia.org/wiki/File:Olympique_Lyonnais_logo.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/1/1c/Olympique_Lyonnais_logo.svg/960px-Olympique_Lyonnais_logo.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Fair use",
+   "note": "Non-free file on English Wikipedia (fair-use rationale for the article only); club crest is a trademark of the club. Usage risk accepted by Max (decision 2026-11-04)."
+  },
+  "rennes": {
+   "file": "rennes.png",
+   "kind": "crest",
+   "source_url": "https://en.wikipedia.org/wiki/File:Stade_Rennais_FC.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/9/9e/Stade_Rennais_FC.svg/960px-Stade_Rennais_FC.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Fair use",
+   "note": "Non-free file on English Wikipedia (fair-use rationale for the article only); club crest is a trademark of the club. Usage risk accepted by Max (decision 2026-11-04)."
+  },
+  "real_sociedad": {
+   "file": "real_sociedad.png",
+   "kind": "crest",
+   "source_url": "https://en.wikipedia.org/wiki/File:Real_Sociedad_logo.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/f/f1/Real_Sociedad_logo.svg/960px-Real_Sociedad_logo.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Fair use",
+   "note": "Non-free file on English Wikipedia (fair-use rationale for the article only); club crest is a trademark of the club. Usage risk accepted by Max (decision 2026-11-04)."
+  },
+  "crystal_palace": {
+   "file": "crystal_palace.png",
+   "kind": "crest",
+   "source_url": "https://en.wikipedia.org/wiki/File:Crystal_Palace_FC_logo_(2022).svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/a/a2/Crystal_Palace_FC_logo_%282022%29.svg/960px-Crystal_Palace_FC_logo_%282022%29.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Fair use",
+   "note": "Non-free file on English Wikipedia (fair-use rationale for the article only); club crest is a trademark of the club. Usage risk accepted by Max (decision 2026-11-04)."
+  },
+  "sparta_praha": {
+   "file": "sparta_praha.png",
+   "kind": "crest",
+   "source_url": "https://commons.wikimedia.org/wiki/File:AC-Sparta-LOGO2021.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/dd/AC-Sparta-LOGO2021.svg/960px-AC-Sparta-LOGO2021.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Public domain",
+   "note": "Hosted on Wikimedia Commons; club crest is a trademark of the club. Usage risk accepted by Max (decision 2026-11-04)."
+  },
+  "nt_spain": {
+   "file": "nt_spain.png",
+   "kind": "flag",
+   "source_url": "https://en.wikipedia.org/wiki/File:Flag_of_Spain.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/9/9a/Flag_of_Spain.svg/960px-Flag_of_Spain.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "PD",
+   "note": "National flag (Wikimedia Commons, public domain / free licence). National teams may show flags (CLAUDE.md)."
+  },
+  "nt_argentina": {
+   "file": "nt_argentina.png",
+   "kind": "flag",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Flag_of_Argentina.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1a/Flag_of_Argentina.svg/960px-Flag_of_Argentina.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Public domain",
+   "note": "National flag (Wikimedia Commons, public domain / free licence). National teams may show flags (CLAUDE.md)."
+  },
+  "nt_france": {
+   "file": "nt_france.png",
+   "kind": "flag",
+   "source_url": "https://en.wikipedia.org/wiki/File:Flag_of_France.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/c/c3/Flag_of_France.svg/960px-Flag_of_France.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "PD",
+   "note": "National flag (Wikimedia Commons, public domain / free licence). National teams may show flags (CLAUDE.md)."
+  },
+  "nt_england": {
+   "file": "nt_england.png",
+   "kind": "flag",
+   "source_url": "https://en.wikipedia.org/wiki/File:Flag_of_England.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/b/be/Flag_of_England.svg/960px-Flag_of_England.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Public domain",
+   "note": "National flag (Wikimedia Commons, public domain / free licence). National teams may show flags (CLAUDE.md)."
+  },
+  "nt_portugal": {
+   "file": "nt_portugal.png",
+   "kind": "flag",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Flag_of_Portugal.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5c/Flag_of_Portugal.svg/960px-Flag_of_Portugal.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Public domain",
+   "note": "National flag (Wikimedia Commons, public domain / free licence). National teams may show flags (CLAUDE.md)."
+  },
+  "nt_brazil": {
+   "file": "nt_brazil.png",
+   "kind": "flag",
+   "source_url": "https://en.wikipedia.org/wiki/File:Flag_of_Brazil.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/0/05/Flag_of_Brazil.svg/960px-Flag_of_Brazil.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "PD",
+   "note": "National flag (Wikimedia Commons, public domain / free licence). National teams may show flags (CLAUDE.md)."
+  },
+  "nt_morocco": {
+   "file": "nt_morocco.png",
+   "kind": "flag",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Flag_of_Morocco.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2c/Flag_of_Morocco.svg/960px-Flag_of_Morocco.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Public domain",
+   "note": "National flag (Wikimedia Commons, public domain / free licence). National teams may show flags (CLAUDE.md)."
+  },
+  "nt_belgium": {
+   "file": "nt_belgium.png",
+   "kind": "flag",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Flag_of_Belgium.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/65/Flag_of_Belgium.svg/960px-Flag_of_Belgium.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Public domain",
+   "note": "National flag (Wikimedia Commons, public domain / free licence). National teams may show flags (CLAUDE.md)."
+  },
+  "nt_netherlands": {
+   "file": "nt_netherlands.png",
+   "kind": "flag",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Flag_of_the_Netherlands.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/20/Flag_of_the_Netherlands.svg/960px-Flag_of_the_Netherlands.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Public domain",
+   "note": "National flag (Wikimedia Commons, public domain / free licence). National teams may show flags (CLAUDE.md)."
+  },
+  "nt_mexico": {
+   "file": "nt_mexico.png",
+   "kind": "flag",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Flag_of_Mexico.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fc/Flag_of_Mexico.svg/960px-Flag_of_Mexico.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Public domain",
+   "note": "National flag (Wikimedia Commons, public domain / free licence). National teams may show flags (CLAUDE.md)."
+  },
+  "nt_colombia": {
+   "file": "nt_colombia.png",
+   "kind": "flag",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Flag_of_Colombia.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/21/Flag_of_Colombia.svg/960px-Flag_of_Colombia.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Public domain",
+   "note": "National flag (Wikimedia Commons, public domain / free licence). National teams may show flags (CLAUDE.md)."
+  },
+  "nt_switzerland": {
+   "file": "nt_switzerland.png",
+   "kind": "flag",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Flag_of_Switzerland.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f3/Flag_of_Switzerland.svg/960px-Flag_of_Switzerland.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Public domain",
+   "note": "National flag (Wikimedia Commons, public domain / free licence). National teams may show flags (CLAUDE.md)."
+  },
+  "nt_germany": {
+   "file": "nt_germany.png",
+   "kind": "flag",
+   "source_url": "https://en.wikipedia.org/wiki/File:Flag_of_Germany.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/b/ba/Flag_of_Germany.svg/960px-Flag_of_Germany.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "PD",
+   "note": "National flag (Wikimedia Commons, public domain / free licence). National teams may show flags (CLAUDE.md)."
+  },
+  "nt_croatia": {
+   "file": "nt_croatia.png",
+   "kind": "flag",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Flag_of_Croatia.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1b/Flag_of_Croatia.svg/960px-Flag_of_Croatia.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Public domain",
+   "note": "National flag (Wikimedia Commons, public domain / free licence). National teams may show flags (CLAUDE.md)."
+  },
+  "nt_italy": {
+   "file": "nt_italy.png",
+   "kind": "flag",
+   "source_url": "https://en.wikipedia.org/wiki/File:Flag_of_Italy.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/0/03/Flag_of_Italy.svg/960px-Flag_of_Italy.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "PD",
+   "note": "National flag (Wikimedia Commons, public domain / free licence). National teams may show flags (CLAUDE.md)."
+  },
+  "nt_usa": {
+   "file": "nt_usa.png",
+   "kind": "flag",
+   "source_url": "https://en.wikipedia.org/wiki/File:Flag_of_the_United_States.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/a/a4/Flag_of_the_United_States.svg/960px-Flag_of_the_United_States.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "PD",
+   "note": "National flag (Wikimedia Commons, public domain / free licence). National teams may show flags (CLAUDE.md)."
+  },
+  "nt_norway": {
+   "file": "nt_norway.png",
+   "kind": "flag",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Flag_of_Norway.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d9/Flag_of_Norway.svg/960px-Flag_of_Norway.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Public domain",
+   "note": "National flag (Wikimedia Commons, public domain / free licence). National teams may show flags (CLAUDE.md)."
+  },
+  "nt_denmark": {
+   "file": "nt_denmark.png",
+   "kind": "flag",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Flag_of_Denmark.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9c/Flag_of_Denmark.svg/960px-Flag_of_Denmark.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Public domain",
+   "note": "National flag (Wikimedia Commons, public domain / free licence). National teams may show flags (CLAUDE.md)."
+  },
+  "nt_austria": {
+   "file": "nt_austria.png",
+   "kind": "flag",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Flag_of_Austria.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/41/Flag_of_Austria.svg/960px-Flag_of_Austria.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Public domain",
+   "note": "National flag (Wikimedia Commons, public domain / free licence). National teams may show flags (CLAUDE.md)."
+  },
+  "nt_turkiye": {
+   "file": "nt_turkiye.png",
+   "kind": "flag",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Flag_of_Turkey.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b4/Flag_of_Turkey.svg/960px-Flag_of_Turkey.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Public domain",
+   "note": "National flag (Wikimedia Commons, public domain / free licence). National teams may show flags (CLAUDE.md)."
+  },
+  "nt_sweden": {
+   "file": "nt_sweden.png",
+   "kind": "flag",
+   "source_url": "https://en.wikipedia.org/wiki/File:Flag_of_Sweden.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/4/4c/Flag_of_Sweden.svg/960px-Flag_of_Sweden.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "PD",
+   "note": "National flag (Wikimedia Commons, public domain / free licence). National teams may show flags (CLAUDE.md)."
+  },
+  "nt_ukraine": {
+   "file": "nt_ukraine.png",
+   "kind": "flag",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Flag_of_Ukraine.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/49/Flag_of_Ukraine.svg/960px-Flag_of_Ukraine.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "retrieved": "2026-11-04",
+   "licence": "Public domain",
+   "note": "National flag (Wikimedia Commons, public domain / free licence). National teams may show flags (CLAUDE.md)."
+  }
+ }
+}

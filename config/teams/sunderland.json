@@ -1,0 +1,50 @@
+{
+ "id": "sunderland",
+ "name": "Sunderland",
+ "short": "SUN",
+ "short_name": "Sunderland",
+ "primary": "#EB172B",
+ "secondary": "#FFFFFF",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "W. Isidor",
+   "number": 18,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/53360--sunderland/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "B. Brobbey",
+   "number": 9,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/53360--sunderland/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "N. Angulo",
+   "number": 10,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/53360--sunderland/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "G. Zelenko",
+   "number": 18
+  },
+  {
+   "name": "H. Abernoy",
+   "number": 9
+  },
+  {
+   "name": "J. Brisco",
+   "number": 10
+  }
+ ]
+}

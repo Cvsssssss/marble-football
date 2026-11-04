@@ -1,0 +1,51 @@
+{
+ "id": "nt_turkiye",
+ "name": "Türkiye",
+ "short": "TUR",
+ "short_name": "Türkiye",
+ "national": true,
+ "primary": "#E30A17",
+ "secondary": "#FFFFFF",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "K. Aktürkoğlu",
+   "number": 7,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Turkey_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "İ. Kahveci",
+   "number": 10,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Turkey_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "Y. Akgün",
+   "number": 19,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Turkey_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "D. Irving",
+   "number": 7
+  },
+  {
+   "name": "E. Joss",
+   "number": 10
+  },
+  {
+   "name": "F. Kirby",
+   "number": 19
+  }
+ ]
+}

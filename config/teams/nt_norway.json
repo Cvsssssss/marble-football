@@ -1,0 +1,51 @@
+{
+ "id": "nt_norway",
+ "name": "Norway",
+ "short": "NOR",
+ "short_name": "Norway",
+ "national": true,
+ "primary": "#BA0C2F",
+ "secondary": "#00205B",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "E. Haaland",
+   "number": 9,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Norway_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "J. Strand Larsen",
+   "number": 11,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Norway_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "A. Nusa",
+   "number": 20,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Norway_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "N. Zander",
+   "number": 9
+  },
+  {
+   "name": "O. Ashby",
+   "number": 11
+  },
+  {
+   "name": "P. Brook",
+   "number": 20
+  }
+ ]
+}

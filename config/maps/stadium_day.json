@@ -1,0 +1,14 @@
+{
+  "id": "stadium_day",
+  "name": "Stadium Day",
+  "sky": ["#3d8fd6", "#8cc4ee", "#dcebf5"],
+  "rock": ["#8e8a84", "#6f6b66", "#4f4c48"],
+  "grass": ["#7ccf52", "#55b13a", "#36832a"],
+  "grass_blades": "#73c84f",
+  "scenery": "stadium",
+  "stand": ["#a9bfd2", "#93abc1"],
+  "floodlight": "#e9eef3",
+  "windmill": ["#2f6fd1", "#1d4890"],
+  "keeper": ["#e2c31a", "#b39a10"],
+  "music": { "transpose": 2, "bpm": 116, "progression": "stride", "arp": "up" }
+}

@@ -1,0 +1,50 @@
+{
+ "id": "ferencvaros",
+ "name": "Ferencváros",
+ "short": "FTC",
+ "short_name": "Ferencváros",
+ "primary": "#1A7F3C",
+ "secondary": "#FFFFFF",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "F. Kovačević",
+   "number": 19,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/52298--ferencvaros/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "B. Yusuf",
+   "number": 11,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/52298--ferencvaros/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "L. Joseph",
+   "number": 75,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/52298--ferencvaros/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "K. Jarrow",
+   "number": 19
+  },
+  {
+   "name": "L. Kendric",
+   "number": 11
+  },
+  {
+   "name": "M. Lorca",
+   "number": 75
+  }
+ ]
+}

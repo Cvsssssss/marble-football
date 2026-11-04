@@ -1,0 +1,51 @@
+{
+ "id": "nt_switzerland",
+ "name": "Switzerland",
+ "short": "SUI",
+ "short_name": "Switzerland",
+ "national": true,
+ "primary": "#D52B1E",
+ "secondary": "#FFFFFF",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "D. Ndoye",
+   "number": 11,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Switzerland_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "Z. Amdouni",
+   "number": 10,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Switzerland_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "J. Monteiro",
+   "number": 7,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Switzerland_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "R. Jarvik",
+   "number": 11
+  },
+  {
+   "name": "S. Kestrel",
+   "number": 10
+  },
+  {
+   "name": "T. Lisle",
+   "number": 7
+  }
+ ]
+}

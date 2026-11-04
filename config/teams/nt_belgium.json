@@ -1,0 +1,51 @@
+{
+ "id": "nt_belgium",
+ "name": "Belgium",
+ "short": "BEL",
+ "short_name": "Belgium",
+ "national": true,
+ "primary": "#E30613",
+ "secondary": "#FDDA24",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "R. Lukaku",
+   "number": 9,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Belgium_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "L. Trossard",
+   "number": 10,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Belgium_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "C. De Ketelaere",
+   "number": 17,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Belgium_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "D. Welke",
+   "number": 9
+  },
+  {
+   "name": "E. Yvain",
+   "number": 10
+  },
+  {
+   "name": "F. Zorin",
+   "number": 17
+  }
+ ]
+}

@@ -1,0 +1,51 @@
+{
+ "id": "nt_england",
+ "name": "England",
+ "short": "ENG",
+ "short_name": "England",
+ "national": true,
+ "primary": "#FFFFFF",
+ "secondary": "#CF081F",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "H. Kane",
+   "number": 9,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/England_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "B. Saka",
+   "number": 7,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/England_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "A. Gordon",
+   "number": 11,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/England_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "K. Jesper",
+   "number": 9
+  },
+  {
+   "name": "L. Korvin",
+   "number": 7
+  },
+  {
+   "name": "M. Laredo",
+   "number": 11
+  }
+ ]
+}

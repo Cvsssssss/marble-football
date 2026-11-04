@@ -1,0 +1,51 @@
+{
+ "id": "nt_portugal",
+ "name": "Portugal",
+ "short": "POR",
+ "short_name": "Portugal",
+ "national": true,
+ "primary": "#C8102E",
+ "secondary": "#046A38",
+ "colours_verified": true,
+ "strength": 80,
+ "players": [
+  {
+   "name": "R. Leão",
+   "number": 7,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Portugal_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "G. Ramos",
+   "number": 9,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Portugal_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "J. Félix",
+   "number": 11,
+   "position": "FW",
+   "source_url": "https://en.wikipedia.org/wiki/Portugal_national_football_team",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "N. Marlow",
+   "number": 7
+  },
+  {
+   "name": "O. Nyberg",
+   "number": 9
+  },
+  {
+   "name": "P. Orlan",
+   "number": 11
+  }
+ ]
+}

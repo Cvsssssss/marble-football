@@ -1,0 +1,50 @@
+{
+ "id": "sparta_praha",
+ "name": "Sparta Prague",
+ "short": "SPA",
+ "short_name": "Sparta Prague",
+ "primary": "#A50034",
+ "secondary": "#FFFFFF",
+ "colours_verified": false,
+ "strength": 80,
+ "players": [
+  {
+   "name": "J. Braut Brunes",
+   "number": 14,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/50033--sparta-praha/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "M. Vojta",
+   "number": 29,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/50033--sparta-praha/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "E. Singhateh",
+   "number": 27,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/50033--sparta-praha/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "K. Varga",
+   "number": 14
+  },
+  {
+   "name": "L. Whitcomb",
+   "number": 29
+  },
+  {
+   "name": "M. Ysolde",
+   "number": 27
+  }
+ ]
+}

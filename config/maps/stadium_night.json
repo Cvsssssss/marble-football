@@ -1,0 +1,15 @@
+{
+  "id": "stadium_night",
+  "name": "Stadium Night",
+  "sky": ["#0b1830", "#1a3358", "#34557e"],
+  "rock": ["#6e6a74", "#55515c", "#3b3843"],
+  "grass": ["#6cc24a", "#4aa236", "#2f7428"],
+  "grass_blades": "#64b846",
+  "scenery": "stadium",
+  "night": true,
+  "stand": ["#24395a", "#1c2f4c"],
+  "floodlight": "#fff6dc",
+  "windmill": ["#f2f2f2", "#a9b2bd"],
+  "keeper": ["#35d0a0", "#1f9a74"],
+  "music": { "transpose": -3, "bpm": 104, "progression": "open", "arp": "wave" }
+}
