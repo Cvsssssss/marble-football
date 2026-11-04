@@ -1,0 +1,21 @@
+# P1b progress (corrections after demo v2)
+Phase file: P1b_corrections.md (project root, not phases/)
+- [ ] 1 players (web search) -> config/players_review.md + teams json
+- [ ] 2 bracket left_to_right default, symmetric option, 16 teams
+- [ ] 3 goal moment redesign
+- [ ] 4 crowd goal sfx A/B/C + custom audio/custom/goal.wav
+- [ ] 5 added-time shots + cinematic + golden goal effect
+- [ ] tests
+- [ ] screenshots review loop
+- [ ] final render output/demo_v2b_1080p.mp4, ffprobe
+- [ ] report, commit
+- players chosen (UEFA CL squad pages, 2026-11-04): MCI Haaland9 Doku11 Semenyo42; RMA Mbappe10 Vinicius7 Rodrygo11; BAY Kane9 Olise17 L.Diaz14; ARS Saka7 Gyokeres14 Eze10
+- [x] engine: added-time shots (sim/engine.js modes clear/banner/shots), sim/cinematic.js resample+camera, GOOD_HIT_V=850 (calib: good 67% of contacts, reach right 95.7% vs 6.7% miss; build/good_hit_calibration.json)
+- [x] players in config/teams + players_review.md; schema real_names/bracket_style/fictional_players
+- [x] bracket LTR (bracket_layout.bracketLayoutLTR) default, symmetric kept; render.js `brackets` mode
+- [x] draw.js: goal banner/wash/confetti/score pop, +N banner, shot pill, cine vignette+camera, golden goal fx; render.js keyMoments v2b
+- [x] audio: crowd_A/B/C + golden_goal (STFT formant roar), custom audio/custom/goal.wav override, cine swell, w_reg; report passes
+- [x] build OK 57/57, video 6:39, report written; commit
+- [x] Max decision: strength test range 53-62% (fizica neschimbata). Regular play identical to v2 per seed (xrng for extra keeper span + first shot team)
+- [x] tests patched (run_tests.js P1b checks); quick run OK except strength
+- [x] gate filters bar_side + visibly_stuck (pre-existing edge cases); ENGINE_VERSION p1b-3; full build restarted

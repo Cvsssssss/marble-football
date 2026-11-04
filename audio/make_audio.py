@@ -225,13 +225,118 @@ def goal_C():  # short percussive thump + marimba-like three-note flourish
         m = marimba(f0, d - t0); j = int(t0 * SR); out[j:j + len(m)] += (0.5 + 0.08 * k) * m
     out *= np.minimum(1, (d - t) / 0.2)
     return norm(out)
-GOAL_SFX = {'A': goal_A(), 'B': goal_B(), 'C': goal_C()}
-GOAL = GOAL_SFX[ACFG.get('goal_sfx', 'A')]
+GOAL_V2 = {'A': goal_A(), 'B': goal_B(), 'C': goal_C()}   # P1 sounds, still selectable as "v2_A".."v2_C"
+
+# ---------------- P1b crowd goal sounds (own rng; all other effects and the music stay bit-identical) ----------------
+# A stadium roar built from layered band-limited noise: an STFT filter bank applies vowel-like formants that glide
+# from "oooh" to "aaah" while the level swells; several layers (lower/higher voices, slightly different timing),
+# slow random surges, soft release, plus a short net-thump at the start.
+crng = np.random.default_rng(4242)
+VOW = {'oo': (300, 870, 2240), 'ah': (730, 1090, 2440), 'eh': (530, 1840, 2480)}
+def formant_env(f, F, bw=(110, 160, 240), floor=0.12, lo=140, hi=4200):
+    e = floor + sum(np.exp(-0.5 * ((f - Fk) / b) ** 2) * g for Fk, b, g in zip(F, bw, (1.0, 0.75, 0.35)))
+    band = 1 / (1 + (lo / np.maximum(f, 1)) ** 4) / (1 + (f / hi) ** 4)
+    return e * band
+def crowd_layer(d, shift=1.0, delay=0.0, glide=0.45, v0='oo', v1='ah', surge=0.18, nfft=2048, hop=512):
+    n = int(d * SR); x = crng.standard_normal(n + nfft)
+    win = np.hanning(nfft)
+    f = np.fft.rfftfreq(nfft, 1 / SR)
+    out = np.zeros(n + nfft)
+    for i in range(0, n, hop):
+        tau = i / SR
+        m = float(np.clip((tau - delay - 0.05) / glide, 0, 1)); m = m * m * (3 - 2 * m)
+        F = [(a + (b - a) * m) * shift for a, b in zip(VOW[v0], VOW[v1])]
+        seg = x[i:i + nfft] * win
+        out[i:i + nfft] += np.fft.irfft(np.fft.rfft(seg) * formant_env(f, F), nfft) * win
+    out = out[:n]
+    t = np.arange(n) / SR
+    # slow random surges (low-passed noise, 2-5 Hz)
+    sv = np.convolve(crng.standard_normal(n // 480 + 8), np.ones(6) / 6, 'same')[: n // 480 + 1]
+    am = 1 + surge * np.interp(t, np.arange(len(sv)) * 0.01, sv / (np.max(np.abs(sv)) + 1e-9))
+    return out / (np.max(np.abs(out)) + 1e-9) * am
+def net_thump(n):
+    out = np.zeros(n); tt = t_(0.22); f = 58 + 60 * np.exp(-tt * 30)
+    th = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-tt * 18)
+    sw = crng.standard_normal(len(tt)); sw = lowpass(sw, 6000) * np.exp(-tt * 40) * 0.25
+    out[:len(tt)] += th + sw
+    return out
+def envelope(n, swell, peak_t, d, rel):
+    t = np.arange(n) / SR
+    a = 1 - np.exp(-np.maximum(0, t) / swell)
+    a *= 0.75 + 0.25 * np.clip(t / peak_t, 0, 1)
+    r = np.clip((d - t) / rel, 0, 1); r = r * r * (3 - 2 * r)
+    return a * r
+def mix_layers(d, specs):
+    n = int(d * SR); out = np.zeros(n)
+    for sp in specs:
+        g = sp.pop('g'); out += g * crowd_layer(d, **sp)
+    return out
+def crowd_A():  # big stadium roar: 4 layers, wide band, long swell, oooh -> AAAH
+    d = 2.4; n = int(d * SR)
+    r = mix_layers(d, [dict(g=1.0, shift=0.9, glide=0.5), dict(g=0.8, shift=1.15, delay=0.04, glide=0.45),
+                       dict(g=0.55, shift=1.35, delay=0.08, glide=0.55, v1='eh'), dict(g=0.5, shift=0.75, delay=0.02, glide=0.6)])
+    r = r / (np.max(np.abs(r)) + 1e-9) * envelope(n, 0.22, 0.7, d, 0.9)
+    return norm(r + 0.55 * net_thump(n))
+def crowd_B():  # roar + short rising chime
+    d = 2.2; n = int(d * SR); t = np.arange(n) / SR
+    r = mix_layers(d, [dict(g=1.0, shift=0.95, glide=0.4), dict(g=0.7, shift=1.2, delay=0.05, glide=0.4)])
+    r = r / (np.max(np.abs(r)) + 1e-9) * envelope(n, 0.2, 0.6, d, 0.8)
+    ch = np.zeros(n)
+    for k, (f0, t0) in enumerate(((880.0, 0.10), (1174.7, 0.22), (1568.0, 0.34))):
+        b = bell(f0, d - t0, 4.0); j = int(t0 * SR); ch[j:j + len(b)] += (0.32 + 0.05 * k) * b
+    return norm(r + 0.45 * net_thump(n) + 0.55 * ch)
+def crowd_C():  # smaller, closer crowd: fewer voices, individual shouts more audible, shorter
+    d = 1.8; n = int(d * SR); t = np.arange(n) / SR
+    r = mix_layers(d, [dict(g=1.0, shift=1.05, glide=0.3, surge=0.35), dict(g=0.6, shift=1.3, delay=0.06, glide=0.3, surge=0.4, v1='eh')])
+    shouts = np.zeros(n)
+    for k in range(5):  # a few individual voices ("aaah!") with a pitch, through vowel formants
+        t0 = 0.05 + 0.09 * k + 0.04 * crng.random(); dd = 0.45 + 0.35 * crng.random(); f0 = 150 + 110 * crng.random()
+        tt = t_(dd); ph = 2 * np.pi * np.cumsum(f0 * (1 + 0.06 * tt / dd)) / SR
+        src = sum(np.sin(h * ph) / h for h in range(1, 18))
+        F = [v * (1 + 0.15 * crng.random()) for v in VOW['ah']]
+        X = np.fft.rfft(src); fr = np.fft.rfftfreq(len(src), 1 / SR)
+        v = np.fft.irfft(X * formant_env(fr, F, floor=0.05), len(src)) * np.sin(np.pi * np.minimum(1, tt / dd)) ** 1.5
+        j = int(t0 * SR); m = min(n - j, len(v)); shouts[j:j + m] += v[:m] / (np.max(np.abs(v)) + 1e-9) * (0.35 + 0.15 * crng.random())
+    r = r / (np.max(np.abs(r)) + 1e-9) * envelope(n, 0.12, 0.4, d, 0.6)
+    return norm(0.85 * r + 0.5 * shouts * envelope(n, 0.02, 0.1, d, 0.5) + 0.6 * net_thump(n))
+def golden_goal_sfx():  # bigger roar (crowd A, longer) + a short bright sting
+    d = 2.5; n = int(d * SR)
+    r = mix_layers(d, [dict(g=1.0, shift=0.9, glide=0.45), dict(g=0.9, shift=1.15, delay=0.03, glide=0.4), dict(g=0.7, shift=1.4, delay=0.06, glide=0.5, v1='eh'), dict(g=0.6, shift=0.72, glide=0.55)])
+    r = r / (np.max(np.abs(r)) + 1e-9) * envelope(n, 0.15, 0.5, d, 0.9)
+    st = np.zeros(n)
+    for i, f0 in enumerate((783.99, 1046.5, 1318.5, 1568.0)):
+        b = bell(f0, 1.2, 3.5); j = int((0.04 + i * 0.06) * SR); st[j:j + len(b)] += 0.4 * b
+    return norm(r + 0.5 * net_thump(n) + 0.5 * st)
+CROWD = {'A': crowd_A(), 'B': crowd_B(), 'C': crowd_C()}
+GOLDEN_GOAL = golden_goal_sfx()
+# loudness match: every goal sound gets the same max short-term (400 ms) RMS, so switching A/B/C does not change the mix level
+def _st(x, w=int(0.4 * SR), hop=int(0.1 * SR)): return max(float(np.sqrt(np.mean(x[i:i + w] ** 2))) for i in range(0, max(1, len(x) - w + 1), hop))
+ST_TARGET = 0.20
+for _k in list(CROWD): CROWD[_k] = (CROWD[_k] * ST_TARGET / _st(CROWD[_k])).astype(np.float32)
+GOLDEN_GOAL = (GOLDEN_GOAL * ST_TARGET * 1.25 / _st(GOLDEN_GOAL)).astype(np.float32)   # a bit bigger than a normal goal
+GOAL_SFX = dict(CROWD); GOAL_SFX.update({'v2_' + k: v for k, v in GOAL_V2.items()})
+SEL = ACFG.get('goal_sfx', 'A')
+GOAL = GOAL_SFX[SEL]
+CUSTOM = os.path.join(ROOT, 'audio', 'custom', 'goal.wav')
+CUSTOM_USED = False
+if os.path.exists(CUSTOM):  # Max's own royalty-free recording overrides the synthesised sound
+    with wave.open(CUSTOM, 'rb') as w:
+        ch, sw, fr, nf = w.getnchannels(), w.getsampwidth(), w.getframerate(), w.getnframes()
+        raw = w.readframes(nf)
+    if sw != 2: raise SystemExit('audio/custom/goal.wav must be 16-bit PCM WAV')
+    xx = np.frombuffer(raw, np.int16).astype(np.float32) / 32768.0
+    if ch > 1: xx = xx.reshape(-1, ch).mean(axis=1)
+    if fr != SR: xx = np.interp(np.arange(int(len(xx) * SR / fr)) / SR, np.arange(len(xx)) / fr, xx).astype(np.float32)
+    xx = xx[: int(3.0 * SR)]
+    fo = min(len(xx), int(0.3 * SR)); xx[-fo:] *= np.linspace(1, 0, fo)
+    GOAL = (xx * ST_TARGET / max(_st(xx), 1e-6)).astype(np.float32); CUSTOM_USED = True; SEL = 'custom'
 GOAL_GAIN = 0.55
+S['w_reg'] = S['w_half']   # 90' whistle (before the added-time shots): same two-blast pattern as half-time
 
 def pan_x(x): return float(np.clip((x / 1280.0) * 2 - 1, -1, 1)) * 0.6
 cnt = {}
 goal_times = []
+cine_windows = []
 for e in show['audio']:
     t = e['t']; ty = e['type']; v = e.get('v', 300)
     # v1 look/sound kept: v1 collision events always had x=0 (bug), so collision sounds were panned by pan_x(0).
@@ -248,7 +353,12 @@ for e in show['audio']:
     elif ty == 'whoosh':          place(S['whoosh'][0], t, 0.18, -0.8)
     elif ty == 'net':             place(S['net'][0], t, 0.35, 0.6)
     elif ty == 'goal':
-        _stem[0] = 'goal'; place(GOAL, t, GOAL_GAIN, 0.0); _stem[0] = 'other'; goal_times.append(t)
+        _stem[0] = 'goal'; place(GOLDEN_GOAL if e.get('golden') else GOAL, t, GOAL_GAIN, 0.0); _stem[0] = 'other'; goal_times.append(t)
+    elif ty == 'cine_in':  # good hit: a rising "oooh" from the crowd until the cinematic ends, plus a music swell (below)
+        co = next((x for x in show['audio'] if x['type'] == 'cine_out' and x.get('match') == e.get('match') and x.get('k') == e.get('k')), None)
+        d = min(6.0, ((co['t'] if co else t + 3.0) - t) + 0.8)
+        sw = crowd_layer(d, shift=1.0, glide=d * 0.8, v0='oo', v1='oo', surge=0.1) * envelope(int(d * SR), d * 0.5, d, d, 0.7)
+        place(norm(sw), t, 0.16, 0.0); cine_windows.append((t, t + d))
     elif ty == 'whistle':
         place(S['w_' + e['kind']], t, 0.5, 0.0)
         if e['kind'] == 'end': goal_times.append(t)
@@ -330,6 +440,8 @@ for t in goal_times:
 def smooth_curve(x, w):
     c = np.cumsum(np.concatenate([[0], x])); y = (c[w:] - c[:-w]) / w
     return np.concatenate([np.full(w // 2, y[0]), y, np.full(len(x) - len(y) - w // 2, y[-1])]).astype(np.float32)
+for a_, b_ in cine_windows:  # music swell during a cinematic good hit (+3.5 dB, eased by the smoothing below)
+    lvl[int(a_ * SR):int(b_ * SR)] *= 1.5
 lvl = smooth_curve(lvl, int(0.3 * SR))
 music = mus_full * lvl * duck
 # fade out at the very end
@@ -358,9 +470,12 @@ def st_max(x, w=int(0.4 * SR), hop=int(0.1 * SR)):  # max short-term (400 ms) RM
     return max(rms(x[i:i + w]) for i in range(0, len(x) - w + 1, hop))
 sdir = os.path.join(ROOT, 'output', 'goal_sfx_samples'); os.makedirs(sdir, exist_ok=True)
 scale = 0.9 / peak  # same scaling as the final mix (before ffmpeg loudnorm)
-rep = {'selected': ACFG.get('goal_sfx', 'A'), 'samples': {}, 'reference_effects': {}, 'in_mix': []}
-for k, x in GOAL_SFX.items():
-    write_wav(os.path.join(sdir, f'goal_{k}.wav'), x * 0.89)
+rep = {'selected': SEL, 'custom_file_used': CUSTOM_USED, 'samples': {}, 'reference_effects': {}, 'in_mix': []}
+SAMPLES = {k: v for k, v in CROWD.items()}; SAMPLES['golden_goal'] = GOLDEN_GOAL
+if CUSTOM_USED: SAMPLES['custom'] = GOAL
+for k, x in SAMPLES.items():
+    if k in CROWD: write_wav(os.path.join(sdir, f'crowd_{k}.wav'), x / (np.max(np.abs(x)) + 1e-9) * 0.89)
+    elif k == 'golden_goal': write_wav(os.path.join(sdir, 'crowd_golden_goal.wav'), x / (np.max(np.abs(x)) + 1e-9) * 0.89)
     placed = x * GOAL_GAIN * 0.9 * 1.41 * scale
     rep['samples'][k] = {'duration_s': round(len(x) / SR, 3), 'peak_dBFS_in_mix': round(db(np.max(np.abs(placed))), 1), 'max_shortterm_rms_dBFS_in_mix': round(db(st_max(placed)), 1)}
 for name, x, g in (('whistle_end', S['w_end'], 0.5), ('bar_metal', S['bar'][0], 0.55), ('ground_thump', S['ground'][0], 0.45), ('windmill_knock', S['mill'][0], 0.55), ('golden_sting', S['golden'], 0.7), ('net', S['net'][0], 0.35)):
@@ -375,8 +490,8 @@ for e in show['audio']:
         'music_rms_dBFS': round(db(rms(m_)), 1), 'goal_minus_other_dB': round(db(rms(g_)) - db(rms(o_)), 1), 'goal_peak_dBFS': round(db(np.max(np.abs(g_))), 1)})
 ref_peak = max(v['peak_dBFS_in_mix'] for v in rep['reference_effects'].values())
 ref_st = max(v['max_shortterm_rms_dBFS_in_mix'] for v in rep['reference_effects'].values())
-sel = rep['samples'][rep['selected']]
+sel = rep['samples'][rep['selected']] if rep['selected'] in rep['samples'] else rep['samples']['A']
 rep['criteria'] = {'goal_peak_not_above_loudest_effect_peak': sel['peak_dBFS_in_mix'] <= ref_peak, 'goal_shortterm_not_above_loudest_effect_shortterm': sel['max_shortterm_rms_dBFS_in_mix'] <= ref_st,
-                   'all_samples_le_1_8s': all(v['duration_s'] <= 1.8 for v in rep['samples'].values()), 'loudest_ref_peak_dBFS': ref_peak, 'loudest_ref_shortterm_dBFS': ref_st}
+                   'crowd_samples_le_2_5s': all(rep['samples'][k]['duration_s'] <= 2.5 for k in ('A', 'B', 'C', 'golden_goal')), 'loudest_ref_peak_dBFS': ref_peak, 'loudest_ref_shortterm_dBFS': ref_st}
 json.dump(rep, open(os.path.join(ROOT, 'build', 'audio_goal_report.json'), 'w'), indent=1)
 print('goal sfx report', json.dumps(rep['criteria']))

@@ -298,6 +298,17 @@
     f.b = A.b.map((ba, q) => { const bb = B.b[q]; if (ba[3] !== bb[3] || Math.hypot(bb[0] - ba[0], bb[1] - ba[1]) > 80) return ba; return [lerp(ba[0], bb[0], u), lerp(ba[1], bb[1], u), lerp(ba[2], bb[2], u), ba[3]]; });
     return f;
   }
+  // frame at a simulation time (frames are not uniform in time when slow motion is used)
+  function frameAtTime(m, t) {
+    const F = m.frames; let lo = 0, hi = F.length - 1;
+    if (t <= F[0].t) return { fr: F[0], i: 0 };
+    if (t >= F[hi].t) return { fr: F[hi], i: hi };
+    while (lo < hi - 1) { const md = (lo + hi) >> 1; if (F[md].t <= t) lo = md; else hi = md; }
+    return { fr: interpFrame(m, lo + (t - F[lo].t) / Math.max(1e-9, F[hi].t - F[lo].t)), i: lo };
+  }
+  // video time (s since the match segment start) of an event
+  function evV(e) { return (e.vf !== undefined ? e.vf : e.t * FPS) / FPS; }
+  function lastEventBeforeV(m, type, v, filt) { let best = null; for (const e of m.events) { if (evV(e) > v + 1e-9) break; if (e.type === type && (!filt || filt(e))) best = e; } return best; }
   function ballR(m, i) { return i % 2 === 0 ? m.rA : m.rB; }
   function teamOf(i) { return i % 2 === 0 ? 'A' : 'B'; }
   function styleOf(m, i) { return kitStyle(m.kits[teamOf(i)]); }
@@ -307,15 +318,19 @@
   function drawScene(c, m, fr, opts) {
     opts = opts || {};
     const t = fr.t;
-    // camera: goal zoom + shake
+    const v = opts.v !== undefined ? opts.v : t;
+    // camera: cinematic track (good hit in added time) or goal zoom + shake, both eased in and out
     let zoom = 1, cx = G.W / 2, cy = G.H / 2, shx = 0, shy = 0;
-    const lg = opts.noCam ? null : lastEventBefore(m, 'goal', t);
-    if (lg && t - lg.t < 1.6) {
-      const u = t - lg.t;
-      const z = u < 0.25 ? easeOut(u / 0.25) : u < 1.0 ? 1 : 1 - smooth((u - 1.0) / 0.6);
-      zoom = 1 + 0.12 * z; cx = lerp(G.W / 2, 1110, z); cy = lerp(G.H / 2, 470, z);
-      const sh = Math.exp(-u * 7) * 6;
-      shx = Math.sin(u * 67) * sh; shy = Math.cos(u * 53) * sh * 0.7;
+    if (!opts.noCam && fr.cam) { zoom = fr.cam[0]; cx = fr.cam[1]; cy = fr.cam[2]; }
+    else if (!opts.noCam) {
+      const lg = lastEventBeforeV(m, 'goal', v);
+      if (lg && !lg.golden && v - evV(lg) < 1.9) { // golden goal: no zoom (own effect)
+        const u = v - evV(lg);
+        const z = smooth(u / 0.4) * (1 - smooth((u - 1.05) / 0.8));
+        zoom = 1 + 0.12 * z; cx = lerp(G.W / 2, 1110, z); cy = lerp(G.H / 2, 470, z);
+        const env = smooth(u / 0.08) * Math.exp(-u * 4.2) * 5;
+        shx = (Math.sin(u * 29) + 0.45 * Math.sin(u * 47 + 1.3)) * env; shy = (Math.cos(u * 25) + 0.45 * Math.sin(u * 39 + 0.7)) * env * 0.7;
+      }
     }
     if (opts.zoom) { zoom = opts.zoom.z; cx = opts.zoom.x; cy = opts.zoom.y; }
     // keep the camera window inside the scene (no black borders when zoomed)
@@ -364,7 +379,7 @@
         for (let k = 4; k >= 1; k--) {
           const pf = matchFrame(m, opts.frameIndex - k * (opts.trailStep || 1)); const pb = pf.b[i];
           if (pb[3] !== 3) continue;
-          const sp = Math.hypot(b[0] - pb[0], b[1] - pb[1]) / (k * (opts.trailStep || 1)) * FPS;
+          const sp = Math.hypot(b[0] - pb[0], b[1] - pb[1]) / Math.max(1e-6, fr.t - pf.t);
           if (sp < 420) continue;
           const a = 0.22 * (1 - k / 5) * clamp((sp - 420) / 400, 0, 1);
           c.fillStyle = hexA(m.kits[teamOf(i)].primary, a);
@@ -372,7 +387,46 @@
         }
       }
     }
-    fr.b.forEach((b, i) => { if (b[3] === 3) drawBall(c, b[0], b[1], ballR(m, i), b[2], styleOf(m, i), 1); });
+    fr.b.forEach((b, i) => { if (b[3] === 3 || b[3] === 5) drawBall(c, b[0], b[1], ballR(m, i), b[2], styleOf(m, i), 1); });
+    if (!opts.noFx) goalFx(c, m, v);
+    c.restore();
+  }
+
+  // ---------- goal effects in scene space (confetti burst from the goal, golden shockwave) ----------
+  function goalFx(c, m, v) {
+    const lg = lastEventBeforeV(m, 'goal', v); if (!lg) return;
+    const u = v - evV(lg); if (u < 0 || u > 2.6) return;
+    const gi = m.events.indexOf(lg);
+    const ox = G.GOAL_LINE_X - 6, oy = (G.BAR_Y + G.GROUND_Y) / 2;
+    const kit = m.kits[lg.team];
+    const cols = lg.golden ? ['#ffd84a', '#ffc400', '#fff1b0', '#e8a800'] : [kit.primary, kit.secondary, kit.primary, '#ffffff'];
+    const n = lg.golden ? 90 : 70;
+    c.save();
+    for (let k = 0; k < n; k++) {
+      const h1 = hash(gi * 7919 + k * 31 + 1), h2 = hash(gi * 7919 + k * 31 + 2), h3 = hash(gi * 7919 + k * 31 + 3);
+      const delay = h3 * 0.12; const uu = u - delay; if (uu <= 0) continue;
+      const ang = Math.PI * (0.62 + 0.62 * h1);           // up-left fan out of the goal mouth
+      const sp = 380 + 520 * h2, drag = 2.4;
+      const tau = (1 - Math.exp(-drag * uu)) / drag;
+      const x = ox + Math.cos(ang) * sp * tau, y = oy - Math.sin(ang) * sp * tau + 0.5 * 380 * uu * uu * 0.55;
+      const a = 1 - smooth((uu - 1.2) / 0.8); if (a <= 0) continue;
+      c.save(); c.translate(x, y); c.rotate(uu * (6 + 10 * h1) + k);
+      c.globalAlpha = a; c.fillStyle = cols[k % cols.length];
+      const w = 4 + 4 * h2, hh = 2.5 + 3 * h3 * Math.abs(Math.cos(uu * 9 + k));
+      c.fillRect(-w / 2, -hh / 2, w, hh);
+      if (cols[k % cols.length].toLowerCase() === '#ffffff') { c.strokeStyle = 'rgba(0,0,0,0.25)'; c.lineWidth = 0.6; c.strokeRect(-w / 2, -hh / 2, w, hh); }
+      c.restore();
+    }
+    if (lg.golden) { // golden shockwave rings from the goal
+      for (const d of [0, 0.18]) {
+        const q = (u - d) / 1.0; if (q <= 0 || q >= 1) continue;
+        const r = 30 + 900 * easeOut(q);
+        c.globalAlpha = 0.85 * (1 - q); c.strokeStyle = '#ffd84a'; c.lineWidth = 16 * (1 - q) + 2;
+        c.beginPath(); c.arc(ox, oy, r, 0, Math.PI * 2); c.stroke();
+        c.globalAlpha = 0.35 * (1 - q); c.strokeStyle = '#fff4c2'; c.lineWidth = 5 * (1 - q) + 1;
+        c.beginPath(); c.arc(ox, oy, r * 0.93, 0, Math.PI * 2); c.stroke();
+      }
+    }
     c.restore();
   }
 
@@ -406,13 +460,21 @@
     const N = show.cfg.BALLS_PER_TEAM;
     for (let q = 0; q < N; q++) {
       const ia = q * 2, ib = q * 2 + 1;
-      ballIcon(c, cx - half + 48 + q * 21, y + h / 2 + 13, 8.5, kitStyle(m.kits.A), fr.b[ia][3] >= 2);
-      ballIcon(c, cx + half - 48 - q * 21, y + h / 2 + 13, 8.5, kitStyle(m.kits.B), fr.b[ib][3] >= 2);
+      ballIcon(c, cx - half + 48 + q * 21, y + h / 2 + 13, 8.5, kitStyle(m.kits.A), fr.b[ia][3] >= 2 && fr.b[ia][3] <= 4);
+      ballIcon(c, cx + half - 48 - q * 21, y + h / 2 + 13, 8.5, kitStyle(m.kits.B), fr.b[ib][3] >= 2 && fr.b[ib][3] <= 4);
     }
     // score box
     c.fillStyle = '#ffffff'; rrect(c, cx - 62, y + 6, 124, h - 12, 9); c.fill();
-    const pulse = opts.scorePulse || 0;
-    text(c, `${sc[0]}–${sc[1]}`, cx, y + h / 2 + 1, 34 + 6 * pulse, '#0b1a2e', 'center', 800);
+    // score: the scoring team's number "pops" (scale + team colour flash)
+    const pop = opts.scorePop || null;
+    text(c, '–', cx, y + h / 2 + 1, 34, '#0b1a2e', 'center', 800);
+    for (const [k, xx] of [[0, cx - 30], [1, cx + 30]]) {
+      const isPop = pop && pop.side === k;
+      const z = isPop ? 1 + 0.45 * pop.p : 1;
+      const pc = isPop ? (lum(pop.color) > 0.75 ? '#0b1a2e' : mixHex(pop.color, '#0b1a2e', 0.35)) : '#0b1a2e';
+      const col = isPop && pop.p > 0.05 ? mixHex('#0b1a2e', pc, Math.min(1, pop.p * 1.6)) : '#0b1a2e';
+      text(c, String(sc[k]), xx, y + h / 2 + 1, 34 * z, col, 'center', 800);
+    }
     // aggregate
     if (m.leg === 'LEG 2') {
       const ag = [m.prev[0] + sc[0], m.prev[1] + sc[1]];
@@ -427,9 +489,15 @@
       c.fillStyle = `rgb(255,${(190 + 30 * bl) | 0},${(20 * bl) | 0})`; rrect(c, cx - 112, cyk, 224, 30, 10); c.fill();
       text(c, `GOLDEN BALL · ${ck.main}`, cx, cyk + 15.5, 17, '#2a1a00', 'center', 800); // clock frozen at 90+added
     } else {
-      c.fillStyle = 'rgba(8,20,38,0.80)'; rrect(c, cx - 44, cyk, 88, 30, 10); c.fill();
-      text(c, ck.main, cx - (ck.plus ? 14 : 0), cyk + 15.5, 19, '#ffffff', 'center', 700);
-      if (ck.plus) { c.fillStyle = '#ffd84a'; rrect(c, cx + 8, cyk + 5, 34, 20, 6); c.fill(); text(c, `+${ck.plus}`, cx + 25, cyk + 15.5, 15, '#1a1200', 'center', 800); }
+      if (ck.phase === 'shots') { // 90+k' and the shot counter
+        c.fillStyle = 'rgba(8,20,38,0.80)'; rrect(c, cx - 82, cyk, 164, 30, 10); c.fill();
+        text(c, ck.main, cx - 36, cyk + 15.5, 19, '#ffffff', 'center', 700);
+        c.fillStyle = '#ffd84a'; rrect(c, cx + 4, cyk + 5, 72, 20, 6); c.fill(); text(c, `SHOT ${ck.shot}/${ck.added}`, cx + 40, cyk + 15.5, 13, '#1a1200', 'center', 800);
+      } else {
+        c.fillStyle = 'rgba(8,20,38,0.80)'; rrect(c, cx - 44, cyk, 88, 30, 10); c.fill();
+        text(c, ck.main, cx - (ck.plus ? 14 : 0), cyk + 15.5, 19, '#ffffff', 'center', 700);
+        if (ck.plus) { c.fillStyle = '#ffd84a'; rrect(c, cx + 8, cyk + 5, 34, 20, 6); c.fill(); text(c, `+${ck.plus}`, cx + 25, cyk + 15.5, 15, '#1a1200', 'center', 800); }
+      }
     }
     c.restore();
   }
@@ -446,29 +514,123 @@
     c.restore();
   }
 
-  function matchOverlays(c, m, fr) {
-    const t = fr.t;
-    // goal banner
-    const lg = lastEventBefore(m, 'goal', t);
-    if (lg && t - lg.t < 1.7) {
-      const side = lg.team; const ti = side === 'A' ? m.ta : m.tb;
-      const golden = lg.golden;
-      const kp = m.kits[side].primary;
-      banner(c, golden ? 'GOLDEN GOAL!' : 'GOAL!', teamName(ti), (t - lg.t) / 1.7, golden ? 'rgba(255,190,0,0.93)' : hexA(kp, 0.93), golden ? '#10233d' : inkOn(kp));
+  function scorerLine(m, e) {
+    const ti = e.team === 'A' ? m.ta : m.tb, P = show.teams[ti].players[e.player];
+    return `${P.name} · ${window.CLOCK.minuteLabel(m, e.t, show.cfg.GAME_MIN_PER_SEC)}`;
+  }
+  // GOAL moment banner (~2 s): slides in with a soft bounce, team colours, scorer + minute; slides out.
+  function goalBanner(c, m, e, u, golden) {
+    const D = golden ? 3.0 : 2.0;
+    const side = e.team, ti = side === 'A' ? m.ta : m.tb, kit = m.kits[side];
+    const inU = clamp(u / 0.42, 0, 1), outU = smooth((u - (D - 0.3)) / 0.3);
+    const sx = lerp(-G.W * 0.75, 0, easeOutBack(inU)) + outU * G.W * 0.6;
+    c.save(); c.scale(S, S); c.globalAlpha = 1 - outU;
+    const cx = G.W / 2 + sx, cy = 270, W2 = 320, H1 = 62;
+    // dark slanted panel (readable on any map) with team-colour stripes at both ends; golden goal = gold panel
+    const body = golden ? '#ffc400' : 'rgba(8,20,38,0.93)';
+    const ink = golden ? '#2a1a00' : '#ffffff';
+    const slant = (x0, x1, y0, y1, k) => { c.beginPath(); c.moveTo(x0 + k, y0); c.lineTo(x1 + k, y0); c.lineTo(x1 - k, y1); c.lineTo(x0 - k, y1); c.closePath(); };
+    c.shadowColor = 'rgba(0,0,0,0.35)'; c.shadowBlur = 18; c.shadowOffsetY = 4;
+    c.fillStyle = body; slant(cx - W2, cx + W2, cy - H1, cy + H1, 22); c.fill();
+    c.shadowColor = 'transparent';
+    for (const [dx, col] of [[-W2 - 2, kit.primary], [-W2 + 16, kit.secondary], [W2 - 16, kit.secondary], [W2 - 34, kit.primary]]) {
+      c.fillStyle = col; slant(cx + dx, cx + dx + 18, cy - H1, cy + H1, 22); c.fill();
     }
-    const half = lastEventBefore(m, 'whistle', t, (e) => e.kind === 'half');
-    if (half && t - half.t < 1.3) banner(c, 'HALF-TIME', null, (t - half.t) / 1.3);
-    const add = lastEventBefore(m, 'added', t);
-    if (add && t - add.t < 1.4) {
-      const u = (t - add.t) / 1.4; const a = u < 0.15 ? u / 0.15 : u > 0.8 ? 1 - (u - 0.8) / 0.2 : 1;
-      c.save(); c.scale(S, S); c.globalAlpha = a; const s = 1 + 0.25 * (1 - easeOutBack(Math.min(1, u / 0.25)));
-      c.translate(G.W / 2, 200); c.scale(s, s);
-      c.fillStyle = '#ffd84a'; rrect(c, -150, -34, 300, 68, 14); c.fill();
-      text(c, `ADDED TIME +${add.minutes}`, 0, 1, 32, '#1a1200', 'center', 800);
+    // title pops slightly after the panel lands
+    const ts = 1 + 0.18 * (1 - easeOutBack(clamp((u - 0.2) / 0.35, 0, 1)));
+    c.save(); c.translate(cx, cy - 8); c.scale(ts, ts);
+    text(c, golden ? 'GOLDEN GOAL' : 'GOAL!', 0, 0, golden ? 70 : 84, ink, 'center', 800);
+    c.restore();
+    // team name on a pill in the team colours (primary fill, secondary border)
+    const nm = teamName(ti).toUpperCase();
+    const z = fitText(c, nm, 2 * W2 - 160, 26, 800);
+    c.font = `800 ${z}px ${FONT}`; const pw = c.measureText(nm).width + 44;
+    c.fillStyle = kit.primary; rrect(c, cx - pw / 2, cy + H1 - 20, pw, 40, 20); c.fill();
+    c.strokeStyle = kit.secondary; c.lineWidth = 3; rrect(c, cx - pw / 2, cy + H1 - 20, pw, 40, 20); c.stroke();
+    if (lum(kit.primary) > 0.85 && lum(kit.secondary) > 0.85) { c.strokeStyle = 'rgba(16,35,61,0.5)'; c.lineWidth = 1.5; rrect(c, cx - pw / 2, cy + H1 - 20, pw, 40, 20); c.stroke(); }
+    text(c, nm, cx, cy + H1 + 1, z, inkOn(kit.primary), 'center', 800);
+    // scorer strip under the panel
+    const sl = scorerLine(m, e);
+    c.font = `800 26px ${FONT}`; const sw = c.measureText(sl).width + 56;
+    const sa = smooth((u - 0.3) / 0.25);
+    c.globalAlpha = (1 - outU) * sa;
+    const sy = cy + H1 + 30;
+    c.fillStyle = 'rgba(8,20,38,0.92)'; rrect(c, cx - sw / 2, sy, sw, 44, 10); c.fill();
+    text(c, sl, cx, sy + 23, 26, '#ffffff', 'center', 800);
+    c.restore();
+  }
+  function colourWash(c, color, u) { // short full-screen wash in the scoring team's colour (~0.4 s)
+    const a = 0.3 * (u < 0.06 ? u / 0.06 : 1 - smooth((u - 0.06) / 0.34));
+    if (a <= 0) return;
+    c.save(); c.setTransform(1, 0, 0, 1, 0, 0);
+    const gr = c.createRadialGradient(OUT_W * 0.8, OUT_H * 0.62, 50, OUT_W * 0.8, OUT_H * 0.62, OUT_W);
+    gr.addColorStop(0, hexA(color, a)); gr.addColorStop(1, hexA(color, a * 0.45));
+    c.fillStyle = gr; c.fillRect(0, 0, OUT_W, OUT_H); c.restore();
+  }
+  function goldRain(c, u, seed) { // gold confetti falling over the whole screen (golden goal)
+    c.save(); c.scale(S, S);
+    const cols = ['#ffd84a', '#ffc400', '#fff1b0', '#e8a800', '#ffffff'];
+    for (let k = 0; k < 140; k++) {
+      const h1 = hash(seed * 131 + k * 7 + 1), h2 = hash(seed * 131 + k * 7 + 2), h3 = hash(seed * 131 + k * 7 + 3);
+      const uu = u - h3 * 1.1; if (uu <= 0) continue;
+      const y = -20 + (150 + 140 * h2) * uu, x = h1 * G.W + 22 * Math.sin(uu * (2 + 2 * h2) + k);
+      if (y > G.H + 20) continue;
+      const a = 1 - smooth((u - 2.4) / 0.6);
+      c.save(); c.translate(x, y); c.rotate(uu * (3 + 4 * h1) + k); c.globalAlpha = a; c.fillStyle = cols[k % cols.length];
+      c.fillRect(-4, -2.2 * Math.abs(Math.cos(uu * 6 + k)) - 0.6, 8, 4.4 * Math.abs(Math.cos(uu * 6 + k)) + 1.2); c.restore();
+    }
+    c.restore();
+  }
+  function matchOverlays(c, m, fr, v) {
+    if (v === undefined) v = fr.t;
+    // cinematic vignette (good hit in added time)
+    if (fr.ts !== undefined && fr.ts < 1) {
+      const w = (1 - fr.ts) / (1 - 0.35);
+      c.save(); c.setTransform(1, 0, 0, 1, 0, 0);
+      const gr = c.createRadialGradient(OUT_W / 2, OUT_H / 2, OUT_H * 0.45, OUT_W / 2, OUT_H / 2, OUT_W * 0.65);
+      gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, `rgba(0,0,0,${0.38 * w})`);
+      c.fillStyle = gr; c.fillRect(0, 0, OUT_W, OUT_H); c.restore();
+    }
+    // goal moment (only the latest goal; ~2 s; golden goal ~3 s with its own effect)
+    const lg = lastEventBeforeV(m, 'goal', v);
+    if (lg) {
+      const u = v - evV(lg);
+      if (lg.golden) { if (u < 3.0) { colourWash(c, '#ffc400', u); goldRain(c, u, m.events.indexOf(lg)); goalBanner(c, m, lg, u, true); } }
+      else if (u < 2.0) { colourWash(c, m.kits[lg.team].primary, u); goalBanner(c, m, lg, u, false); }
+    }
+    const half = lastEventBeforeV(m, 'whistle', v, (e) => e.kind === 'half');
+    if (half && v - evV(half) < 1.3) banner(c, 'HALF-TIME', null, (v - evV(half)) / 1.3);
+    const reg = lastEventBeforeV(m, 'whistle', v, (e) => e.kind === 'reg');
+    if (reg && v - evV(reg) < 1.4) banner(c, "90'", 'Added time next', (v - evV(reg)) / 1.4);
+    // +N banner: N added-time shots
+    const add = lastEventBeforeV(m, 'added', v);
+    if (add && v - evV(add) < 1.6) {
+      const u = (v - evV(add)) / 1.6; const a = u < 0.1 ? u / 0.1 : 1 - smooth((u - 0.82) / 0.18);
+      c.save(); c.scale(S, S); c.globalAlpha = a; const s = 1 + 0.35 * (1 - easeOutBack(Math.min(1, u / 0.22)));
+      c.translate(G.W / 2, 270); c.scale(s, s);
+      c.shadowColor = 'rgba(0,0,0,0.35)'; c.shadowBlur = 16;
+      c.fillStyle = '#ffd84a'; rrect(c, -170, -92, 340, 184, 22); c.fill(); c.shadowColor = 'transparent';
+      text(c, 'ADDED TIME', 0, -60, 24, '#1a1200', 'center', 800);
+      text(c, `+${add.minutes}`, 0, 4, 96, '#1a1200', 'center', 800);
+      text(c, `${add.minutes} EXTRA SHOT${add.minutes === 1 ? "" : "S"}`, 0, 66, 22, '#1a1200', 'center', 800);
       c.restore();
     }
-    const gb = lastEventBefore(m, 'golden', t);
-    if (gb && t - gb.t < 2.4) banner(c, 'GOLDEN BALL', 'Level! Next goal wins', (t - gb.t) / 2.4, 'rgba(255,190,0,0.94)', '#2a1a00');
+    // each added-time shot: small pill under the scoreboard
+    const sh = lastEventBeforeV(m, 'shot', v);
+    if (sh && v - evV(sh) < 1.3) {
+      const u = (v - evV(sh)) / 1.3; const a = smooth(u / 0.12) * (1 - smooth((u - 0.8) / 0.2));
+      c.save(); c.scale(S, S); c.globalAlpha = a;
+      const ti = sh.team === 'A' ? m.ta : m.tb, kit = m.kits[sh.team];
+      const lab = `SHOT ${sh.k} OF ${sh.n} · ${teamName(ti).toUpperCase()}`;
+      c.font = `800 20px ${FONT}`; const w = c.measureText(lab).width + 60;
+      const y = m.leg === 'LEG 2' ? 150 : 120;
+      c.fillStyle = 'rgba(8,20,38,0.88)'; rrect(c, G.W / 2 - w / 2, y, w, 36, 10); c.fill();
+      kitDot(c, kit, G.W / 2 - w / 2 + 20, y + 18, 8);
+      text(c, lab, G.W / 2 + 10, y + 19, 20, '#ffffff', 'center', 800);
+      c.restore();
+    }
+    const gb = lastEventBeforeV(m, 'golden', v);
+    if (gb && v - evV(gb) < 2.4) banner(c, 'GOLDEN BALL', 'Level! Next goal wins', (v - evV(gb)) / 2.4, 'rgba(255,190,0,0.94)', '#2a1a00');
   }
 
   // ---------- full screens ----------
@@ -540,7 +702,10 @@
   // Demo data (4 teams, two-legged semis) mapped onto the generic symmetric layout:
   // semifinal 1 = left half, semifinal 2 = right half, final in the centre.
   const BL_OPTS4 = { top: 300, bottom: 420, maxBoxW: 380, maxRowH: 58 };
-  function demoBracketData(step) {
+  const BL_LTR4 = { top: 175, bottom: 560, maxBoxW: 400, maxRowH: 58 };
+  function bracketStyle(st) { return st || show.bracketStyle || 'left_to_right'; }
+  function demoLayout(style) { return style === 'symmetric' ? window.BRACKET.bracketLayout(4, BL_OPTS4) : window.BRACKET.bracketLayoutLTR(4, BL_LTR4); }
+  function demoBracketData(step, style) {
     const cur = bracketState(step), prev = bracketState(step - 1);
     const sfBox = (si) => {
       const s = show.sf[si], cs = cur.sf[si], ps = prev.sf[si];
@@ -548,9 +713,11 @@
         vals: [cs.l1, cs.l2, cs.agg], newVals: [!!(cs.l1 && !ps.l1), !!(cs.l2 && !ps.l2), !!(cs.agg && !ps.agg)],
         win: cs.win, newWin: cs.win !== null && ps.win === null, golden: cs.golden };
     };
-    return { '0L0': sfBox(0), '0R0': sfBox(1),
-      F: { label: 'FINAL', rows: cur.finalists, newRows: cur.finalists.map((x, r) => x !== null && prev.finalists[r] === null),
-        placeholders: ['Winner SF1', 'Winner SF2'], glow: step === 5 } };
+    const d = { '0L0': sfBox(0),
+      F: { label: style === 'symmetric' ? 'FINAL' : null, rows: cur.finalists, newRows: cur.finalists.map((x, r) => x !== null && prev.finalists[r] === null),
+        placeholders: ['Winner SF1', 'Winner SF2'], glow: step === 5 }, CH: { team: null } };
+    d[style === 'symmetric' ? '0R0' : '0L1'] = sfBox(1);
+    return d;
   }
   function drawPolyPrefix(c, poly, u) {
     let tot = 0; for (let i = 1; i < poly.length; i++) tot += Math.hypot(poly[i][0] - poly[i - 1][0], poly[i][1] - poly[i - 1][1]);
@@ -567,7 +734,7 @@
   function drawBracketBox(c, b, d, t) {
     d = d || {};
     const rowH = b.rowH, small = b.w < 260;
-    const fs = Math.min(23, rowH * 0.42);
+    const fs = Math.min(23, rowH * 0.5);
     const nc = d.cols ? d.cols.length : 0, cw = small ? 30 : 44;
     const colX = (k) => b.x + b.w - cw * (nc - k) + cw / 2 - 6;
     if (d.label) text(c, d.label, b.x, b.y - 16, small ? 11 : 14, '#8fb0dc', 'left', 700);
@@ -605,7 +772,8 @@
   function drawBracketGeneric(c, L, data, t, opts) {
     opts = opts || {};
     const B = window.BRACKET;
-    if (opts.headers !== false && L.nTeams > 4) L.headers.forEach((h) => text(c, h.text, h.x, 125, L.nTeams > 8 ? 13 : 17, '#8fb0dc', 'center', 700));
+    if (L.style === 'left_to_right') L.headers.forEach((h) => text(c, h.text, h.x, L.headerY, L.nTeams > 8 ? 15 : 19, '#8fb0dc', 'center', 700));
+    else if (opts.headers !== false && L.nTeams > 4) L.headers.forEach((h) => text(c, h.text, h.x, 125, L.nTeams > 8 ? 13 : 17, '#8fb0dc', 'center', 700));
     // connectors (grey), then the highlighted advance path of each decided match
     for (const b of L.boxes) {
       const poly = B.connector(L, b.id); if (!poly) continue;
@@ -613,9 +781,14 @@
       const d = data[b.id];
       if (d && d.win != null) { c.strokeStyle = '#ffd84a'; c.lineWidth = 4; drawPolyPrefix(c, poly, d.newWin ? smooth((t - 0.9) / 1.0) : 1); }
     }
-    const F = L.final;
-    drawTrophy(c, F.x + F.w / 2, F.y - 95, L.nTeams > 8 ? 0.38 : 0.5, 0.45);
-    for (const b of L.boxes) drawBracketBox(c, b, data[b.id], t);
+    drawTrophy(c, L.trophy.x, L.trophy.y, L.nTeams > 8 ? 0.38 : 0.5, L.style === 'left_to_right' ? 0.75 : 0.45);
+    for (const b of L.boxes) {
+      if (!b.champion) { drawBracketBox(c, b, data[b.id], t); continue; }
+      const d = data[b.id] || {};
+      c.fillStyle = 'rgba(255,255,255,0.07)'; rrect(c, b.x, b.y, b.w, b.h, 10); c.fill();
+      if (d.team === null || d.team === undefined) text(c, '?', b.x + b.w / 2, b.y + b.h / 2 + 2, Math.min(48, b.h * 0.5), 'rgba(255,255,255,0.35)', 'center', 800);
+      else { teamBar(c, d.team, b.x, b.y, 8, b.h); const z = fitText(c, show.teams[d.team].name, b.w - 30, 22); text(c, show.teams[d.team].name, b.x + b.w / 2 + 4, b.y + b.h / 2 + 1, z, '#ffffff', 'center'); }
+    }
     // qualifying team moves along the connector towards the centre
     for (const b of L.boxes) {
       const d = data[b.id]; if (!d || !d.newWin || d.win == null) continue;
@@ -637,9 +810,10 @@
     const t = lf / FPS;
     c.save(); c.scale(S, S);
     text(c, show.competition.name, G.W / 2, 62, 50, '#ffffff', 'center', 800);
-    const L = window.BRACKET.bracketLayout(4, BL_OPTS4);
-    drawBracketGeneric(c, L, demoBracketData(step), t);
-    if (step === 5) { const a = smooth((t - 0.4) / 0.6); c.globalAlpha = a; text(c, 'THE FINALISTS', G.W / 2, 600, 30, '#ffd84a', 'center', 800); c.globalAlpha = 1; }
+    const style = bracketStyle(drawBracket.style);
+    const L = demoLayout(style);
+    drawBracketGeneric(c, L, demoBracketData(step, style), t);
+    if (step === 5) { const a = smooth((t - 0.4) / 0.6); c.globalAlpha = a; text(c, 'THE FINALISTS', G.W / 2, style === 'symmetric' ? 600 : 650, 30, '#ffd84a', 'center', 800); c.globalAlpha = 1; }
     c.restore();
   }
   function drawTrophy(c, x, y, s, alpha) {
@@ -807,7 +981,7 @@
     if (seg.type === 'motm') { drawMotm(ctx, m, lf, seg); return; }
     if (seg.type === 'matchPre') {
       const fr = m.frames[0];
-      drawScene(ctx, m, fr, { noCam: true }); drawHUD(ctx, m, fr);
+      drawScene(ctx, m, fr, { noCam: true, noFx: true }); drawHUD(ctx, m, fr);
       const a = smooth(lf / 8) * (1 - smooth((lf - seg.len + 8) / 8));
       const lines = [{ s: names, size: 40 }];
       if (m.leg === 'LEG 2') lines.push({ s: `Leg 1: ${m.prev[0]}–${m.prev[1]}`, size: 24, w: 600, color: '#ffd84a' });
@@ -817,17 +991,19 @@
       return;
     }
     if (seg.type === 'match') {
-      const fr = m.frames[lf];
-      drawScene(ctx, m, fr, { frameIndex: lf });
-      const lg = lastEventBefore(m, 'goal', fr.t);
-      const pulse = lg && fr.t - lg.t < 0.5 ? Math.sin(((fr.t - lg.t) / 0.5) * Math.PI) : 0;
-      drawHUD(ctx, m, fr, { scorePulse: pulse });
-      matchOverlays(ctx, m, fr);
+      const fr = m.frames[Math.min(lf, m.frames.length - 1)];
+      const v = lf / FPS;
+      drawScene(ctx, m, fr, { frameIndex: lf, v });
+      const lg = lastEventBeforeV(m, 'goal', v);
+      let scorePop = null;
+      if (lg && v - evV(lg) < 0.7) { const u = (v - evV(lg)) / 0.7; scorePop = { side: lg.team === 'A' ? 0 : 1, p: Math.sin(Math.PI * clamp(u, 0, 1)) * (u < 0.3 ? easeOutBack(u / 0.3) : 1), color: m.kits[lg.team].primary }; }
+      drawHUD(ctx, m, fr, { scorePop });
+      matchOverlays(ctx, m, fr, v);
       return;
     }
     if (seg.type === 'fulltime') {
       const fr = m.frames[m.frames.length - 1];
-      drawScene(ctx, m, fr, { noCam: true, frameIndex: m.frames.length - 1, trail: false });
+      drawScene(ctx, m, fr, { noCam: true, noFx: true, frameIndex: m.frames.length - 1, trail: false });
       drawHUD(ctx, m, fr);
       ctx.fillStyle = `rgba(5,12,25,${0.45 * smooth(lf / 10)})`; ctx.fillRect(0, 0, OUT_W, OUT_H);
       const sc = m.score;
@@ -846,9 +1022,9 @@
     }
     if (seg.type === 'replay') {
       const srcT = seg.t0 + (lf / FPS) * seg.speed;
-      const ft = clamp(srcT * FPS, 0, m.frames.length - 1);
-      const fr = interpFrame(m, ft);
-      drawScene(ctx, m, fr, { frameIndex: Math.round(ft), noCam: true, zoom: { z: 1.18, x: 1030, y: 450 } });
+      const at = frameAtTime(m, srcT);
+      const fr = at.fr;
+      drawScene(ctx, m, fr, { frameIndex: at.i, noCam: true, noFx: true, zoom: { z: 1.18, x: 1030, y: 450 } });
       // replay look: slight desaturating tint + letterbox + label
       ctx.fillStyle = 'rgba(20,30,50,0.10)'; ctx.fillRect(0, 0, OUT_W, OUT_H);
       ctx.save(); ctx.scale(S, S);
@@ -887,14 +1063,20 @@
     return { total: show.totalFrames };
   };
   window.renderFrame = renderFrame;
-  window.renderEmptyBracket = function (n, title) {
+  window.renderEmptyBracket = function (n, title, style) {
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, OUT_W, OUT_H);
     darkBG(ctx, 0);
     ctx.save(); ctx.scale(S, S);
     text(ctx, title || show.competition.name, G.W / 2, 62, 50, '#ffffff', 'center', 800);
-    const L = window.BRACKET.bracketLayout(n, { top: 175, bottom: 690 });
+    const L = bracketStyle(style) === 'symmetric' ? window.BRACKET.bracketLayout(n, { top: 175, bottom: 690 }) : window.BRACKET.bracketLayoutLTR(n, n > 4 ? { top: 160, bottom: 700, headerY: 132 } : BL_LTR4);
     drawBracketGeneric(ctx, L, {}, 0);
     ctx.restore(); simLabel();
+    return canvas.toDataURL('image/png');
+  };
+  // demo bracket at a given step in a given style (screenshots / tests); lf = local frame in the segment
+  window.renderDemoBracket = function (step, style, lf) {
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, OUT_W, OUT_H);
+    drawBracket.style = style; drawBracket(ctx, step, lf === undefined ? 90 : lf, 0); drawBracket.style = null; simLabel();
     return canvas.toDataURL('image/png');
   };
   window.grabFrame = function (g, q) { renderFrame(g); return canvas.toDataURL('image/jpeg', q || 0.92); };

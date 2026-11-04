@@ -1,2 +1,48 @@
-{ "id": "bayern", "name": "Bayern Munich", "short": "BAY", "primary": "#DC052D", "secondary": "#FFFFFF", "strength": 87,
-  "players": [ { "name": "F. Brandt", "number": 9 }, { "name": "N. Kessler", "number": 10 }, { "name": "R. Albrecht", "number": 17 } ] }
+{
+ "id": "bayern",
+ "name": "Bayern Munich",
+ "short": "BAY",
+ "primary": "#DC052D",
+ "secondary": "#FFFFFF",
+ "strength": 87,
+ "players": [
+  {
+   "name": "H. Kane",
+   "number": 9,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefachampionsleague/clubs/50037--bayern-munchen/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "M. Olise",
+   "number": 17,
+   "position": "W (listed MF)",
+   "source_url": "https://www.uefa.com/uefachampionsleague/clubs/50037--bayern-munchen/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "L. Díaz",
+   "number": 14,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefachampionsleague/clubs/50037--bayern-munchen/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "F. Brandt",
+   "number": 9
+  },
+  {
+   "name": "N. Kessler",
+   "number": 10
+  },
+  {
+   "name": "R. Albrecht",
+   "number": 17
+  }
+ ]
+}

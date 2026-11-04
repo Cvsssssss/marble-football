@@ -1,2 +1,48 @@
-{ "id": "arsenal", "name": "Arsenal", "short": "ARS", "primary": "#EF0107", "secondary": "#FFFFFF", "strength": 86,
-  "players": [ { "name": "O. Whitfield", "number": 7 }, { "name": "S. Adeyemi", "number": 11 }, { "name": "C. Marlow", "number": 9 } ] }
+{
+ "id": "arsenal",
+ "name": "Arsenal",
+ "short": "ARS",
+ "primary": "#EF0107",
+ "secondary": "#FFFFFF",
+ "strength": 86,
+ "players": [
+  {
+   "name": "B. Saka",
+   "number": 7,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefachampionsleague/clubs/52280--arsenal/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "V. Gyökeres",
+   "number": 14,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefachampionsleague/clubs/52280--arsenal/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "E. Eze",
+   "number": 10,
+   "position": "W/AM (listed MF)",
+   "source_url": "https://www.uefa.com/uefachampionsleague/clubs/52280--arsenal/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "O. Whitfield",
+   "number": 7
+  },
+  {
+   "name": "S. Adeyemi",
+   "number": 11
+  },
+  {
+   "name": "C. Marlow",
+   "number": 9
+  }
+ ]
+}

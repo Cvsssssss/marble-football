@@ -4,6 +4,7 @@ const Matter = require('matter-js');
 const crypto = require('crypto');
 const G = require('./geometry');
 const BASE_CFG = require('./config');
+const CINE = require('./cinematic');
 
 const { Engine, Bodies, Body, Composite, Events, Common } = Matter;
 
@@ -20,7 +21,7 @@ const modPi = (x) => ((x % Math.PI) + Math.PI) % Math.PI;
 const smooth = (x) => { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); };
 
 const CAT = { BALL: 0x1, STATIC: 0x2, KEEPER: 0x4, MILL: 0x8, BAR: 0x10 };
-const STATE = { queue: 0, pipe: 1, emerge: 2, play: 3, net: 4 };
+const STATE = { queue: 0, pipe: 1, emerge: 2, play: 3, net: 4, route: 5 }; // route = flying back to the pipe at 90'
 
 // ---------- windmill angle (with the late-game boost) ----------
 // omega(t) = OMEGA * (1 + (BOOST-1) * smoothstep((t - tA) / (tB - tA))), tA/tB = BOOST_RAMP game minutes.
@@ -93,6 +94,15 @@ function makeKeeperSchedule(rng, cfg, tMax) {
     };
     cycles.push(c);
     t += c.crouch + c.air;
+  }
+  return cycles;
+}
+function extendKeeperSchedule(cycles, rng, cfg, tMax) {
+  let last = cycles[cycles.length - 1], t = last.t0 + last.crouch + last.air;
+  while (t < tMax) {
+    const c = { t0: t, crouch: uni(rng, cfg.KEEPER_CROUCH[0], cfg.KEEPER_CROUCH[1]), air: uni(rng, cfg.KEEPER_JUMP_T[0], cfg.KEEPER_JUMP_T[1]),
+      h: uni(rng, cfg.KEEPER_JUMP_H[0], cfg.KEEPER_JUMP_H[1]), bobF: uni(rng, 10, 15) };
+    cycles.push(c); t += c.crouch + c.air;
   }
   return cycles;
 }
@@ -211,10 +221,16 @@ function simulateMatch(seed, ctx, cfgOverride) {
 
   const addedTime = cfg.ADDED_MIN[0] + Math.floor(rng() * (cfg.ADDED_MIN[1] - cfg.ADDED_MIN[0] + 1)); // 1..3 by default
   const regEnd = 90 / cfg.GAME_MIN_PER_SEC;    // 45 s
-  const endReg = regEnd + addedTime / cfg.GAME_MIN_PER_SEC;
-  const tMaxAll = endReg + cfg.GOLDEN_CAP + 4;
-  const ksched = makeKeeperSchedule(rng, cfg, tMaxAll + 2);
+  // P1b: added time = addedTime extra shots after 90' (not game minutes); endReg = when the last shot is over
+  let endReg = null;
+  const tMaxAll = regEnd + cfg.CLEAR_TIME + 3 + cfg.ADDED_BANNER + addedTime * (cfg.SHOT_CAP + cfg.SHOT_GOAL_GAP + 4) + cfg.GOLDEN_CAP + 6;
+  // the main rng is consumed exactly as in v2 (keeper schedule for the old time span), so regular play up to 90'
+  // is identical to v2 for the same seed; the extra time span and the first shot team use their own rng
+  const xrng = mulberry32((seed ^ 0x5bd1e995) >>> 0);
+  const ksched = makeKeeperSchedule(rng, cfg, regEnd + addedTime / cfg.GAME_MIN_PER_SEC + cfg.GOLDEN_CAP + 4 + 2);
+  extendKeeperSchedule(ksched, xrng, cfg, tMaxAll + 2);
   const millPhase = rng() * Math.PI * 2;
+  let shotTeam = xrng() < 0.5 ? 'A' : 'B'; // team of the first added-time shot (seeded)
   const MA = makeMillAngle(cfg, millPhase);
   const millAngle = MA.angle;
 
@@ -237,7 +253,11 @@ function simulateMatch(seed, ctx, cfgOverride) {
   let nextRelease = 0.5;
   let turn = 'A';
   let tossTarget = cfg.TOSS_PHASE + uni(rng, -cfg.TOSS_PHASE_JIT, cfg.TOSS_PHASE_JIT);
-  let mode = 'regular'; // regular | golden | done
+  let mode = 'regular'; // regular | clear | banner | shots | golden | decided | done
+  let clearStart = null, bannerStart = null, nextShotAt = 0, decideAt = null;
+  let shotIdx = 0, shotBall = null, shotT0 = 0, shotCineDone = false, cineOpen = null;
+  const shots = [], shotStarts = [], shotContacts = [], cines = [];
+  let fineMode = false, fineStart = -1; // from the first shot on, one frame per physics step (for slow-motion resampling)
   let goldenStart = null, goldenWinner = null, tailUntil = null;
   let ended = false, failed = null;
   const frames = [];
@@ -250,6 +270,22 @@ function simulateMatch(seed, ctx, cfgOverride) {
     if (b.body) { Composite.remove(engine.world, b.body); b.body = null; }
     b.state = 'pipe'; b.s = 0; b.still = 0; b.scored = false; b.barGhost = false; b.barAge = undefined; b.launch = null;
     ev(t, 'whoosh', { ball: b.id, why });
+    if (b === shotBall) resolveShot(why, t);
+  }
+  function resolveShot(result, t) {
+    const k = shotIdx + 1;
+    shots.push({ k, team: shotBall.team, ball: shotBall.id, t0: +shotT0.toFixed(4), t1: +t.toFixed(4), result, cine: cines.some((c) => c.k === k) });
+    if (cineOpen) { cineOpen.tOut = Math.min(t, cineOpen.tIn + cfg.CINE_MAX_SIM); cineOpen = null; }
+    shotBall = null; shotIdx++;
+    nextShotAt = t + (result === 'goal' ? cfg.SHOT_GOAL_GAP : cfg.SHOT_GAP);
+    if (shotIdx >= addedTime) decideAt = t + (result === 'goal' ? cfg.SHOT_GOAL_GAP : cfg.SHOT_END_GAP);
+  }
+  // 90' clear: a ball flies along a smooth arc to the pipe mouth (top-left), then joins the pipe
+  function startRoute(b, t, k) {
+    const x = b.body ? b.body.position.x : b.x, y = b.body ? b.body.position.y : b.y;
+    if (b.body) { Composite.remove(engine.world, b.body); b.body = null; }
+    b.state = 'route'; b.t = -k * cfg.ROUTE_STAGGER; b.rx0 = x; b.ry0 = y; b.x = x; b.y = y; b.launch = null;
+    ev(t + k * cfg.ROUTE_STAGGER, 'whoosh', { ball: b.id, why: 'clear' });
   }
 
   // collision sound events
@@ -263,7 +299,7 @@ function simulateMatch(seed, ctx, cfgOverride) {
       let type;
       if (ba && bb) type = 'ballball';
       else type = other.label; // ground | wall | bar | mill | keeper
-      if (type === 'mill' && !ball.launch) ball.launch = { step0: step, best: 0 };
+      if (type === 'mill' && !ball.launch) ball.launch = { step0: step, best: 0, vx: 0, t0: simT };
       const n = pair.collision.normal;
       const rvx = A.velocity.x - B.velocity.x, rvy = A.velocity.y - B.velocity.y;
       const imp = Math.abs(rvx * n.x + rvy * n.y) * 60;
@@ -312,13 +348,25 @@ function simulateMatch(seed, ctx, cfgOverride) {
     const t0 = simT, t1 = simT + dt;
     // --- clock events ---
     if (!halfDone && t1 >= regEnd / 2) { halfDone = true; ev(regEnd / 2, 'whistle', { kind: 'half' }); }
-    if (!addedDone && t1 >= regEnd) { addedDone = true; ev(regEnd, 'added', { minutes: addedTime }); }
-    if (mode === 'regular' && t1 >= endReg) {
+    if (mode === 'regular' && t1 >= regEnd) {
+      // 90': whistle, the pitch is cleared (balls in play fly into the pipe), then the +N banner and N shots
+      mode = 'clear'; clearStart = regEnd; addedDone = true;
+      ev(regEnd, 'whistle', { kind: 'reg' });
+      let k = 0;
+      for (const b of balls) if (b.state === 'play' || b.state === 'emerge') startRoute(b, regEnd, k++);
+    }
+    if (mode === 'clear' && t1 >= clearStart + cfg.CLEAR_TIME && balls.every((b) => b.state === 'pipe')) {
+      mode = 'banner'; bannerStart = t1; ev(t1, 'added', { minutes: addedTime, shots: addedTime });
+    }
+    if (mode === 'banner' && t1 >= bannerStart + cfg.ADDED_BANNER) { mode = 'shots'; nextShotAt = t1; }
+    if (mode === 'shots' && shotIdx >= addedTime && decideAt !== null && t1 >= decideAt) {
+      endReg = t1;
       const tot = ctx.kind === 'leg2' ? [score.A + ctx.prevA, score.B + ctx.prevB] : [score.A, score.B];
       if (cfg.GOLDEN_BALL && ctx.kind !== 'leg1' && ctx.kind !== 'test' && tot[0] === tot[1]) {
-        mode = 'golden'; goldenStart = endReg; ev(endReg, 'golden');
+        mode = 'golden'; goldenStart = t1; ev(t1, 'golden');
+        nextRelease = t1 + 0.6; turn = shots.length ? (shots[shots.length - 1].team === 'A' ? 'B' : 'A') : 'A';
       } else {
-        mode = 'done'; ev(endReg, 'whistle', { kind: 'end' }); ended = true; simT = endReg;
+        mode = 'done'; ev(t1, 'whistle', { kind: 'end' }); ended = true;
         break;
       }
     }
@@ -330,23 +378,31 @@ function simulateMatch(seed, ctx, cfgOverride) {
     driveKeeper(keeper, keeperPose(ksched, t0), keeperPose(ksched, t1));
 
     // --- outlet ---
-    const outletOpen = mode !== 'done' && tailUntil === null;
+    const regularFlow = (mode === 'regular' || mode === 'golden') && tailUntil === null && t0 >= nextRelease;
+    const shotFlow = mode === 'shots' && shotBall === null && shotIdx < addedTime && t0 >= nextShotAt;
     const phaseOk = modPi(millAngle(t0) - tossTarget) < MA.omega(t1) * dt * 1.001 + 1e-9;
-    if (outletOpen && t0 >= nextRelease && phaseOk) {
+    if ((regularFlow || shotFlow) && phaseOk) {
       const inPipe = balls.filter((b) => b.state === 'pipe').sort((a, b) => b.s - a.s);
       const spoutClear = !balls.some((b) => b.body && Math.hypot(b.body.position.x - spoutTop.x, b.body.position.y - spoutTop.y) < 2 * b.r + 6)
         && !balls.some((b) => b.state === 'emerge');
       if (inPipe.length && inPipe[0].s >= L - 0.5 && spoutClear) {
         // queued = balls resting in the final queue zone
         const queued = inPipe.filter((b, k) => b.s >= L - k * spacingOf(b) - 0.5);
-        let pick = queued.find((b) => b.team === turn) || queued[0];
+        const pick = shotFlow ? queued.find((b) => b.team === shotTeam) : (queued.find((b) => b.team === turn) || queued[0]);
+        if (pick) {
         pick.state = 'emerge'; pick.t = 0; pick.x = G.SPOUT_X; pick.y = G.GROUND_Y + pick.r;
         turn = pick.team === 'A' ? 'B' : 'A';
         ev(t0, 'pop', { ball: pick.id, team: pick.team });
+        if (shotFlow) {
+          shotBall = pick; shotT0 = t0; shotCineDone = false; shotStarts.push(+t0.toFixed(4));
+          ev(t0, 'shot', { k: shotIdx + 1, n: addedTime, team: pick.team, ball: pick.id });
+          shotTeam = shotTeam === 'A' ? 'B' : 'A';
+        }
         // golden ball: if it has not resolved after GOLDEN_WIDEN_AFTER s, widen the spout flow slightly
         const boost = mode === 'golden' ? cfg.GOLDEN_FLOW_BOOST * (t0 - goldenStart > cfg.GOLDEN_WIDEN_AFTER ? cfg.GOLDEN_WIDEN : 1) : 1;
         nextRelease = t0 + uni(rng, cfg.RELEASE_INTERVAL[0], cfg.RELEASE_INTERVAL[1]) / boost - Math.PI / MA.omega(t0) / 2;
         tossTarget = MA.tossPhase(t0) + uni(rng, -cfg.TOSS_PHASE_JIT, cfg.TOSS_PHASE_JIT);
+        }
       }
     }
 
@@ -377,6 +433,18 @@ function simulateMatch(seed, ctx, cfgOverride) {
           b.body = body; b.state = 'play'; b.still = 0;
           Composite.add(engine.world, body);
         }
+      } else if (b.state === 'route') {
+        b.t += dt;
+        if (b.t > 0) {
+          const u = smooth(b.t / cfg.ROUTE_TIME);
+          // quadratic bezier: lift, then glide to the pipe mouth above the top-left corner
+          const mx = (b.rx0 + G.PIPE_X) / 2, my = Math.min(b.ry0, 260) - 220;
+          const ex = G.PIPE_X, ey = -40;
+          b.x = (1 - u) * (1 - u) * b.rx0 + 2 * (1 - u) * u * mx + u * u * ex;
+          b.y = (1 - u) * (1 - u) * b.ry0 + 2 * (1 - u) * u * my + u * u * ey;
+          b.spin -= 0.25;
+        }
+        if (b.t >= cfg.ROUTE_TIME) { b.state = 'pipe'; b.s = 0; b.still = 0; b.barGhost = false; b.barAge = undefined; }
       } else if (b.state === 'net') {
         b.t += dt;
         b.x += b.vx * dt; b.vx *= Math.exp(-5 * dt);
@@ -411,8 +479,19 @@ function simulateMatch(seed, ctx, cfgOverride) {
       if (sp > maxV) Body.setVelocity(bd, { x: bd.velocity.x * maxV / sp, y: bd.velocity.y * maxV / sp });
       if (cfg.BAR_MODE !== 'v1') { const hit = sweptBar(b, bd, b.r, b.px, b.py, cfg.BALL_RESTITUTION); if (hit) barEvent(b, hit); }
       if (b.launch) {
-        b.launch.best = Math.max(b.launch.best, Math.hypot(bd.velocity.x, bd.velocity.y) * 60);
-        if (step - b.launch.step0 >= Math.round(0.3 * cfg.HZ)) { launches.push({ gm: +(simT * cfg.GAME_MIN_PER_SEC).toFixed(2), v: Math.round(b.launch.best) }); b.launch = null; }
+        const spd = Math.hypot(bd.velocity.x, bd.velocity.y) * 60;
+        if (spd > b.launch.best) { b.launch.best = spd; b.launch.vx = bd.velocity.x * 60; }
+        if (step - b.launch.step0 >= Math.round(0.3 * cfg.HZ)) {
+          launches.push({ gm: +(simT * cfg.GAME_MIN_PER_SEC).toFixed(2), v: Math.round(b.launch.best) });
+          // added-time shot: the first windmill contact decides "good hit" (cinematic) or miss
+          if (mode === 'shots' && b === shotBall && !shotCineDone) {
+            shotCineDone = true;
+            const good = b.launch.best >= cfg.GOOD_HIT_V && b.launch.vx > 0;
+            shotContacts.push({ k: shotIdx + 1, t: +b.launch.t0.toFixed(4), v: Math.round(b.launch.best), vx: Math.round(b.launch.vx), good });
+            if (good) { cineOpen = { k: shotIdx + 1, ball: b.id, tIn: b.launch.t0, tOut: null }; cines.push(cineOpen); }
+          }
+          b.launch = null;
+        }
       }
       const vx = vFromMatter(bd.velocity.x), vy = vFromMatter(bd.velocity.y);
       b.spin += (vx * dt) / b.r;
@@ -422,15 +501,17 @@ function simulateMatch(seed, ctx, cfgOverride) {
         Composite.remove(engine.world, bd); b.body = null;
         b.state = 'net'; b.t = 0; b.x = x; b.y = y; b.vx = Math.max(vx, 120); b.vy = vy;
         const kp = keeperPose(ksched, simT);
-        const counts = mode !== 'done' && tailUntil === null;
+        const counts = (mode === 'regular' || mode === 'shots' || mode === 'golden') && tailUntil === null;
         if (counts) {
           score[b.team]++;
-          const g = { t: simT, team: b.team, ball: b.id, player: b.player, x, y, keeperAir: kp.air, keeperCrouch: !kp.air && kp.c > 0.5, golden: mode === 'golden' };
+          const shotK = mode === 'shots' && b === shotBall ? shotIdx + 1 : null;
+          const g = { t: simT, team: b.team, ball: b.id, player: b.player, x, y, keeperAir: kp.air, keeperCrouch: !kp.air && kp.c > 0.5, golden: mode === 'golden', shot: shotK };
           goals.push(g);
-          ev(simT, 'goal', { team: b.team, ball: b.id, player: b.player, golden: mode === 'golden', sc: [score.A, score.B] });
+          ev(simT, 'goal', { team: b.team, ball: b.id, player: b.player, golden: mode === 'golden', shot: shotK, sc: [score.A, score.B] });
+          if (b === shotBall) resolveShot('goal', simT);
           if (mode === 'golden') {
             goldenWinner = b.team; ev(simT, 'whistle', { kind: 'end' });
-            tailUntil = simT + 2.0; mode = 'decided';
+            tailUntil = simT + 3.0; mode = 'decided'; // 3 s: golden-goal effect
           }
         }
         continue;
@@ -442,17 +523,24 @@ function simulateMatch(seed, ctx, cfgOverride) {
       if (b.still > cfg.STUCK_TIME) { toPipe(b, simT, 'stuck'); stuckCount++; continue; }
     }
 
-    if (step % stepsPerFrame === 0) recordFrame();
+    if (shotBall && shotBall.body && simT - shotT0 > cfg.SHOT_CAP) toPipe(shotBall, simT, 'cap');
+
+    if (fineMode) recordFrame();
+    else if (step % stepsPerFrame === 0) { recordFrame(); if (mode === 'shots') { fineMode = true; fineStart = frames.length - 1; } }
   }
   if (!ended && !failed) failed = 'time_cap';
+  for (const c of cines) c.tOut = Math.min(c.tOut === null ? simT : c.tOut, c.tIn + cfg.CINE_MAX_SIM);
+  const outFrames = fineStart >= 0 ? CINE.resample(frames, fineStart, cines, cfg, stepsPerFrame) : frames;
+  CINE.annotate(events, outFrames, cines, cfg);
 
   const res = {
-    seed, ctx, addedTime, regEnd, endReg, endT: simT,
+    seed, ctx, addedTime, regEnd, endReg: endReg === null ? simT : endReg, endT: simT,
+    shots, shotStarts, shotContacts, cines,
     goldenStart, goldenWinner, goldenResolve: goldenWinner ? goals[goals.length - 1].t - goldenStart : null,
-    score, goals, events, frames, stuckCount, safetyCount, failed,
+    score, goals, events, frames: outFrames, stuckCount, safetyCount, failed,
     rA: ctx.rA, rB: ctx.rB, millPhase, omega: cfg.OMEGA, launches,
   };
-  res.hash = crypto.createHash('sha256').update(JSON.stringify({ f: frames, e: events })).digest('hex');
+  res.hash = crypto.createHash('sha256').update(JSON.stringify({ f: outFrames, e: events })).digest('hex');
   return res;
 }
 

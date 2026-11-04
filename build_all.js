@@ -11,8 +11,8 @@ const arg = (n, d) => { const i = process.argv.indexOf(n); return i > 0 ? proces
 const comp = path.resolve(arg('--competition', path.join('config', 'competitions', 'demo_4teams.json')));
 let conf;
 try { conf = L.loadCompetition(comp); } catch (e) { if (e instanceof L.ConfigError) { console.error(e.message); process.exit(2); } throw e; }
-const out = conf.competition.output || 'output/demo_v2_1080p.mp4';
-const shots = conf.competition.screenshots || 'output/screenshots_v2';
+const out = conf.competition.output || 'output/demo_v2b_1080p.mp4';
+const shots = conf.competition.screenshots || 'output/screenshots_v2b';
 const skipTests = process.argv.includes('--skip-tests');
 const run = (cmd, args) => { console.log('\n>>> ' + [cmd, ...args].join(' ')); execFileSync(cmd, args, { stdio: 'inherit', cwd: __dirname }); };
 const node = process.execPath;
@@ -23,7 +23,7 @@ const t0 = Date.now();
 if (!skipTests) run(node, ['tests/run_tests.js']);
 run(node, ['sim/tournament.js', '--competition', comp, '--out', show]);
 run(node, ['render/render.js', 'stills', shots, '--show', show]);
-run(node, ['render/render.js', 'bracket16', path.join(shots, 'bracket16_empty.png'), '16', '--show', show]);
+run(node, ['render/render.js', 'brackets', shots, '--show', show]); // both bracket styles, 4 and 16 teams
 run(py, ['audio/make_audio.py', show, path.join('build', 'audio_raw.wav')]);
 run(node, ['render/render.js', 'video', workers, '--show', show]);
 run(node, ['render/mux.js', '--out', out, '--shots', shots]);

@@ -46,4 +46,20 @@ module.exports = {
   GOLDEN_BALL: true,
   // crossbar: 'swept' = v2 one-way top surface with swept test (collider == drawing); 'v1' = old matter-js collider (for before/after measurement only)
   BAR_MODE: 'swept',
+  // ---- P1b: added time = N extra shots (N = announced added minutes), cinematic good hits ----
+  ENGINE_VERSION: 'p1b-3', // part of the seed-cache key (simHash)
+  CLEAR_TIME: 1.5,         // s after the 90' whistle: balls in play are routed into the pipe
+  ROUTE_TIME: 0.9,         // s each ball flies to the pipe mouth
+  ROUTE_STAGGER: 0.12,     // s between balls
+  ADDED_BANNER: 1.6,       // s the "+N" banner is shown before the first shot
+  SHOT_CAP: 8.5,           // s of simulation per shot (<= 12 s of video even with slow motion)
+  SHOT_GAP: 0.7,           // s after a missed shot before the next one
+  SHOT_GOAL_GAP: 2.2,      // s after a goal (celebration) before the next shot / the final whistle
+  SHOT_END_GAP: 0.8,       // s after the last missed shot before the final whistle
+  GOOD_HIT_V: 850,         // px/s peak launch speed (0.3 s after windmill contact) that counts as a "good hit" (calibrated, see tests/calibrate_good_hit.js)
+  SLOWMO: 0.35,            // time scale during the cinematic
+  SLOWMO_IN: 0.3,          // s of video to ease into slow motion
+  SLOWMO_OUT: 0.45,        // s of video to ease back
+  CINE_MAX_SIM: 1.8,       // s of simulation a cinematic may last (then it eases out even if the shot is not resolved)
+  ZOOM_MAX: 1.6,
 };

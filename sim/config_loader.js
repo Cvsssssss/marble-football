@@ -10,14 +10,17 @@ const HEX = /^#[0-9A-Fa-f]{6}$/;
 
 // ---------- schemas ----------
 // type: 'string' | 'number' | 'integer' | 'boolean' | 'hex' | 'array' | 'object'
+const PLAYERS = { type: 'array', minItems: 3, maxItems: 3, items: { type: 'object', required: ['name', 'number'],
+  props: { name: { type: 'string', minLen: 2, maxLen: 24 }, number: { type: 'integer', min: 1, max: 99 }, position: { type: 'string' },
+    source_url: { type: 'string', pattern: /^https?:\/\// }, retrieved: { type: 'string', pattern: /^\d{4}-\d{2}-\d{2}$/ }, verified: { type: 'boolean' } } } };
 const S = {
   team: {
     type: 'object', required: ['id', 'name', 'primary', 'secondary', 'strength', 'players'],
     props: {
       id: { type: 'string', pattern: /^[a-z0-9_]+$/ }, name: { type: 'string', minLen: 1, maxLen: 40 }, short: { type: 'string', maxLen: 4 },
       primary: { type: 'hex' }, secondary: { type: 'hex' }, strength: { type: 'number', min: 1, max: 100 },
-      players: { type: 'array', minItems: 3, maxItems: 3, items: { type: 'object', required: ['name', 'number'],
-        props: { name: { type: 'string', minLen: 2, maxLen: 24 }, number: { type: 'integer', min: 1, max: 99 } } } },
+      players: PLAYERS,
+      fictional_players: PLAYERS, // used when the competition sets real_names: false
     },
   },
   map: {
@@ -45,7 +48,7 @@ const S = {
   },
   audio: {
     type: 'object', required: ['goal_sfx'],
-    props: { goal_sfx: { type: 'string', enum: ['A', 'B', 'C'] }, music_seed: { type: 'integer', min: 0 } },
+    props: { goal_sfx: { type: 'string', enum: ['A', 'B', 'C', 'v2_A', 'v2_B', 'v2_C'] }, music_seed: { type: 'integer', min: 0 } },
   },
   competition: {
     type: 'object', required: ['id', 'name', 'format', 'teams', 'pairing', 'map', 'rules'],
@@ -55,6 +58,7 @@ const S = {
       teams: { type: 'array', minItems: 4, maxItems: 4, items: { type: 'string' } },
       pairing: { type: 'array', minItems: 2, maxItems: 2, items: { type: 'array', minItems: 2, maxItems: 2, items: { type: 'integer', min: 0, max: 3 } } },
       map: { type: 'string' }, rules: { type: 'string' }, output: { type: 'string' }, screenshots: { type: 'string' },
+      real_names: { type: 'boolean' }, bracket_style: { type: 'string', enum: ['left_to_right', 'symmetric'] },
     },
   },
 };
@@ -155,6 +159,10 @@ function loadCompetition(compFile, opts) {
     if (t.id !== id) errs.push(`${path.relative(ROOT, f)}: id "${t.id}" does not match file name "${id}"`);
     const nums = t.players.map((p) => p.number);
     if (new Set(nums).size !== nums.length) errs.push(`${path.relative(ROOT, f)}: duplicate shirt numbers`);
+    if (comp.real_names === false) {
+      if (!t.fictional_players) errs.push(`${path.relative(ROOT, f)}: real_names is false but "fictional_players" is missing`);
+      else t.players = t.fictional_players;
+    }
     return t;
   });
   if (new Set(comp.teams).size !== comp.teams.length) errs.push('competition: the same team is listed twice');
@@ -170,7 +178,7 @@ function loadCompetition(compFile, opts) {
   if (errs.length) throw new ConfigError(errs);
   const all = { competition: comp, teams, map, rules, audio };
   // sim hash: only what changes the simulation (render cache key = simHash + seed)
-  const simPart = { rules, pairing: comp.pairing, format: comp.format, strength: teams.map((t) => t.strength) };
+  const simPart = { engine: require('./config').ENGINE_VERSION, rules, pairing: comp.pairing, format: comp.format, strength: teams.map((t) => t.strength) };
   all.simHash = crypto.createHash('sha256').update(JSON.stringify(simPart)).digest('hex').slice(0, 16);
   all.hash = crypto.createHash('sha256').update(JSON.stringify(all)).digest('hex').slice(0, 16);
   all.compFile = compFile;

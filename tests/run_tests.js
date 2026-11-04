@@ -35,7 +35,7 @@ function matchInvariants(m, label) {
     const f = fr[i];
     if (f.b.length !== N) accountingOk = false;
     f.b.forEach((b, q) => {
-      if (![0, 1, 2, 3, 4].includes(b[3]) || !Number.isFinite(b[0]) || !Number.isFinite(b[1])) accountingOk = false;
+      if (![0, 1, 2, 3, 4, 5].includes(b[3]) || !Number.isFinite(b[0]) || !Number.isFinite(b[1])) accountingOk = false;
       const rr = r[q % 2];
       if (b[3] === 3) {
         if (b[0] < -5 || b[0] > G.W + 5 || b[1] > G.H + 60) boundsOk = false;
@@ -43,23 +43,26 @@ function matchInvariants(m, label) {
         if (inGoal[q] > 2) inGoalOk = false;
         if (i > 0 && fr[i - 1].b[q][3] === 3) {
           const p = fr[i - 1].b[q];
-          const sp = Math.hypot(b[0] - p[0], b[1] - p[1]) * CFG.FPS;
-          if (sp < CFG.STUCK_SPEED) still[q]++; else still[q] = 0;
+          const dtf = Math.max(1e-6, f.t - fr[i - 1].t); // frames are denser in slow motion
+          const sp = Math.hypot(b[0] - p[0], b[1] - p[1]) / dtf;
+          if (sp < CFG.STUCK_SPEED) still[q] += dtf; else still[q] = 0;
           maxStill = Math.max(maxStill, still[q]);
         }
       } else still[q] = 0;
-      if (b[3] === 4) { net[q]++; maxNet = Math.max(maxNet, net[q]); } else net[q] = 0;
+      if (b[3] === 4) { net[q] += i > 0 ? f.t - fr[i - 1].t : 0; maxNet = Math.max(maxNet, net[q]); } else net[q] = 0;
     });
   }
-  stuckOk = maxStill / CFG.FPS <= CFG.STUCK_TIME + 0.15;
-  netOk = maxNet / CFG.FPS <= CFG.NET_TIME + 0.1;
+  stuckOk = maxStill <= CFG.STUCK_TIME + 0.15;
+  netOk = maxNet <= CFG.NET_TIME + 0.1;
+  // no ball left in the goal at the end of the match
+  if (fr[fr.length - 1].b.some((b) => b[3] === 4 || (b[3] === 3 && b[0] > G.GOAL_LINE_X && b[1] > G.BAR_Y))) inGoalOk = false;
   // goals end in the pipe: each goal event followed by a whoosh(goal) for that ball
   for (const e of m.events.filter((x) => x.type === 'goal')) {
     const w = m.events.find((x) => x.type === 'whoosh' && x.ball === e.ball && x.t >= e.t && x.why === 'goal');
     const endT = m.endT !== undefined ? m.endT : fr[fr.length - 1].t;
     if (!w && endT - e.t > CFG.NET_TIME + 0.05) netOk = false;
   }
-  return { accountingOk, inGoalOk, netOk, stuckOk, boundsOk, maxStillS: +(maxStill / CFG.FPS).toFixed(2), maxNetS: +(maxNet / CFG.FPS).toFixed(2), stuckTeleports: m.stuckCount };
+  return { accountingOk, inGoalOk, netOk, stuckOk, boundsOk, maxStillS: +maxStill.toFixed(2), maxNetS: +maxNet.toFixed(2), stuckTeleports: m.stuckCount };
 }
 
 // ---------- 1. tournament ----------
@@ -72,14 +75,92 @@ check('no ball permanently stuck (max still time <= 1.3 s + tolerance)', allInv.
 check(`anti-stuck teleports per match <= ${CFG.MAX_STUCK_PER_MATCH}`, T.matches.every((m) => m.stuckCount <= CFG.MAX_STUCK_PER_MATCH), T.matches.map((m) => m.stuckCount));
 check('goals per match between 1 and 10', T.matches.every((m) => { const g = m.score[0] + m.score[1]; return g >= 1 && g <= 10; }), T.matches.map((m) => m.score.join('-')));
 
-// clock
-const clockOk = T.matches.every((m) => [1, 2, 3].includes(m.addedTime) && Math.abs(m.endReg - (90 + m.addedTime) / CFG.GAME_MIN_PER_SEC) < 1e-9);
-const endOk = T.matches.every((m) => {
-  const last = m.frames[m.frames.length - 1].t;
-  if (m.goldenStart === null) return Math.abs(last - m.endReg) <= 1 / CFG.FPS + 1e-6 && m.events.some((e) => e.type === 'whistle' && e.kind === 'end' && Math.abs(e.t - m.endReg) < 1e-6);
-  return m.events.some((e) => e.type === 'golden' && Math.abs(e.t - m.endReg) < 1e-6);
-});
-check("clock ends at 90' + added time (1-3)", clockOk && endOk, T.matches.map((m) => `90+${m.addedTime}`));
+// ---------- P1b: added time = N shots ----------
+console.log('== added-time shots');
+function shotChecks(m) {
+  const regEnd = 90 / CFG.GAME_MIN_PER_SEC;
+  const shotEv = m.events.filter((e) => e.type === 'shot');
+  const r = { n: m.addedTime, shots: m.shots.length, ok: true, why: [] };
+  const bad = (w) => { r.ok = false; r.why.push(w); };
+  if (m.shots.length !== m.addedTime || shotEv.length !== m.addedTime) bad('count');
+  if (shotEv.some((e) => e.t < regEnd)) bad('before90');                             // none at 45' / in regular play
+  if (m.goldenStart !== null && shotEv.some((e) => e.t >= m.goldenStart)) bad('golden');
+  shotEv.forEach((e, i) => { if (e.k !== i + 1 || e.team !== (i % 2 === 0 ? shotEv[0].team : (shotEv[0].team === 'A' ? 'B' : 'A'))) bad('alternate'); });
+  // shots one at a time: shot k+1 starts only after shot k resolved
+  for (let i = 1; i < m.shots.length; i++) if (m.shots[i].t0 < m.shots[i - 1].t1) bad('overlap');
+  // pitch cleared: at every shot start all other balls are in the pipe
+  for (const sh of m.shots) {
+    const f = m.frames.filter((x) => x.t <= sh.t0 + 1e-6).pop();
+    if (f.b.some((b, q) => q !== sh.ball && ![0, 1].includes(b[3]))) bad('notCleared');
+  }
+  // the 90' clear: a whistle at 90' and every ball in play routed to the pipe within ~1.5 s (+ net time)
+  const reg = m.events.find((e) => e.type === 'whistle' && e.kind === 'reg');
+  if (!reg || Math.abs(reg.t - regEnd) > 0.01) bad('regWhistle');
+  else { const f = m.frames.find((x) => x.t >= regEnd + CFG.CLEAR_TIME + 0.05); if (f && f.b.some((b) => ![0, 1].includes(b[3]))) bad('clearSlow'); }
+  // each shot <= 12 s of video (slow motion included)
+  const vfAt = (t) => m.frames.findIndex((x) => x.t >= t - 1e-6);
+  for (const sh of m.shots) if ((vfAt(sh.t1) - vfAt(sh.t0)) / CFG.FPS > 12.05) bad('shotLong');
+  // final whistle / golden ball right after the last shot (no goal after the final whistle)
+  const end = m.events.find((e) => e.type === 'whistle' && e.kind === 'end');
+  if (m.goldenStart === null) { if (!end || end.t < m.shots[m.shots.length - 1].t1) bad('end'); if (m.goals.some((g) => g.t > end.t)) bad('goalAfterWhistle'); }
+  else if (m.goldenStart < m.shots[m.shots.length - 1].t1) bad('goldenEarly');
+  return r;
+}
+{
+  const extra = []; for (let i = 0; i < (QUICK ? 20 : 60); i++) { const r = eng.simulateMatch(820000 + i, { kind: i % 3 === 0 ? 'leg1' : 'final' }); if (!r.failed) extra.push(r); }
+  const all = T.matches.concat(extra);
+  const res = all.map(shotChecks);
+  check(`added time: number of shots == N in every match (${all.length} matches), none at 45', none in golden ball, alternating, one at a time, each <= 12 s video`, res.every((x) => x.ok), res.filter((x) => !x.ok).slice(0, 3));
+  check('added time: pitch cleared at 90\' (whistle, balls routed to the pipe within 1.5 s) before the shots', res.every((x) => !x.why.includes('notCleared') && !x.why.includes('clearSlow') && !x.why.includes('regWhistle')));
+  const inv = extra.map((m) => matchInvariants(m));
+  check('added time: every ball accounted for, no ball left in the goal (random matches incl. shots)', inv.every((x) => x.accountingOk && x.inGoalOk && x.netOk));
+  // cinematic only on good hits in the shots; never in the first half, regular play, misses or golden ball
+  let cineOk = true; const cInfo = { goodHits: 0, misses: 0, cineFrames: 0 };
+  for (const m of all) {
+    const regEnd = 90 / CFG.GAME_MIN_PER_SEC;
+    const shotOf = (t) => m.shots.find((s) => t >= s.t0 - 1e-6 && t <= s.t1 + 3);
+    for (const c of m.shotContacts) { if (c.good) cInfo.goodHits++; else cInfo.misses++; if (c.good !== m.cines.some((x) => x.k === c.k)) cineOk = false; if (c.good && !(c.v >= CFG.GOOD_HIT_V && c.vx > 0)) cineOk = false; }
+    for (const f of m.frames) {
+      const fx = (f.ts !== undefined && f.ts < 1) || !!f.cam;
+      if (!fx) continue;
+      cInfo.cineFrames++;
+      if (f.t < regEnd) cineOk = false;                                         // first half / regular play
+      if (m.goldenStart !== null && f.t >= m.goldenStart) cineOk = false;       // golden ball
+      const sh = shotOf(f.t);
+      if (!sh || !m.cines.some((c) => c.k === f.cine)) cineOk = false;          // only during a good-hit shot
+      if (f.cam && (f.cam[0] > CFG.ZOOM_MAX + 1e-9 || f.cam[0] < 1)) cineOk = false;
+      if (f.ts !== undefined && f.ts < CFG.SLOWMO - 1e-6) cineOk = false;
+    }
+    // misses: no effect frames inside a shot without a good hit
+    for (const sh of m.shots) if (!m.cines.some((c) => c.k === sh.k)) { if (m.frames.some((f) => f.t >= sh.t0 && f.t <= sh.t1 && (f.cam || f.ts !== undefined))) cineOk = false; }
+    // smooth: time scale changes by small steps
+    for (let i = 1; i < m.frames.length; i++) { const a = m.frames[i - 1].ts === undefined ? 1 : m.frames[i - 1].ts, b = m.frames[i].ts === undefined ? 1 : m.frames[i].ts; if (Math.abs(a - b) > 0.12) cineOk = false; }
+  }
+  check(`cinematic (slow motion + zoom) only on good hits (>= ${CFG.GOOD_HIT_V} px/s towards the goal) in added-time shots; never on misses, regular play, first half or golden ball; zoom <= ${CFG.ZOOM_MAX}, smooth`, cineOk && cInfo.goodHits > 0 && cInfo.misses > 0, cInfo);
+  // scenario: aggregate 2-3 -> goal in an added-time shot -> 3-3 -> golden ball. The simulation before the
+  // decision does not depend on the first-leg score, so a seed is found first and the first-leg score chosen to fit.
+  let scen = null;
+  for (let i = 0; i < 400 && !scen; i++) {
+    const r0 = eng.simulateMatch(830000 + i, { kind: 'leg2', prevA: 50, prevB: 0 }); // prev 50-0: never level -> no golden
+    if (r0.failed) continue;
+    const sg = r0.goals.filter((g) => g.shot); if (!sg.length) continue;
+    const last = sg[sg.length - 1];
+    const before = r0.goals.filter((g) => g.t < last.t);
+    const sA = before.filter((g) => g.team === 'A').length, sB = before.filter((g) => g.team === 'B').length;
+    const afterAll = r0.goals.filter((g) => g.t > last.t && g.t <= r0.endReg).length; if (afterAll) continue;
+    const prev = last.team === 'A' ? [2 - sA, 3 - sB] : [3 - sA, 2 - sB];
+    if (prev[0] < 0 || prev[1] < 0) continue;
+    const r = eng.simulateMatch(830000 + i, { kind: 'leg2', prevA: prev[0], prevB: prev[1] });
+    const aggBefore = [prev[0] + sA, prev[1] + sB];
+    const aggAfter = [prev[0] + r.score.A - (r.goldenWinner === 'A' ? 1 : 0), prev[1] + r.score.B - (r.goldenWinner === 'B' ? 1 : 0)];
+    scen = { seed: 830000 + i, prev, aggBefore, shotGoalAt: CLOCK.minuteLabel(r, last.t, CFG.GAME_MIN_PER_SEC), aggAfterShots: aggAfter, golden: r.goldenStart !== null, goldenWinner: r.goldenWinner, hashSamePrefix: r.frames.length > 0 };
+  }
+  check('scenario: aggregate 2-3, goal in an added-time shot -> 3-3 -> GOLDEN BALL starts after the last shot', !!scen && scen.golden && scen.aggAfterShots[0] === 3 && scen.aggAfterShots[1] === 3 && ((scen.aggBefore[0] === 2 && scen.aggBefore[1] === 3) || (scen.aggBefore[0] === 3 && scen.aggBefore[1] === 2)), scen);
+  // added-time goals count for scorers / MOTM / replay
+  const addG = T.matches.flatMap((m, mi) => m.goals.filter((g) => g.shot).map((g) => ({ mi, g })));
+  const counted = addG.every(({ mi, g }) => T.matches[mi].score[g.team === 'A' ? 0 : 1] >= 1);
+  check('added-time goals change the score and count for scorers (demo has at least one)', addG.length > 0 && counted, { addedTimeGoals: addG.length, cinematics: T.matches.map((m) => m.cines.length) });
+}
 check('half-time whistle at 45\'', T.matches.every((m) => m.events.some((e) => e.type === 'whistle' && e.kind === 'half' && Math.abs(e.t - 22.5) < 0.01)));
 
 // golden ball correctness: golden starts iff the deciding result is level at end of added time
@@ -217,7 +298,8 @@ console.log('== strength');
     if ((w === 'A') === favIsA) fav++;
   }
   const pct = 100 * fav / dec;
-  check('strength: favourite win rate in 55-62% (single matches, golden ball decides)', pct >= 55 && pct <= 62, { favouriteWinPct: +pct.toFixed(1), matches: dec, sizeDiff: `+-${(100 * s).toFixed(0)}% radius` });
+  // P1b (Max's decision): added-time shots alternate and are equal for both teams, so the favourite edge drops ~2 points
+  check('strength: favourite win rate in 53-62% (single matches, golden ball decides; P1b range)', pct >= 53 && pct <= 62, { favouriteWinPct: +pct.toFixed(1), matches: dec, sizeDiff: `+-${(100 * s).toFixed(0)}% radius` });
 }
 
 // ---------- 6. golden ball resolution statistics ----------
@@ -240,13 +322,14 @@ console.log('== clock');
     for (const f of m.frames) {
       const c = CLOCK.clockAt(m, f.t, gmps);
       if (c.value < prev || c.value > 90 + m.addedTime) ok = false;
+      if (c.phase === 'shots' && c.value !== 90 + CLOCK.shotsStarted(m, f.t)) ok = false;
       if (m.goldenStart !== null && f.t >= m.goldenStart && c.main !== `90+${m.addedTime}'`) ok = false;
       prev = c.value; max = Math.max(max, c.value);
     }
     for (const g of m.goals) { const lab = CLOCK.minuteLabel(m, g.t, gmps); const v = lab.includes('+') ? 90 + +lab.slice(3, -1) : +lab.slice(0, -1); if (v > 90 + m.addedTime) ok = false; }
     if (m.goldenStart !== null) info.push({ label, added: m.addedTime, shownMax: `90+${max - 90}'` });
   }
-  check(`clock: for ${all.length} matches the displayed clock never exceeds 90+added and never goes backwards (golden ball frozen)`, ok, info.slice(0, 4));
+  check(`clock: for ${all.length} matches the displayed clock never exceeds 90+N, never goes backwards, reads 90+k as shot k starts (golden ball frozen)`, ok, info.slice(0, 4));
   check('rules: added time within config range [1,3]', all.every(({ m }) => m.addedTime >= CFG.ADDED_MIN[0] && m.addedTime <= Math.min(3, CFG.ADDED_MIN[1])));
 }
 
@@ -272,7 +355,22 @@ console.log('== bracket');
   }
   check('bracket: symmetric layout, final centred, left/right halves mirrored (4, 8, 16 teams)', ok, info);
   const L4 = BRACKET.bracketLayout(4);
-  check('bracket (demo): semifinal 1 on the left, semifinal 2 on the right, final in the middle', L4.byKey['0L0'].x < L4.final.x && L4.byKey['0R0'].x > L4.final.x);
+  check('bracket symmetric option (demo): semifinal 1 on the left, semifinal 2 on the right, final in the middle', L4.byKey['0L0'].x < L4.final.x && L4.byKey['0R0'].x > L4.final.x);
+  let ltrOk = true; const ltrInfo = {};
+  for (const n of [4, 8, 16]) {
+    const Lb = BRACKET.bracketLayoutLTR(n, n > 4 ? { top: 160, bottom: 700 } : undefined);
+    for (const b of Lb.boxes) {
+      if (b.x < 0 || b.x + b.w > Lb.W + 1e-6 || b.y < 100 || b.y + b.h > 720) ltrOk = false;
+      if (b.next) { const t = Lb.byKey[b.next]; if (!(t.x > b.x + b.w - 1e-6)) ltrOk = false; }      // rounds go left -> right
+    }
+    if (!(Lb.champion.x > Lb.final.x + Lb.final.w)) ltrOk = false;                                   // champion right of the final
+    if (Lb.boxes.filter((b) => b.round === 0).length !== n / 2) ltrOk = false;
+    if (Lb.rowH < 26) ltrOk = false;                                                                  // readable on a phone (>= 39 px rows at 1080p)
+    ltrInfo[n] = { columns: Lb.cols, boxW: Math.round(Lb.boxW), rowH: Lb.rowH };
+  }
+  check('bracket left_to_right (default): rounds in columns left -> right, final then CHAMPION on the right; 4, 8, 16 teams; rows >= 26 design px', ltrOk, ltrInfo);
+  const comp = L.loadCompetition();
+  check('bracket style: competition default is left_to_right, symmetric still available', (comp.competition.bracket_style || 'left_to_right') === 'left_to_right' && typeof BRACKET.bracketLayout === 'function');
 }
 
 // ---------- 9. kit colours + contrast swap (CIE76 dE < 30 -> swap) ----------
@@ -313,6 +411,18 @@ console.log('== awards');
   check('players: 3 named players per team, each ball = one player (goal records carry the player)', T.teams.every((t) => t.players.length === 3) && T.matches.every((m) => m.goals.every((x) => x.player === (x.ball >> 1))));
 }
 
+// ---------- P1b: real players file ----------
+{
+  const comp = L.loadCompetition();
+  const md = path.join(ROOT, 'config', 'players_review.md');
+  const okFile = fs.existsSync(md) && comp.teams.every((t) => t.players.every((p) => fs.readFileSync(md, 'utf8').includes(p.name)));
+  const okSrc = comp.teams.every((t) => t.players.length === 3 && t.players.every((p) => /^https?:\/\//.test(p.source_url || '') && /^\d{4}-\d{2}-\d{2}$/.test(p.retrieved || '') && typeof p.verified === 'boolean'));
+  const fmt = comp.teams.every((t) => t.players.every((p) => /^([A-Z]\. \S.*|[A-Z][a-zà-ÿ]+)$/u.test(p.name)));
+  check('players: real_names on, 3 players per team with source_url / retrieved / verified, listed in config/players_review.md, format "I. Surname"', comp.competition.real_names === true && okFile && okSrc && fmt, comp.teams.map((t) => t.players.map((p) => p.name).join(', ')));
+  const conf2 = L.loadCompetition(undefined, {});
+  check('players: fictional_players kept for real_names=false', conf2.teams.every((t) => Array.isArray(t.fictional_players) && t.fictional_players.length === 3));
+}
+
 // ---------- 11. windmill boost from minute 70 ----------
 console.log('== windmill boost');
 {
@@ -341,7 +451,14 @@ if (!QUICK) {
   const map = JSON.parse(fs.readFileSync(mf, 'utf8')); map.sky = ['#ff7a00', '#ffa64d', '#ffd9b3']; fs.writeFileSync(mf, JSON.stringify(map));
   const base = TOUR.buildAll(path.join(ROOT, 'config', 'competitions', 'demo_4teams.json'), path.join(ROOT, 'build', 'test_show_base.json'));
   const chg = TOUR.buildAll(path.join(tmp, 'competitions', 'demo_4teams.json'), path.join(ROOT, 'build', 'test_show_changed.json'), { configDir: tmp });
-  execFileSync(process.execPath, [path.join(ROOT, 'render', 'render.js'), 'bracket16', 'output/screenshots_v2/bracket16_empty.png', '16', '--show', 'build/test_show_base.json'], { cwd: ROOT, stdio: 'ignore', timeout: 180000 });
+  execFileSync(process.execPath, [path.join(ROOT, 'render', 'render.js'), 'brackets', 'build/test_brackets', '--show', 'build/test_show_base.json'], { cwd: ROOT, stdio: 'ignore', timeout: 180000 });
+  const bfiles = ['bracket4_left_to_right.png', 'bracket4_symmetric.png', 'bracket16_left_to_right.png', 'bracket16_symmetric.png'];
+  check('bracket styles render: 4 and 16 teams, left_to_right and symmetric (PNG files written)', bfiles.every((f) => fs.existsSync(path.join(ROOT, 'build', 'test_brackets', f)) && fs.statSync(path.join(ROOT, 'build', 'test_brackets', f)).size > 20000));
+  const py = process.platform === 'win32' ? 'python' : 'python3';
+  execFileSync(py, [path.join(ROOT, 'audio', 'make_audio.py'), path.join(ROOT, 'build', 'test_show_base.json'), path.join(ROOT, 'build', 'test_audio.wav')], { cwd: ROOT, stdio: 'ignore', timeout: 400000 });
+  const ar = JSON.parse(fs.readFileSync(path.join(ROOT, 'build', 'audio_goal_report.json'), 'utf8'));
+  check('goal sounds: crowd A/B/C <= 2.5 s, selected sound not louder (peak and 400 ms RMS) than the loudest existing effect', ar.criteria.goal_peak_not_above_loudest_effect_peak && ar.criteria.goal_shortterm_not_above_loudest_effect_shortterm && ar.criteria.crowd_samples_le_2_5s
+    && ['crowd_A.wav', 'crowd_B.wav', 'crowd_C.wav'].every((f) => fs.existsSync(path.join(ROOT, 'output', 'goal_sfx_samples', f))), { samples: ar.samples, criteria: ar.criteria });
   // a frame of match 0 with City's ball 0 in play, no goal camera move in the last 2 s
   const m0 = base.show.matches[0], seg = base.show.segments.find((x) => x.type === 'match' && x.match === 0);
   let fi = -1;
@@ -362,9 +479,9 @@ if (!QUICK) {
 }
 
 // ---------- screenshots present (only when they exist) ----------
-const shots = path.join(__dirname, '..', 'output', 'screenshots_v2');
+const shots = path.join(__dirname, '..', L.loadCompetition().competition.screenshots || 'output/screenshots_v2b');
 if (fs.existsSync(path.join(shots, '01_intro.png'))) {
-  const need = ['07_keeper_crouched.png', '08_keeper_jumping.png', 'bracket16_empty.png'];
+  const need = ['07_keeper_crouched.png', '08_keeper_jumping.png', 'bracket16_left_to_right.png', 'bracket16_symmetric.png'];
   check('screenshots: keeper poses + 16-team empty bracket present', need.every((f) => fs.existsSync(path.join(shots, f))), need.filter((f) => !fs.existsSync(path.join(shots, f))));
 }
 

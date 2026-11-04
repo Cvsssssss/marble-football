@@ -54,8 +54,52 @@
       if (r === R - 1) headers.push({ text: name, x: colX(cols >> 1) + boxW / 2 });
       else { headers.push({ text: name, x: colX(r) + boxW / 2 }); headers.push({ text: name, x: colX(cols - 1 - r) + boxW / 2 }); }
     }
-    return { nTeams, rounds: R, cols, colW, boxW, rowH, boxes, byKey, final: fin, headers, W };
+    return { style: 'symmetric', nTeams, rounds: R, cols, colW, boxW, rowH, boxes, byKey, final: fin, headers, W, trophy: { x: fin.x + boxW / 2, y: fin.y - 95 } };
   }
+
+  // Left-to-right bracket (v1 look, default): first round in the left column, then one column per round,
+  // the final, and a narrower CHAMPION slot on the right. All boxes have side 'L' (connectors go right).
+  // Box ids: `${round}L${index}` for rounds before the final, 'F' = final, 'CH' = champion slot.
+  function bracketLayoutLTR(nTeams, opts) {
+    opts = opts || {};
+    const W = opts.W || 1280, top = opts.top || 170, bottom = opts.bottom || 560, margin = opts.margin || 40;
+    const R = Math.round(Math.log2(nTeams));
+    if (Math.pow(2, R) !== nTeams || R < 2) throw new Error('bracketLayoutLTR: nTeams must be a power of two >= 4');
+    const CHW = 0.72;                                  // champion column width (in round columns)
+    const colW = (W - 2 * margin) / (R + CHW);
+    const gap = opts.gap !== undefined ? opts.gap : Math.min(90, colW * 0.2);
+    const boxW = Math.min(opts.maxBoxW || 400, colW - gap);
+    const n0 = nTeams / 2;                             // first-round matches
+    const avail = bottom - top;
+    const gapRows = opts.gapRows !== undefined ? opts.gapRows : (n0 > 2 ? 0.35 : 1.6);
+    const rowH = Math.min(opts.maxRowH || 58, Math.floor(avail / (n0 * 2 + (n0 - 1) * gapRows)));
+    const boxH = 2 * rowH;
+    const boxes = [], byKey = {};
+    const colX = (ci) => margin + ci * colW;
+    for (let r = 0; r < R; r++) {
+      const n = nTeams / Math.pow(2, r + 1);
+      for (let i = 0; i < n; i++) {
+        let cy;
+        if (r === 0) { const span = avail - boxH; cy = top + boxH / 2 + (n === 1 ? span / 2 : (span * i) / (n - 1)); }
+        else { const a = byKey[`${r - 1}L${2 * i}`], b = byKey[`${r - 1}L${2 * i + 1}`]; cy = (a.y + a.h / 2 + b.y + b.h / 2) / 2; }
+        const id = r === R - 1 ? 'F' : `${r}L${i}`;
+        const bx = { id, round: r, side: 'L', index: i, x: colX(r), y: cy - boxH / 2, w: boxW, h: boxH, rowH,
+          feeders: r === 0 ? null : [`${r - 1}L${2 * i}`, `${r - 1}L${2 * i + 1}`] };
+        boxes.push(bx); byKey[id] = bx;
+      }
+    }
+    const fin = byKey.F;
+    const chW = Math.min(300, CHW * colW - gap * 0.4), chH = Math.round(boxH * 0.9);
+    const ch = { id: 'CH', round: R, side: 'L', index: 0, x: colX(R) + gap * 0.4, y: fin.y + fin.h / 2 - chH / 2, w: chW, h: chH, rowH: chH, feeders: ['F'], champion: true };
+    boxes.push(ch); byKey.CH = ch;
+    for (const b of boxes) if (b.feeders) b.feeders.forEach((fid, k) => { byKey[fid].next = b.id; byKey[fid].nextRow = b.champion ? 0 : k; });
+    const headers = [];
+    for (let r = 0; r < R; r++) headers.push({ text: ROUND_NAMES[nTeams / Math.pow(2, r)] || `ROUND ${r + 1}`, x: colX(r) + boxW / 2 });
+    headers.push({ text: 'CHAMPION', x: ch.x + ch.w / 2 });
+    return { style: 'left_to_right', nTeams, rounds: R, cols: R + 1, colW, boxW, rowH, boxes, byKey, final: fin, champion: ch, headers, W,
+      headerY: opts.headerY || top - 52, trophy: { x: ch.x + ch.w / 2, y: ch.y - 100 } };
+  }
+  function layoutFor(style, nTeams, opts) { return style === 'symmetric' ? bracketLayout(nTeams, opts) : bracketLayoutLTR(nTeams, opts); }
 
   // Connector polyline from a box's inner edge (towards the centre) into its target row.
   function connector(L, id) {
@@ -80,7 +124,7 @@
     return poly[poly.length - 1];
   }
 
-  const api = { bracketLayout, connector, pointAlong };
+  const api = { bracketLayout, bracketLayoutLTR, layoutFor, connector, pointAlong };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.BRACKET = api;
 })(typeof self !== 'undefined' ? self : this);

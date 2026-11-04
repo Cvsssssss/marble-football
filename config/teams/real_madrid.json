@@ -1,2 +1,48 @@
-{ "id": "real_madrid", "name": "Real Madrid", "short": "RMA", "primary": "#FFFFFF", "secondary": "#FEBE10", "strength": 89,
-  "players": [ { "name": "L. Varela", "number": 7 }, { "name": "M. Duarte", "number": 9 }, { "name": "J. Belmonte", "number": 11 } ] }
+{
+ "id": "real_madrid",
+ "name": "Real Madrid",
+ "short": "RMA",
+ "primary": "#FFFFFF",
+ "secondary": "#FEBE10",
+ "strength": 89,
+ "players": [
+  {
+   "name": "K. Mbappé",
+   "number": 10,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefachampionsleague/clubs/50051--real-madrid/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "V. Júnior",
+   "number": 7,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefachampionsleague/clubs/50051--real-madrid/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "Rodrygo",
+   "number": 11,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefachampionsleague/clubs/50051--real-madrid/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "L. Varela",
+   "number": 7
+  },
+  {
+   "name": "M. Duarte",
+   "number": 9
+  },
+  {
+   "name": "J. Belmonte",
+   "number": 11
+  }
+ ]
+}

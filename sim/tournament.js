@@ -27,12 +27,20 @@ function passesRules(r, rc) {
   rc = rc || {};
   const gmin = rc.GOALS_MIN !== undefined ? rc.GOALS_MIN : CFG.GOALS_MIN, gmax = rc.GOALS_MAX !== undefined ? rc.GOALS_MAX : CFG.GOALS_MAX;
   if (r.failed) return 'failed:' + r.failed;
+  if (r.shots && r.shots.length !== r.addedTime) return 'shots:' + r.shots.length; // added time N = exactly N shots
   const goals = r.score.A + r.score.B;
   if (goals < gmin || goals > gmax) return 'goals:' + goals;
   if (r.stuckCount > CFG.MAX_STUCK_PER_MATCH) return 'stuck:' + r.stuckCount;
   if (r.safetyCount > 0) return 'safety';
   if (r.goldenStart !== null && (r.goldenResolve === null || r.goldenResolve > CFG.GOLDEN_CAP)) return 'golden_cap';
   for (const f of r.frames) if (f.b.length !== 2 * CFG.BALLS_PER_TEAM) return 'accounting';
+  // P1b gate (filters rare engine edge cases seen on screen, physics unchanged): every crossbar contact from above
+  // (the 0.1 s front-corner latch can report a side contact), and no ball visibly resting > STUCK_TIME + 0.15 s
+  if (r.events.some((e) => e.type === 'bar' && !(e.y < G.BAR_TOP))) return 'bar_side';
+  { const still = new Array(2 * CFG.BALLS_PER_TEAM).fill(0); const F = r.frames;
+    for (let i = 1; i < F.length; i++) { const dt = F[i].t - F[i - 1].t;
+      for (let q = 0; q < still.length; q++) { const b = F[i].b[q], p = F[i - 1].b[q];
+        if (b[3] === 3 && p[3] === 3 && Math.hypot(b[0] - p[0], b[1] - p[1]) / Math.max(1e-6, dt) < CFG.STUCK_SPEED) { still[q] += dt; if (still[q] > CFG.STUCK_TIME + 0.15) return 'visibly_stuck'; } else still[q] = 0; } } }
   if (r.ctx.kind !== 'leg1') { // a deciding match must produce a winner
     const tot = r.ctx.kind === 'leg2' ? [r.score.A + r.ctx.prevA, r.score.B + r.ctx.prevB] : [r.score.A, r.score.B];
     if (tot[0] === tot[1] && !r.goldenWinner) return 'no_winner';
@@ -138,7 +146,8 @@ function buildTournament(conf, opts) {
   for (let si = 0; si < 2; si++) {
     const [ta, tb] = sfPairs[si];
     const [rA, rB] = radii(TEAMS, ta, tb);
-    const l1 = run(++key, { kind: 'leg1', rA, rB }, niceGoals);
+    // demo preference: SF1 leg 1 contains a goal in added time (an added-time shot); winners are never chosen
+    const l1 = run(++key, { kind: 'leg1', rA, rB }, si === 0 ? (r) => niceGoals(r) && r.goals.some((g) => g.shot) : niceGoals);
     // demo preference: SF2 leg 2 shows a golden ball (aggregate level after added time)
     const wantGolden = si === 1;
     let l2 = run(++key, { kind: 'leg2', prevA: l1.score.A, prevB: l1.score.B, rA, rB },
@@ -175,6 +184,7 @@ function buildTournament(conf, opts) {
       kits: { A: kits.A, B: kits.B }, kitDE: kits.dE, kitNote: kits.note,
       motm: manOfTheMatch(r.goals, score, r.goldenWinner),
       launches: r.launches,
+      shots: r.shots, shotStarts: r.shotStarts, shotContacts: r.shotContacts, cines: r.cines,
     };
   }
 }
@@ -198,7 +208,7 @@ function buildShow(T) {
     const nFrames = m.frames.length;
     const ms = add('match', nFrames / FPS, { match: mi });
     ms.len = nFrames; f = ms.start + nFrames;
-    for (const e of m.events) { const x = Object.assign({}, e, { match: mi }); delete x.t; delete x.type; at(ms.start + e.t * FPS, e.type, x); }
+    for (const e of m.events) { const x = Object.assign({}, e, { match: mi }); delete x.t; delete x.type; delete x.vf; at(ms.start + (e.vf !== undefined ? e.vf : e.t * FPS), e.type, x); }
     const ft = add('fulltime', m.goldenStart !== null ? 2.8 : 2.6, { match: mi }); at(ft.start + 2, 'crowd_end');
     if (m.replayGoal !== null) {
       const g = m.goals[m.replayGoal];
@@ -223,7 +233,7 @@ function makeShow(conf, T) {
   const S = buildShow(T);
   return Object.assign({
     geometryNote: 'design space 1280x720', configHash: conf.hash, simHash: conf.simHash,
-    map: conf.map, audioCfg: conf.audio,
+    map: conf.map, audioCfg: conf.audio, bracketStyle: conf.competition.bracket_style || 'left_to_right',
     cfg: { OMEGA: CFG.OMEGA, GAME_MIN_PER_SEC: conf.rules.GAME_MIN_PER_SEC, BALLS_PER_TEAM: conf.rules.BALLS_PER_TEAM },
   }, T, S);
 }
@@ -252,7 +262,9 @@ function buildAll(compFile, outFile, opts) {
     seconds: show.totalFrames / FPS, totalFrames: show.totalFrames, buildMs: Date.now() - t0,
     sf: T.sf.map((s) => ({ tie: `${TEAMS[s.ta].name} vs ${TEAMS[s.tb].name}`, l1: s.l1, l2: s.l2, agg: s.agg, golden: s.golden, winner: TEAMS[s.winner].name })),
     final: { tie: `${TEAMS[T.final.ta].name} vs ${TEAMS[T.final.tb].name}`, score: T.final.score, golden: T.final.golden, winner: TEAMS[T.final.winner].name },
-    matches: T.matches.map((m) => ({ stage: m.stage, leg: m.leg, seed: m.seed, score: m.score, added: m.addedTime, golden: m.goldenStart !== null, goldenResolve: m.goldenResolve, stuck: m.stuckCount,
+    matches: T.matches.map((m) => ({ stage: m.stage, leg: m.leg, seed: m.seed, score: m.score, added: m.addedTime,
+      shots: (m.shots || []).map((x) => `${x.k}:${x.team}:${x.result}${x.cine ? ':cine' : ''}`), addedGoals: m.goals.filter((g) => g.shot).length, cinematics: (m.cines || []).length,
+      golden: m.goldenStart !== null, goldenResolve: m.goldenResolve, stuck: m.stuckCount,
       secs: +(m.frames.length / FPS).toFixed(2), hash: m.hash.slice(0, 16), kits: `${m.kits.A.primary}${m.kits.A.swapped ? '(swap)' : ''} vs ${m.kits.B.primary}${m.kits.B.swapped ? '(swap)' : ''} dE=${m.kitDE}`,
       motm: m.motm ? `${pn(m.motm.team === 'A' ? m.ta : m.tb, m.motm.player)} (${m.motm.goals})${m.motm.tiebreak ? ' tb:' + m.motm.tiebreak : ''}` : null })),
     topScorers: T.topScorers.map((e) => `${pn(e.team, e.player)} ${TEAMS[e.team].name} ${e.goals} goals / ${e.matches} matches`),

@@ -1,2 +1,48 @@
-{ "id": "man_city", "name": "Manchester City", "short": "MCI", "primary": "#6CABDD", "secondary": "#FFFFFF", "strength": 90,
-  "players": [ { "name": "K. Moreno", "number": 9 }, { "name": "T. Halvorsen", "number": 10 }, { "name": "D. Okafor", "number": 7 } ] }
+{
+ "id": "man_city",
+ "name": "Manchester City",
+ "short": "MCI",
+ "primary": "#6CABDD",
+ "secondary": "#FFFFFF",
+ "strength": 90,
+ "players": [
+  {
+   "name": "E. Haaland",
+   "number": 9,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefachampionsleague/clubs/52919--man-city/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "J. Doku",
+   "number": 11,
+   "position": "W (listed MF)",
+   "source_url": "https://www.uefa.com/uefachampionsleague/clubs/52919--man-city/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  },
+  {
+   "name": "A. Semenyo",
+   "number": 42,
+   "position": "FW",
+   "source_url": "https://www.uefa.com/uefachampionsleague/clubs/52919--man-city/squad/",
+   "retrieved": "2026-11-04",
+   "verified": true
+  }
+ ],
+ "fictional_players": [
+  {
+   "name": "K. Moreno",
+   "number": 9
+  },
+  {
+   "name": "T. Halvorsen",
+   "number": 10
+  },
+  {
+   "name": "D. Okafor",
+   "number": 7
+  }
+ ]
+}
