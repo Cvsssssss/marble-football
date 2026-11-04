@@ -59,6 +59,8 @@ function validatePlan(plan) {
     if (a.competition === b.competition) errs.push(`video ${n} (${b.id}): same competition "${b.competition}" twice in a row`);
     if (b.week < a.week) errs.push(`video ${n} (${b.id}): weeks must not go backwards`);
   }
+  const pairs = V.map((v) => `${v.competition}/${v.map}`);
+  pairs.forEach((p, i) => { if (pairs.indexOf(p) !== i) errs.push(`video ${i + 1}: competition + map "${p}" already used by ${V[pairs.indexOf(p)].id} (next.js tracks plan entries by this pair)`); });
   // same competition: at least 1 week apart
   for (let i = H.length; i < all.length; i++) for (let j = 0; j < i; j++) {
     if (all[j].competition === all[i].competition && all[i].week - all[j].week < 1) errs.push(`video ${i - H.length + 1} (${all[i].id}): competition "${all[i].competition}" again within 1 week`);

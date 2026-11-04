@@ -18,7 +18,8 @@ const { decisiveGoal } = require('../sim/reels');
     const m = show.matches[mi];
     const gi = picks.indexOf(mi) === k ? decisiveGoal(m) : Math.max(0, m.goals.length - 1 - k);
     const g = m.goals[gi] || m.goals[0];
-    return { mi, t: g.t + 0.28 }; // a moment after the ball crosses the line: net + confetti
+    // close-up on the goal mouth just after the ball crosses the line: ball in the net, keeper, confetti
+    return { mi, t: g.t + 0.2, zoom: { z: 2.1, x: g.x - 90, y: g.y - 70 } };
   });
   fs.mkdirSync(outDir, { recursive: true });
   const browser = await chromium.launch();
@@ -29,7 +30,7 @@ const { decisiveGoal } = require('../sim/reels');
   let k = 0;
   for (const mo of moments) {
     k++;
-    const png = await page.evaluate(([a, b]) => window.renderThumb(a, b), [mo.mi, mo.t]);
+    const png = await page.evaluate(([a, b, c]) => window.renderThumb(a, b, c), [mo.mi, mo.t, mo.zoom]);
     fs.writeFileSync(path.join(outDir, `thumbnail_${k}.png`), Buffer.from(png.split(',')[1], 'base64'));
   }
   await browser.close();

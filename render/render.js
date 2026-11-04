@@ -263,6 +263,14 @@ async function balls(dir) {
   else if (mode === 'brackets') await brackets(path.resolve(ROOT, process.argv[3] || 'output/screenshots_p2'));
   else if (mode === 'balls') await balls(path.resolve(ROOT, process.argv[3] || 'output/screenshots_p2'));
   else if (mode === 'video') await video(+process.argv[3] || 8);
+  else if (mode === 'forget') { // P4 --rerender-match <id>: drop the cached block(s) of one match so only that match renders again
+    const show = loadShow(); const id = process.argv[3];
+    const idx = require('../sim/tournament').matchesIndex(show).matches.find((m) => m.id === id);
+    if (!idx) { console.error('unknown match id ' + id); process.exit(2); }
+    let n = 0;
+    for (const b of blocks(show)) if (b.segs.some((s) => s.match === idx.index)) { const f = path.join(ROOT, 'build', 'segcache', b.key + '.mp4'); if (fs.existsSync(f)) { fs.unlinkSync(f); n++; } }
+    console.log(`forget ${id}: ${n} cached block(s) removed`);
+  }
   else { console.log('usage: stills [dir] | frames a,b,c [dir] | video [workers] [--preview] | brackets [dir] | balls [dir]'); process.exit(1); }
 })().catch((e) => { console.error(e); process.exit(1); });
 

@@ -1,0 +1,8 @@
+{
+ "_comment": "Meciuri reale viitoare, scrise de mână (folosite când nu există FOOTBALL_DATA_TOKEN în .env). Format: data în ora Copenhaga (YYYY-MM-DD), ora locală, competiția (CL, EL, WC, EC, FRIENDLY_WORLD, FRIENDLY_EURO), echipele cu numele din config/teams (sau un alias din strong_match_rules.json). EXEMPLU — editează-l cu meciurile reale.",
+ "fixtures": [
+  { "date": "2026-11-24", "time": "21:00", "competition": "CL", "home": "Real Madrid", "away": "Manchester City", "note": "exemplu" },
+  { "date": "2026-11-26", "time": "18:45", "competition": "EL", "home": "Benfica", "away": "Juventus", "note": "exemplu" },
+  { "date": "2026-11-25", "time": "21:00", "competition": "CL", "home": "Club Brugge", "away": "LASK", "note": "exemplu (nu e tare)" }
+ ]
+}

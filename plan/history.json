@@ -1,0 +1,148 @@
+{
+ "_comment": "Ce s-a generat / publicat. Actualizat de generator; Max poate edita: status \"generated\" | \"published\" | \"discarded\", published_long (data-ora), published_reels.",
+ "runs": [
+  {
+   "published_long": null,
+   "published_reels": [],
+   "run": "2026-11-04_uel_top16_stadium_day_preview",
+   "generated_at": "2026-11-04T11:48:51.743Z",
+   "competition": "uel_top16",
+   "map": "stadium_day",
+   "accent": "#2F80ED",
+   "quality": "preview_720p",
+   "status": "discarded",
+   "forced_pair": null,
+   "fingerprint": {
+    "id": "2026-11-04_uel_top16_stadium_day_preview",
+    "competition": "uel_top16",
+    "competition_name": "MARBLE CONTINENTAL",
+    "map": "stadium_day",
+    "accent": "#2F80ED",
+    "colours": [
+     "#2F80ED",
+     "#8cc4ee",
+     "#2f6fd1"
+    ],
+    "music": "stride/up/2/116/seed1234",
+    "bracket": [
+     "benfica-sparta_praha",
+     "besiktas-sunderland",
+     "ferencvaros-rennes",
+     "lyon-olympiacos",
+     "crystal_palace-leverkusen",
+     "az-juventus",
+     "bournemouth-real_sociedad",
+     "omonia-union_sg"
+    ]
+   },
+   "note": "repetiție P4 (preview)"
+  },
+  {
+   "published_long": null,
+   "published_reels": [],
+   "run": "2026-11-04_nations_world_16_sunset_preview",
+   "generated_at": "2026-11-04T11:42:45.176Z",
+   "competition": "nations_world_16",
+   "map": "sunset",
+   "accent": "#F2994A",
+   "quality": "preview_720p",
+   "status": "discarded",
+   "forced_pair": null,
+   "fingerprint": {
+    "id": "2026-11-04_nations_world_16_sunset_preview",
+    "competition": "nations_world_16",
+    "competition_name": "MARBLE WORLD NATIONS",
+    "map": "sunset",
+    "accent": "#F2994A",
+    "colours": [
+     "#F2994A",
+     "#e98a6a",
+     "#2e3a66"
+    ],
+    "music": "warm/down/5/108/seed1234",
+    "bracket": [
+     "nt_spain-nt_usa",
+     "nt_belgium-nt_netherlands",
+     "nt_england-nt_germany",
+     "nt_portugal-nt_switzerland",
+     "nt_argentina-nt_italy",
+     "nt_mexico-nt_morocco",
+     "nt_croatia-nt_france",
+     "nt_brazil-nt_colombia"
+    ]
+   },
+   "note": "repetiție P4 (preview)"
+  },
+  {
+   "published_long": null,
+   "published_reels": [],
+   "run": "2026-11-04_uel_top16_stadium_day",
+   "generated_at": "2026-11-04T12:05:11.776Z",
+   "competition": "uel_top16",
+   "map": "stadium_day",
+   "accent": "#2F80ED",
+   "quality": "final_1080p",
+   "status": "generated",
+   "forced_pair": null,
+   "fingerprint": {
+    "id": "2026-11-04_uel_top16_stadium_day",
+    "competition": "uel_top16",
+    "competition_name": "MARBLE CONTINENTAL",
+    "map": "stadium_day",
+    "accent": "#2F80ED",
+    "colours": [
+     "#2F80ED",
+     "#8cc4ee",
+     "#2f6fd1"
+    ],
+    "music": "stride/up/2/116/seed1234",
+    "bracket": [
+     "benfica-sparta_praha",
+     "besiktas-sunderland",
+     "ferencvaros-rennes",
+     "lyon-olympiacos",
+     "crystal_palace-leverkusen",
+     "az-juventus",
+     "bournemouth-real_sociedad",
+     "omonia-union_sg"
+    ]
+   }
+  },
+  {
+   "published_long": null,
+   "published_reels": [],
+   "run": "2026-11-04_nations_euro_16_stadium_night_preview",
+   "generated_at": "2026-11-04T12:17:06.246Z",
+   "competition": "nations_euro_16",
+   "map": "stadium_night",
+   "accent": "#F2C94C",
+   "quality": "preview_720p",
+   "status": "discarded",
+   "forced_pair": null,
+   "fingerprint": {
+    "id": "2026-11-04_nations_euro_16_stadium_night_preview",
+    "competition": "nations_euro_16",
+    "competition_name": "MARBLE EURO NATIONS",
+    "map": "stadium_night",
+    "accent": "#F2C94C",
+    "colours": [
+     "#F2C94C",
+     "#1a3358",
+     "#f2f2f2"
+    ],
+    "music": "open/wave/-3/104/seed1234",
+    "bracket": [
+     "nt_spain-nt_ukraine",
+     "nt_croatia-nt_germany",
+     "nt_austria-nt_portugal",
+     "nt_belgium-nt_denmark",
+     "nt_france-nt_sweden",
+     "nt_italy-nt_switzerland",
+     "nt_england-nt_turkiye",
+     "nt_netherlands-nt_norway"
+    ]
+   },
+   "note": "repetiție P4 (preview)"
+  }
+ ]
+}

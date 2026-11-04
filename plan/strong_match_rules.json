@@ -1,0 +1,20 @@
+{
+ "_comment": "Reguli pentru „meci real tare” (citite de npm run next). Un meci e tare dacă: ambele echipe sunt în cele 16 ale competiției MARBLE potrivite, SAU una e în big_clubs, SAU ambele au poziția în faza ligii <= max_league_position. Se generează doar dacă ambele echipe sunt în cele 16 (altfel perechea nu poate fi forțată).",
+ "competition_map": { "CL": "ucl_2026_top16", "EL": "uel_top16", "WC": "nations_world_16", "EC": "nations_euro_16", "FRIENDLY_WORLD": "nations_world_16", "FRIENDLY_EURO": "nations_euro_16" },
+ "big_clubs": ["real_madrid", "barcelona", "bayern", "man_city", "liverpool", "psg", "arsenal", "inter", "juventus", "dortmund", "nt_spain", "nt_france", "nt_england", "nt_argentina", "nt_brazil", "nt_germany", "nt_portugal"],
+ "max_league_position": 12,
+ "lookahead_days": 10,
+ "min_days_between_long": 4,
+ "publish_long_local_time": "19:00",
+ "generate_hours_before_publish": 7,
+ "weekly_publish_local_time": "19:00",
+ "forced_round": "R16",
+ "aliases": {
+  "FC Barcelona": "barcelona", "Real Madrid CF": "real_madrid", "FC Bayern München": "bayern", "Bayern Munich": "bayern", "Manchester City FC": "man_city", "Manchester City": "man_city",
+  "Liverpool FC": "liverpool", "Paris Saint-Germain FC": "psg", "Arsenal FC": "arsenal", "FC Internazionale Milano": "inter", "Inter Milan": "inter", "Juventus FC": "juventus",
+  "Borussia Dortmund": "dortmund", "Aston Villa FC": "aston_villa", "Sporting Clube de Portugal": "sporting", "Real Betis Balompié": "real_betis", "VfB Stuttgart": "stuttgart",
+  "Como 1907": "como", "Club Brugge KV": "club_brugge", "LASK": "lask", "SL Benfica": "benfica", "Bayer 04 Leverkusen": "leverkusen", "AFC Bournemouth": "bournemouth",
+  "Olympique Lyonnais": "lyon", "Stade Rennais FC 1901": "rennes", "Real Sociedad de Fútbol": "real_sociedad", "Crystal Palace FC": "crystal_palace", "AC Sparta Praha": "sparta_praha",
+  "Sunderland AFC": "sunderland", "AZ": "az", "Beşiktaş JK": "besiktas", "Olympiakos SFP": "olympiacos", "Ferencvárosi TC": "ferencvaros", "Royale Union Saint-Gilloise": "union_sg", "AC Omonia": "omonia"
+ }
+}

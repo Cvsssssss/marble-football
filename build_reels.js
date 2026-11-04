@@ -91,7 +91,9 @@ async function main() {
   const showFile = path.join(BUILD, 'show.json');
   const { show } = TOUR.buildAll(compFile, showFile, { map: MAP });
   const index = TOUR.matchesIndex(show);
-  const sel = selectReels(index, 3);
+  // only matches whose reel fits in 60 s are candidates (a long match with many goals may not fit even fast-forwarded)
+  const fitIndex = Object.assign({}, index, { matches: index.matches.filter((m) => !m.goals.length || buildReel(show, m.index).seconds <= 60) });
+  const sel = selectReels(fitIndex, 3);
   fs.writeFileSync(path.join(OUT, 'selection.json'), JSON.stringify(sel, null, 1));
   console.log(`selection: ${sel.reels.length} reels (candidates ${sel.candidates}${sel.shortfall ? ', SHORTFALL ' + sel.shortfall : ''})`);
   const playerNames = show.teams.flatMap((t) => t.players.map((p) => p.name));

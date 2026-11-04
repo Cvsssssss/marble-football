@@ -30,14 +30,23 @@ function deficitMoment(m) {
   return best;
 }
 
+// reels must stay <= 60 s: if the normal protected windows leave too little to fast-forward (many goals/shots),
+// retry with shorter windows; reels that already fit are unchanged
+const HARD_MAX = 59.5;
 function buildReel(show, matchIndex, opts) {
+  let r;
+  for (const qs of [1, 0.6, 0.35]) { r = buildReelOnce(show, matchIndex, Object.assign({}, opts, { quietScale: qs })); if (r.seconds <= HARD_MAX) return r; }
+  return r;
+}
+function buildReelOnce(show, matchIndex, opts) {
   opts = opts || {};
+  const QB = QUIET_BEFORE * opts.quietScale, QA = QUIET_AFTER * opts.quietScale;
   const m = show.matches[matchIndex];
   const F = m.frames;
   // --- protected (normal speed) windows ---
   const keyT = [];
   for (const e of m.events) if (['goal', 'shot', 'golden', 'added'].includes(e.type) || (e.type === 'whistle' && e.kind !== 'half')) keyT.push(e.t); // half-time whistle may be fast-forwarded
-  const prot = (t) => keyT.some((k) => t > k - QUIET_BEFORE && t < k + QUIET_AFTER) || (F[0] && t < 1.0);
+  const prot = (t) => keyT.some((k) => t > k - QB && t < k + QA) || (F[0] && t < 1.0);
   // frame list for the match part: each output frame -> source frame index (float), ff flag
   const quiet = F.map((f, i) => !prot(f.t) && !(f.ts !== undefined && f.ts < 1) && !f.cam);
   // runs of quiet frames
@@ -74,7 +83,7 @@ function buildReel(show, matchIndex, opts) {
   let trimmedStart = 0;
   {
     const excess = Math.ceil((fixed + plan.length / FPS - TARGET_MAX + 0.3) * FPS);
-    const g0 = m.goals.length ? Math.round(m.goals[0].t * FPS) - Math.round(QUIET_BEFORE * FPS) - 15 : 0;
+    const g0 = m.goals.length ? Math.round(m.goals[0].t * FPS) - Math.round(QB * FPS) - 15 : 0;
     if (excess > 0 && g0 > 0) {
       let cut = 0; while (cut < plan.length && plan[cut].src < g0 && cut < excess) cut++;
       plan.splice(0, cut); trimmedStart = plan.length ? plan[0].src : 0;
@@ -128,7 +137,7 @@ function buildReel(show, matchIndex, opts) {
     reel: true, fps: FPS, totalFrames: total, winnerSide: m.winnerSide, map: show.map, audioCfg: show.audioCfg, seconds: +(total / FPS).toFixed(2), matchIndex, seed: m.seed, timeline_hash: m.hash,
     view: Object.assign({ zoom }, VIEW), segments: segs, audio,
     decisive: { goal: dg, team: ti(g.team), player: g.player, minute: CLOCK.minuteLabel(m, g.t, show.cfg.GAME_MIN_PER_SEC) },
-    ffStretches: chunks.filter(([a]) => ffMark[a]).length, trimmedStartS: +(trimmedStart / FPS).toFixed(2),
+    ffStretches: chunks.filter(([a]) => ffMark[a]).length, quietScale: opts.quietScale, trimmedStartS: +(trimmedStart / FPS).toFixed(2),
   };
 }
 
