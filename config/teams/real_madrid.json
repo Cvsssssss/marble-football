@@ -1,0 +1,2 @@
+{ "id": "real_madrid", "name": "Real Madrid", "short": "RMA", "primary": "#FFFFFF", "secondary": "#FEBE10", "strength": 89,
+  "players": [ { "name": "L. Varela", "number": 7 }, { "name": "M. Duarte", "number": 9 }, { "name": "J. Belmonte", "number": 11 } ] }

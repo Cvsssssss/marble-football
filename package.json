@@ -1,0 +1,22 @@
+{
+  "name": "marble-cup-demo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "node tests/run_tests.js",
+    "all": "node build_all.js --competition config/competitions/demo_4teams.json",
+    "start": "node build_all.js --competition config/competitions/demo_4teams.json",
+    "test:crossbar": "node tests/crossbar_test.js 5000 both",
+    "test:boost": "node tests/windmill_boost.js 300"
+  },
+  "dependencies": {
+    "ffmpeg-static": "^5.2.0",
+    "ffprobe-static": "^3.1.0",
+    "matter-js": "^0.19.0",
+    "playwright": "^1.48.2"
+  },
+  "allowScripts": {
+    "ffmpeg-static@5.2.0": true
+  }
+}

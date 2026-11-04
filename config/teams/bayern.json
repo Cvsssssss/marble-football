@@ -1,0 +1,2 @@
+{ "id": "bayern", "name": "Bayern Munich", "short": "BAY", "primary": "#DC052D", "secondary": "#FFFFFF", "strength": 87,
+  "players": [ { "name": "F. Brandt", "number": 9 }, { "name": "N. Kessler", "number": 10 }, { "name": "R. Albrecht", "number": 17 } ] }

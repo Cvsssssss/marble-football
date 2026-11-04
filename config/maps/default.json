@@ -1,0 +1,8 @@
+{
+  "id": "default",
+  "name": "Blue Sky",
+  "sky": ["#2f8fe6", "#6db9f5", "#b9e1fb"],
+  "rock": ["#9a6a45", "#7d5236", "#5b3a26"],
+  "grass": ["#86e05a", "#5cc23f", "#3a8f2c"],
+  "grass_blades": "#7fd957"
+}

@@ -1,0 +1,2 @@
+{ "id": "arsenal", "name": "Arsenal", "short": "ARS", "primary": "#EF0107", "secondary": "#FFFFFF", "strength": 86,
+  "players": [ { "name": "O. Whitfield", "number": 7 }, { "name": "S. Adeyemi", "number": 11 }, { "name": "C. Marlow", "number": 9 } ] }

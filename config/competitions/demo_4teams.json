@@ -1,0 +1,12 @@
+{
+  "id": "demo_4teams",
+  "name": "MARBLE CUP",
+  "subtitle": "MARBLE FOOTBALL TOURNAMENT",
+  "format": "semis_two_legs_final",
+  "teams": ["man_city", "real_madrid", "bayern", "arsenal"],
+  "pairing": [[0, 3], [1, 2]],
+  "map": "default",
+  "rules": "base",
+  "output": "output/demo_v2_1080p.mp4",
+  "screenshots": "output/screenshots_v2"
+}
