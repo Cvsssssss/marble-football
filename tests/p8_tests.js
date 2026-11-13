@@ -146,6 +146,7 @@ const COMP = (id) => path.join(ROOT, 'config', 'competitions', id + '.json');
     const b = await page.evaluate((g) => window.grabPNG(g), f + 40);
     const a2 = await page.evaluate((g) => window.grabPNG(g), f);
     const li = await page.evaluate(() => window.bgLayerInfo()), si = await page.evaluate(() => window.stadiumInfo());
+    li.layers = li.layers.filter((x) => x !== 'art:pro').map((x) => (x === 'sky:live' ? 'sky' : x)); // P9: pro art kit (sky drawn live, same order)
     check(`${id}: procedural stadium layers (sky -> scenery:bowl -> platforms), no image, animated fans + flags, deterministic frames, no errors`,
       !li.image && li.layers[0] === 'sky' && li.layers[1] === 'scenery:bowl' && li.layers.indexOf('platforms') > 1 && si && si.fans > 100 && si.flags >= 20 && a === a2 && a !== b && errors.length === 0, { layers: li.layers, si, errors });
     await page.close();

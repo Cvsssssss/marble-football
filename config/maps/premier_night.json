@@ -19,6 +19,7 @@
   "keeper": ["#35d0a0", "#1f9a74"],
   "platform_style": "blocks",
   "goal_style": "deep",
+  "art_style": "pro",
   "background_image": "assets/backgrounds/premier_night.png",
   "use_background_image": false,
   "bg_pitch_top": 0.83,

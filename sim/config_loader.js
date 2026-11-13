@@ -57,6 +57,7 @@ const S = {
       windmill_stripes: { type: 'boolean' }, crowd: { type: 'array', minItems: 2, maxItems: 6, items: { type: 'hex' } },
       roof: { type: 'array', minItems: 2, maxItems: 2, items: { type: 'hex' } }, screen: { type: 'array', minItems: 2, maxItems: 2, items: { type: 'hex' } },
       tint: { type: 'array', minItems: 2, maxItems: 2, items: { type: 'string' } }, rain: { type: 'boolean' },
+      art_style: { type: 'string', enum: ['classic', 'pro'] }, // P9: 'pro' = render/art_pro.js art kit (visual only); default classic
     },
   },
   rules: {

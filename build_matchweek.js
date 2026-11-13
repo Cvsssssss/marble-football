@@ -81,7 +81,7 @@ async function buildMatchweek(opts) {
         const BR = require('./build_reels');
         const rj = path.join(P.buildDir, 'reel.json'), vid = path.join(P.buildDir, 'reel_noaudio.mp4'), wav = path.join(P.buildDir, 'reel.wav');
         fs.writeFileSync(rj, JSON.stringify(reel));
-        const key = crypto.createHash('sha256').update(JSON.stringify(reel)).update(fs.readFileSync(path.join(ROOT, 'render', 'draw.js'))).update(show.background ? show.background.hash : '').digest('hex').slice(0, 16);
+        const key = crypto.createHash('sha256').update(JSON.stringify(reel)).update(fs.readFileSync(path.join(ROOT, 'render', 'draw.js'))).update(fs.readFileSync(path.join(ROOT, 'render', 'art_pro.js'))).update(show.background ? show.background.hash : '').digest('hex').slice(0, 16);
         if (!(fs.existsSync(vid) && fs.existsSync(vid + '.key') && fs.readFileSync(vid + '.key', 'utf8') === key)) { await BR.renderReel(show, reel, vid); fs.writeFileSync(vid + '.key', key); }
         run([path.join('audio', 'make_audio.py'), rj, wav], 'audio reel', py);
         BR.mux(vid, wav, path.join(dir, 'reel.mp4'));

@@ -111,7 +111,7 @@ async function main() {
     if (!NO_RENDER) {
     const vid = path.join(BUILD, `reel${r.rank}_noaudio.mp4`), wav = path.join(BUILD, `reel${r.rank}.wav`);
     // render cache: the silent video is reused when the reel timeline and the renderer are unchanged
-    const key = require('crypto').createHash('sha256').update(JSON.stringify(reel)).update(fs.readFileSync(path.join(ROOT, 'render', 'draw.js'))).digest('hex').slice(0, 16);
+    const key = require('crypto').createHash('sha256').update(JSON.stringify(reel)).update(fs.readFileSync(path.join(ROOT, 'render', 'draw.js'))).update(fs.readFileSync(path.join(ROOT, 'render', 'art_pro.js'))).digest('hex').slice(0, 16);
     const keyF = vid + '.key';
     if (!(fs.existsSync(vid) && fs.existsSync(keyF) && fs.readFileSync(keyF, 'utf8') === key)) { await renderReel(show, reel, vid); fs.writeFileSync(keyF, key); }
     else console.log(`reel ${r.rank}: video unchanged, reused`);

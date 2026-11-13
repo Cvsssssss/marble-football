@@ -129,7 +129,7 @@ async function stills(list, dir) {
 // ---- render cache: blocks of segments ----
 function rendererHash() {
   const h = crypto.createHash('sha256');
-  for (const f of ['render/draw.js', 'render/index.html', 'render/bracket_layout.js', 'render/bg_fit.js', 'render/league_layout.js', 'sim/geometry.js', 'sim/clock.js']) h.update(fs.readFileSync(path.join(ROOT, f)));
+  for (const f of ['render/draw.js', 'render/art_pro.js', 'render/index.html', 'render/bracket_layout.js', 'render/bg_fit.js', 'render/league_layout.js', 'sim/geometry.js', 'sim/clock.js']) h.update(fs.readFileSync(path.join(ROOT, f)));
   return h.digest('hex').slice(0, 12);
 }
 function blocks(show) {

@@ -1,0 +1,50 @@
+{
+ "cups": {
+  "demo_4teams.json": {
+   "simHash": "c60ce663297f6618",
+   "matches": [
+    "390ff493e65ec54c",
+    "e7bbc970430505cc",
+    "dea864d50e4f8dc0"
+   ]
+  },
+  "nations_euro_16.json": {
+   "simHash": "98b8f27fadfee0ec",
+   "matches": [
+    "2bde0286a879da78",
+    "105706c757655bcb",
+    "73938a72ca2ef214"
+   ]
+  },
+  "nations_world_16.json": {
+   "simHash": "ff2686f93f02905e",
+   "matches": [
+    "2bde0286a879da78",
+    "105706c757655bcb",
+    "73938a72ca2ef214"
+   ]
+  },
+  "ucl_2026_top16.json": {
+   "simHash": "a951f27ca7fb8534",
+   "matches": [
+    "2bde0286a879da78",
+    "105706c757655bcb",
+    "73938a72ca2ef214"
+   ]
+  },
+  "uel_top16.json": {
+   "simHash": "b039f31f0f87f043",
+   "matches": [
+    "2bde0286a879da78",
+    "105706c757655bcb",
+    "73938a72ca2ef214"
+   ]
+  }
+ },
+ "league": [
+  "b594c669c3eb0650",
+  "f427b4df15731463",
+  "f73f89ace178f777",
+  "07a9328e27602d45"
+ ]
+}

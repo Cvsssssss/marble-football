@@ -7,6 +7,9 @@
   const FONT = '"Bahnschrift", "Segoe UI", "Arial", sans-serif';
   let show, canvas, ctx, bgCanvas, segIndex = [], bgImg = null, bgLayers = [];
   const FPS = 30;
+  // P9: "pro" art kit (render/art_pro.js), on when show.map.art_style === 'pro'; SKY_PRO = sky + clouds drawn per frame
+  const ART = window.ARTPRO || null;
+  let PRO = false, SKY_PRO = false, lastSway = null, bgOut = null, bgBuilds = 0, bgFast = 0;
 
   // ---------- helpers ----------
   const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
@@ -36,7 +39,10 @@
     c.scale(BG_SS, BG_SS);
     // sky: clean blue vertical gradient
     const MAP = show.map;
-    bgLayers = [];
+    bgLayers = []; bgOut = null;
+    PRO = !!(ART && ART.enabled(MAP));
+    SKY_PRO = PRO && !bgImg && MAP.scenery === 'bowl';
+    if (PRO) ART.setup({ hash, rrect, hexA, shade, mixHex, lum, hexRgb, cloud }, G, show); // 'art:pro' is appended last to bgLayers
     if (bgImg) { // P7 §7b: Max's image as the background layer (cover-fit, bottom-anchored); nothing procedural behind it
       const F = bgFitInfo();
       c.drawImage(bgImg, F.dx, F.dy, F.dw, F.dh); bgLayers.push('image');
@@ -45,24 +51,30 @@
     } else {
       const sky = c.createLinearGradient(0, 0, 0, G.H);
       sky.addColorStop(0, MAP.sky[0]); sky.addColorStop(0.55, MAP.sky[1]); sky.addColorStop(1, MAP.sky[2]);
-      c.fillStyle = sky; c.fillRect(0, 0, G.W, G.H); bgLayers.push('sky');
+      if (!SKY_PRO) { c.fillStyle = sky; c.fillRect(0, 0, G.W, G.H); } bgLayers.push('sky'); // P9 pro: the sky is drawn live (ART.drawSky), still the first layer
       drawScenery(c, MAP); bgLayers.push('scenery:' + (MAP.scenery || 'none'));
     }
     // pipe (vertical part in the sky)
-    drawPipeBase(c, 'sky');
+    if (PRO) ART.pipeStatic(c, 'sky'); else drawPipeBase(c, 'sky');
     // platforms
-    const plat = MAP.platform_style === 'blocks' ? drawPlatformBlocks : drawPlatform;
+    const plat = PRO ? ART.platform : MAP.platform_style === 'blocks' ? drawPlatformBlocks : drawPlatform;
     plat(c, G.LEFT_PLAT[0] - 20, G.LEFT_PLAT[1], 1);
     plat(c, G.RIGHT_PLAT[0], G.RIGHT_PLAT[1] + 20, 2); bgLayers.push('platforms');
+    if (PRO) { ART.pipeStatic(c, 'ground'); bgLayers.push('pipe', 'art:pro'); buildBgOut(); return; }
     drawPipeBase(c, 'ground'); bgLayers.push('pipe');
     // spout hole + collar
     const sx = G.SPOUT_X, gy = G.GROUND_Y;
     c.fillStyle = '#2b2622'; c.beginPath(); c.ellipse(sx, gy + 1, G.BALL_R + 4, 5, 0, 0, Math.PI * 2); c.fill();
   }
+  function buildBgOut() { // P9 pro: the static background at output resolution (see drawScene)
+    bgOut = document.createElement('canvas'); bgOut.width = Math.round(G.W * S); bgOut.height = Math.round(G.H * S);
+    const c = bgOut.getContext('2d'); c.imageSmoothingEnabled = true; c.imageSmoothingQuality = 'high';
+    c.drawImage(bgCanvas, 0, 0, bgOut.width, bgOut.height); bgBuilds++;
+  }
   // P3 map themes: sparse background scenery behind the (identical) play layout
   function drawScenery(c, MAP) {
     const sc = MAP.scenery || 'none';
-    if (MAP.night) { // a few soft stars, fixed pattern
+    if (MAP.night && !SKY_PRO) { // a few soft stars, fixed pattern (P9 pro: in the live sky layer)
       let z = 7; const rnd = () => ((z = (z * 16807) % 2147483647) / 2147483647);
       c.fillStyle = 'rgba(255,255,255,0.55)';
       for (let i = 0; i < 38; i++) { const x = rnd() * G.W, y = 130 + rnd() * 250, r = 0.6 + rnd() * 1.1; c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fill(); }
@@ -165,11 +177,13 @@
   function drawBowl(c, MAP) {
     const L = stadLook(MAP), CR = L.CR, ST = L.ST;
     // sky detail: clouds (day / evening), a grey deck (overcast); night stars come from drawScenery
+    if (L.night && SKY_PRO) ART.buildSky(MAP, [], '#ffffff', 0, false);
     if (!L.night) {
       const ccol = L.overcast ? '#e9edf2' : L.evening ? '#f2b9a0' : '#ffffff';
       const CL = [[150, 70, 46], [330, 112, 30], [560, 48, 22], [800, 92, 34], [1010, 60, 26], [1170, 120, 40], [455, 170, 20], [905, 175, 22]];
-      for (const [x, y, s] of CL) cloud(c, x, y, s, ccol, L.overcast ? 0.55 : 0.85);
-      if (L.overcast) { const g = c.createLinearGradient(0, 0, 0, 220); g.addColorStop(0, 'rgba(120,128,140,0.45)'); g.addColorStop(1, 'rgba(120,128,140,0)'); c.fillStyle = g; c.fillRect(0, 0, G.W, 220); }
+      if (SKY_PRO) ART.buildSky(MAP, L.overcast ? CL.concat([[250, 30, 52], [700, 26, 48], [1100, 34, 50]]) : CL, ccol, L.overcast ? 0.6 : 0.88, L.overcast);
+      else for (const [x, y, s] of CL) cloud(c, x, y, s, ccol, L.overcast ? 0.55 : 0.85);
+      if (L.overcast && !SKY_PRO) { const g = c.createLinearGradient(0, 0, 0, 220); g.addColorStop(0, 'rgba(120,128,140,0.45)'); g.addColorStop(1, 'rgba(120,128,140,0)'); c.fillStyle = g; c.fillRect(0, 0, G.W, 220); }
     }
     // stand structure behind the crowd (tier backs)
     const tiers = [[STAD.roofInner, STAD.rib1, 1.25, 4.6], [(x) => STAD.rib1(x) + 7, STAD.rib2, 1.7, 6.0], [(x) => STAD.rib2(x) + 7, STAD.boards, 2.15, 7.4]];
@@ -259,6 +273,7 @@
     const sp = c.createLinearGradient(0, 262, 0, 340); sp.addColorStop(0, hexA(L.FL, 0.16 * L.glow)); sp.addColorStop(1, hexA(L.FL, 0));
     c.fillStyle = sp; bandPath(c, STAD.roofInner, STAD.rib1); c.fill(); // light spill on the upper tier
     c.restore();
+    if (PRO) ART.conesStatic(c, lights); // P9: floodlight cones (evening/night) + the lights that get a pulsing flare
     // pitch below the boards: mown stripes in perspective, halfway line, centre circle
     const py = STAD.pitch;
     const pg = c.createLinearGradient(0, py, 0, G.H); pg.addColorStop(0, shade(MAP.grass[1], 0.08)); pg.addColorStop(1, MAP.grass[2]);
@@ -269,6 +284,7 @@
     c.beginPath(); c.ellipse(SCX, 612, 132, 26, 0, 0, Math.PI * 2); c.stroke();
     c.fillStyle = '#ffffff'; c.beginPath(); c.ellipse(SCX, 612, 3, 1.4, 0, 0, Math.PI * 2); c.fill();
     c.fillStyle = 'rgba(0,0,0,0.22)'; c.fillRect(0, py, G.W, 3); // board shadow on the grass
+    if (PRO) ART.pitchStatic(c, py); // P9: grass detail, worn paint, light falloff, wall contact shadows, damp sheen
     // soft vignette (scenery only; the play objects are drawn above it)
     const vg = c.createRadialGradient(SCX, 380, 260, SCX, 380, 820); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, `rgba(5,8,20,${L.night ? 0.42 : 0.28})`);
     c.fillStyle = vg; c.fillRect(0, 0, G.W, G.H);
@@ -515,6 +531,15 @@
       c.strokeStyle = dark; c.lineWidth = G.HOOK_THICK + 2.5; c.stroke();
       c.strokeStyle = col; c.lineWidth = G.HOOK_THICK; c.stroke();
     }
+    millBar(c, col, dark);
+    c.restore();
+    // hub
+    const hg = c.createRadialGradient(hx - 3, hy - 3, 1, hx, hy, 11);
+    hg.addColorStop(0, '#f4f4f4'); hg.addColorStop(1, '#5d6670');
+    c.fillStyle = hg; c.beginPath(); c.arc(hx, hy, 10, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#39414a'; c.beginPath(); c.arc(hx, hy, 3.5, 0, Math.PI * 2); c.fill();
+  }
+  function millBar(c, col, dark) { // the approved bar fill (+ P7 bands) in windmill-local coordinates
     const bg = c.createLinearGradient(0, -G.MILL_THICK / 2, 0, G.MILL_THICK / 2);
     const v2 = col.toLowerCase() === '#e8553e'; // approved v2 look stays bit-identical
     bg.addColorStop(0, v2 ? '#ff8a6b' : mixHex(col, '#ffffff', 0.32)); bg.addColorStop(0.5, col); bg.addColorStop(1, v2 ? '#c23f2a' : mixHex(col, dark, 0.6));
@@ -527,12 +552,6 @@
       rrect(c, -G.MILL_HALF - 1, -G.MILL_THICK / 2, 2 * G.MILL_HALF + 2, G.MILL_THICK, 6);
     }
     c.strokeStyle = dark; c.lineWidth = 1.2; c.stroke();
-    c.restore();
-    // hub
-    const hg = c.createRadialGradient(hx - 3, hy - 3, 1, hx, hy, 11);
-    hg.addColorStop(0, '#f4f4f4'); hg.addColorStop(1, '#5d6670');
-    c.fillStyle = hg; c.beginPath(); c.arc(hx, hy, 10, 0, Math.PI * 2); c.fill();
-    c.fillStyle = '#39414a'; c.beginPath(); c.arc(hx, hy, 3.5, 0, Math.PI * 2); c.fill();
   }
 
   // ---------- goal ----------
@@ -680,6 +699,41 @@
   function lastEventBefore(m, type, t, filt) { let best = null; for (const e of m.events) { if (e.t > t) break; if (e.type === type && (!filt || filt(e))) best = e; } return best; }
 
   // ---------- scene ----------
+  // P9 pro: camera breathing (<= ~2 output px), deterministic in video time; 0 around goals (zoom), cinematic tracks
+  // and replays/reels (noCam / zoom options), faded in and out so it never jumps
+  function swayEnv(m, v) {
+    let env = 1;
+    for (const e of m.events) {
+      if (e.type !== 'goal' && e.type !== 'cine_in' && e.type !== 'cine_out') continue;
+      const ev = evV(e);
+      if (v < ev) env = Math.min(env, smooth((ev - v) / 0.5));
+      else if (e.type === 'goal') env = Math.min(env, smooth((v - ev - 1.9) / 0.6));
+      else if (e.type === 'cine_out') env = Math.min(env, smooth((v - ev) / 0.6));
+      else { const co = m.events.find((x) => x.type === 'cine_out' && x.k === e.k); if (!co || v < evV(co)) env = 0; }
+      if (env <= 0) return 0;
+    }
+    return env;
+  }
+  // P9 pro: windmill contacts seen in the timeline (ball inside the bar's reach + sudden velocity change), newest per ball
+  function millHits(m, fi) {
+    const out = [], R = G.BALL_R, reach = G.MILL_THICK / 2 + R + 3;
+    const touching = (f, b) => { const a = -f.m, dx = b[0] - G.HUB_X, dy = b[1] - G.HUB_Y; const lx = dx * Math.cos(a) - dy * Math.sin(a), ly = dx * Math.sin(a) + dy * Math.cos(a); return Math.abs(lx) <= G.MILL_HALF + R && Math.abs(ly) <= reach ? ly : null; };
+    for (let i = 0; i < 6; i++) {
+      for (let k = 0; k < 10; k++) {
+        const f = fi - k; if (f < 2 || f + 1 >= m.frames.length) continue;
+        const F0 = m.frames[f - 1], F1 = m.frames[f], F2 = m.frames[f + 1], b0 = F0.b[i], b1 = F1.b[i], b2 = F2.b[i];
+        if (!b0 || b0[3] !== 3 || b1[3] !== 3 || b2[3] !== 3) continue;
+        const ly = touching(F1, b1); if (ly === null || touching(F0, b0) !== null) continue;
+        const d1 = Math.max(1e-4, F1.t - F0.t), d2 = Math.max(1e-4, F2.t - F1.t);
+        const dv = Math.hypot((b2[0] - b1[0]) / d2 - (b1[0] - b0[0]) / d1, (b2[1] - b1[1]) / d2 - (b1[1] - b0[1]) / d1);
+        if (dv < 220) continue;
+        const s = ly >= 0 ? 1 : -1, nx = -Math.sin(F1.m) * s, ny = Math.cos(F1.m) * s; // contact normal (bar -> ball)
+        out.push({ x: b1[0] - nx * R, y: b1[1] - ny * R, nx, ny, t: F1.t, seed: f * 7 + i });
+        break;
+      }
+    }
+    return out;
+  }
   function drawScene(c, m, fr, opts) {
     opts = opts || {};
     const t = fr.t;
@@ -698,18 +752,33 @@
       }
     }
     if (opts.zoom) { zoom = opts.zoom.z; cx = opts.zoom.x; cy = opts.zoom.y; }
+    let sway = null;
+    if (PRO && !opts.noCam && !opts.zoom && !fr.cam && zoom === 1) {
+      const e = swayEnv(m, v);
+      if (e > 0) { sway = [(0.9 * Math.sin(v * 0.53 + 0.7) + 0.35 * Math.sin(v * 1.31)) * e, (0.7 * Math.sin(v * 0.41) + 0.28 * Math.sin(v * 1.07 + 2)) * e]; zoom = 1 + 2.9 / G.W * e; }
+    }
+    lastSway = sway ? [sway[0], sway[1], zoom] : null;
     // keep the camera window inside the scene (no black borders when zoomed)
     const hw = G.W / (2 * zoom), hh = G.H / (2 * zoom);
+    if (sway) { cx += sway[0]; cy += sway[1]; }
     cx = clamp(cx, hw, G.W - hw); cy = clamp(cy, hh, G.H - hh);
-    if (zoom > 1.0001) { const m = 6 / zoom; shx = clamp(shx, -m, m); shy = clamp(shy, -m, m); } else { shx = 0; shy = 0; }
+    if (zoom > 1.0001 && !sway) { const m = 6 / zoom; shx = clamp(shx, -m, m); shy = clamp(shy, -m, m); } else { shx = 0; shy = 0; }
     c.save();
     c.scale(S, S);
     c.translate(G.W / 2 + shx, G.H / 2 + shy); c.scale(zoom, zoom); c.translate(-cx, -cy);
-    c.drawImage(bgCanvas, 0, 0, G.W, G.H);
+    if (SKY_PRO) ART.drawSky(c, t);
+    // P9 pro: near 1:1 scale -> the background pre-downsampled to output size (high quality, once) drawn with 'medium'
+    // smoothing (bilinear); 'high' (bicubic) on the 2x cache costs ~16 ms/frame in headless Chromium. Zoomed shots
+    // (goal zoom, replays, cinematic) use the 2x cache with 'medium' (mipmapped bilinear). Classic maps: unchanged.
+    const eff = c.getTransform().a;
+    if (bgOut && Math.abs(eff - S) < 0.05 * S) { c.imageSmoothingQuality = 'medium'; c.drawImage(bgOut, 0, 0, G.W, G.H); c.imageSmoothingQuality = 'high'; bgFast++; }
+    else if (PRO) { c.imageSmoothingQuality = 'medium'; c.drawImage(bgCanvas, 0, 0, G.W, G.H); c.imageSmoothingQuality = 'high'; } // zoomed: 2x cache, mipmapped
+    else c.drawImage(bgCanvas, 0, 0, G.W, G.H);
     if (!bgImg && show.map.scenery === 'bowl') drawStadiumLive(c, t); // P8: moving fans + flags
+    if (PRO) { ART.ambient(c, t); ART.blades(c, t); }
     // balls inside the pipe (dim), then pipe glass over them
     fr.b.forEach((b, i) => { if (b[3] === 0 || b[3] === 1) drawBall(c, b[0], b[1], ballR(m, i) * 0.97, b[2], styleOf(m, i), 0.55); });
-    drawPipeGlass(c);
+    if (PRO) ART.pipeGlass(c); else drawPipeGlass(c);
     // emerging balls (clipped to above the ground, look like they rise out of the hole)
     fr.b.forEach((b, i) => {
       if (b[3] !== 2) return;
@@ -718,30 +787,61 @@
     });
     // spout collar + pop ring
     const sx = G.SPOUT_X, gy = G.GROUND_Y;
-    c.fillStyle = '#6f7c88'; rrect(c, sx - G.BALL_R - 9, gy - 4, 8, 7, 2); c.fill(); rrect(c, sx + G.BALL_R + 1, gy - 4, 8, 7, 2); c.fill();
     const pop = lastEventBefore(m, 'pop', t);
-    if (pop && t - pop.t < 0.45) {
-      const u = (t - pop.t) / 0.45;
-      c.strokeStyle = `rgba(255,255,255,${0.85 * (1 - u)})`; c.lineWidth = 2.5 * (1 - u) + 0.5;
-      c.beginPath(); c.ellipse(sx, gy - 2, 14 + 26 * easeOut(u), 4 + 7 * easeOut(u), 0, 0, Math.PI * 2); c.stroke();
+    if (PRO) ART.spout(c, t, pop, pop ? m.events.indexOf(pop) : 0);
+    else {
+      c.fillStyle = '#6f7c88'; rrect(c, sx - G.BALL_R - 9, gy - 4, 8, 7, 2); c.fill(); rrect(c, sx + G.BALL_R + 1, gy - 4, 8, 7, 2); c.fill();
+      if (pop && t - pop.t < 0.45) {
+        const u = (t - pop.t) / 0.45;
+        c.strokeStyle = `rgba(255,255,255,${0.85 * (1 - u)})`; c.lineWidth = 2.5 * (1 - u) + 0.5;
+        c.beginPath(); c.ellipse(sx, gy - 2, 14 + 26 * easeOut(u), 4 + 7 * easeOut(u), 0, 0, Math.PI * 2); c.stroke();
+      }
     }
-    drawWindmillStand(c);
+    if (PRO) ART.windmillStand(c); else drawWindmillStand(c);
     // goal: balls in the net drawn behind the net mesh
-    fr.b.forEach((b, i) => { if (b[3] === 4) drawBall(c, b[0], b[1], ballR(m, i), b[2], styleOf(m, i), 1); });
     const ne = lastEventBefore(m, 'goal', t);
-    let wob = null;
-    if (ne && t - ne.t < 0.9) { const u = (t - ne.t) / 0.9; wob = { a: 5 * (1 - u), p: u * 30, x: 1235, y: 500 }; }
-    if (show.map && show.map.goal_style === 'deep') drawNetDeep(c, wob, t); else drawNet(c, wob);
     const bh = lastEventBefore(m, 'bar', t);
-    drawGoalFrame(c, bh && t - bh.t < 0.25 ? 1 - (t - bh.t) / 0.25 : 0);
+    if (PRO) ART.goalBack(c, t);
+    fr.b.forEach((b, i) => { if (b[3] === 4) drawBall(c, b[0], b[1], ballR(m, i), b[2], styleOf(m, i), 1); });
+    if (PRO) {
+      const st = { rip: null, vib: 0, barFlash: bh && t - bh.t < 0.25 ? 1 - (t - bh.t) / 0.25 : 0, barX: bh && bh.x != null ? bh.x : 1220, flash: 0, fx: 0, fy: 0 };
+      if (ne && t - ne.t < 1.2) {
+        const u = t - ne.t, gb = frameAtTime(m, ne.t).fr.b[ne.ball] || [1235, 500];
+        st.rip = { x: clamp(gb[0], G.GOAL_LINE_X + 10, G.W - 10), y: clamp(gb[1], G.BAR_Y + 10, G.GROUND_Y - 6), u, a: 7 };
+        st.vib = 1.1 * Math.exp(-u * 6); st.flash = u < 0.3 ? 1 - u / 0.3 : 0; st.fx = st.rip.x; st.fy = st.rip.y;
+      }
+      if (bh && t - bh.t < 0.6) st.vib = Math.max(st.vib, 1.4 * Math.exp(-(t - bh.t) * 7));
+      ART.goalFront(c, t, st);
+      if (ne && !opts.noFx) { const k = m.kits[ne.team]; ART.goalDust(c, st.rip ? st.rip.x : 1235, st.rip ? st.rip.y : 520, t - ne.t, m.events.indexOf(ne), [show.map.grass[1], k.primary]); }
+    } else {
+      let wob = null;
+      if (ne && t - ne.t < 0.9) { const u = (t - ne.t) / 0.9; wob = { a: 5 * (1 - u), p: u * 30, x: 1235, y: 500 }; }
+      if (show.map && show.map.goal_style === 'deep') drawNetDeep(c, wob, t); else drawNet(c, wob);
+      drawGoalFrame(c, bh && t - bh.t < 0.25 ? 1 - (t - bh.t) / 0.25 : 0);
+    }
     // shadows
-    fr.b.forEach((b, i) => { if (b[3] === 3) drawShadow(c, b[0], b[1], ballR(m, i)); });
-    drawKeeper(c, fr.k);
-    drawWindmill(c, fr.m);
-    // motion trails for fast balls
+    fr.b.forEach((b, i) => { if (b[3] === 3) (PRO ? ART.ballShadow : drawShadow)(c, b[0], b[1], ballR(m, i)); });
+    if (PRO) ART.keeper(c, fr.k, t); else drawKeeper(c, fr.k);
+    if (PRO) {
+      const WM = show.map.windmill || ['#e8553e', '#a8321f'];
+      const pf = opts.frameIndex != null ? matchFrame(m, opts.frameIndex - 1) : fr;
+      ART.windmill(c, fr.m, fr.m - pf.m, t, (cc) => millBar(cc, WM[0], WM[1]));
+      if (opts.frameIndex != null && !opts.noFx) for (const h of millHits(m, opts.frameIndex)) ART.millSpark(c, h.x, h.y, t - h.t, h.nx, h.ny, h.seed);
+    } else drawWindmill(c, fr.m);
+    // motion trails for fast balls (P9 pro: tapered streak, only for bomb shots)
     if (opts.trail !== false && opts.frameIndex != null) {
       for (let i = 0; i < fr.b.length; i++) {
         const b = fr.b[i]; if (b[3] !== 3) continue;
+        if (PRO) {
+          const pf = matchFrame(m, opts.frameIndex - 1), pb = pf.b[i];
+          if (pb[3] !== 3) continue;
+          const sp = Math.hypot(b[0] - pb[0], b[1] - pb[1]) / Math.max(1e-6, fr.t - pf.t);
+          if (sp < 700) continue;
+          const pts = [[b[0], b[1]]];
+          for (let k = 1; k <= 4; k++) { const q = matchFrame(m, opts.frameIndex - k * (opts.trailStep || 1)).b[i]; if (q[3] !== 3 || Math.hypot(q[0] - pts[pts.length - 1][0], q[1] - pts[pts.length - 1][1]) > 120) break; pts.push([q[0], q[1]]); }
+          ART.trail(c, pts, ballR(m, i), styleOf(m, i).ring || m.kits[teamOf(i)].primary, clamp((sp - 700) / 500, 0, 1));
+          continue;
+        }
         for (let k = 4; k >= 1; k--) {
           const pf = matchFrame(m, opts.frameIndex - k * (opts.trailStep || 1)); const pb = pf.b[i];
           if (pb[3] !== 3) continue;
@@ -753,9 +853,10 @@
         }
       }
     }
-    fr.b.forEach((b, i) => { if (b[3] === 3 || b[3] === 5) drawBall(c, b[0], b[1], ballR(m, i), b[2], styleOf(m, i), 1); });
+    fr.b.forEach((b, i) => { if (b[3] === 3 || b[3] === 5) { drawBall(c, b[0], b[1], ballR(m, i), b[2], styleOf(m, i), 1); if (PRO) ART.ballGloss(c, b[0], b[1], ballR(m, i)); } });
     if (!opts.noFx) goalFx(c, m, v);
-    if (show.map && show.map.rain) { // light drizzle streaks (deterministic in time)
+    if (PRO) ART.rain(c, t);
+    else if (show.map && show.map.rain) { // light drizzle streaks (deterministic in time)
       c.strokeStyle = 'rgba(200,215,240,0.22)'; c.lineWidth = 1;
       for (let i = 0; i < 70; i++) { const h1 = hash(i * 17 + 5), h2 = hash(i * 29 + 9); const y = ((h2 * G.H + t * 520) % (G.H + 40)) - 20, x = (h1 * (G.W + 80) - t * 90 + 4000) % (G.W + 80) - 40; c.beginPath(); c.moveTo(x, y); c.lineTo(x - 4, y + 14); c.stroke(); }
     }
@@ -787,6 +888,7 @@
       if (cols[k % cols.length].toLowerCase() === '#ffffff') { c.strokeStyle = 'rgba(0,0,0,0.25)'; c.lineWidth = 0.6; c.strokeRect(-w / 2, -hh / 2, w, hh); }
       c.restore();
     }
+    if (PRO) ART.goalExtras(c, u, cols, gi, ox, oy); // P9: sparks in the scorer's colours + light sweep
     if (lg.golden) { // golden shockwave rings from the goal
       for (const d of [0, 0.18]) {
         const q = (u - d) / 1.0; if (q <= 0 || q >= 1) continue;
@@ -801,6 +903,9 @@
   }
 
   // ---------- overlays ----------
+  // P9 §6: UI panel. Classic = the old flat fill (unchanged); pro = same rectangle with gradient sheen, edge and soft shadow
+  function uiPanel(c, x, y, w, h, r, fill) { if (PRO) ART.panel(c, x, y, w, h, r, fill); else { c.fillStyle = fill; rrect(c, x, y, w, h, r); c.fill(); } }
+  function uiScoreBox(c, x, y, w, h, r) { if (PRO) ART.scoreBox(c, x, y, w, h, r); else { c.fillStyle = '#ffffff'; rrect(c, x, y, w, h, r); c.fill(); } }
   function teamName(i) { return show.teams[i].name; }
   function clockText(m, t) { return window.CLOCK.clockAt(m, t, show.cfg.GAME_MIN_PER_SEC); }
   function ballIcon(c, x, y, r, st, filled) {
@@ -817,18 +922,18 @@
     c.font = `700 15px ${FONT}`; const lw = c.measureText(label).width + 26;
     const maxLW = G.W / 2 - 270 - 16 - 12; // never reach the scoreboard
     if (lw <= maxLW) {
-      c.fillStyle = 'rgba(8,20,38,0.72)'; rrect(c, 16, 14, lw, 30, 15); c.fill();
+      uiPanel(c, 16, 14, lw, 30, 15, 'rgba(8,20,38,0.72)');
       text(c, label, 16 + lw / 2, 29.5, 15, '#ffffff');
     } else { // long stage names (QUARTER-FINAL n · LEG n): two lines
       const l1 = CN, l2 = m.league ? m.stage : m.leg === 'FINAL' ? 'FINAL' : `${m.stage} · ${m.leg}`;
       c.font = `700 14px ${FONT}`; const w2 = Math.min(maxLW, Math.max(c.measureText(l1).width, c.measureText(l2).width) + 26);
-      c.fillStyle = 'rgba(8,20,38,0.72)'; rrect(c, 16, 12, w2, 46, 14); c.fill();
+      uiPanel(c, 16, 12, w2, 46, 14, 'rgba(8,20,38,0.72)');
       text(c, l1, 16 + w2 / 2, 25.5, fitText(c, l1, w2 - 20, 13), 'rgba(255,255,255,0.78)');
       text(c, l2, 16 + w2 / 2, 44, fitText(c, l2, w2 - 20, 14), '#ffffff');
     }
     // scoreboard (top centre)
     const cx = G.W / 2, y = 16, h = 52, half = 270;
-    c.fillStyle = 'rgba(8,20,38,0.80)'; rrect(c, cx - half, y, 2 * half, h, 14); c.fill();
+    uiPanel(c, cx - half, y, 2 * half, h, 14, 'rgba(8,20,38,0.80)');
     const sc = fr.sc;
     // team A
     kitDot(c, m.kits.A, cx - half + 24, y + h / 2 - 9, 8);
@@ -843,7 +948,7 @@
       ballIcon(c, cx + half - 48 - q * 21, y + h / 2 + 13, 8.5, kitStyle(m.kits.B), fr.b[ib][3] >= 2 && fr.b[ib][3] <= 4);
     }
     // score box
-    c.fillStyle = '#ffffff'; rrect(c, cx - 62, y + 6, 124, h - 12, 9); c.fill();
+    uiScoreBox(c, cx - 62, y + 6, 124, h - 12, 9);
     // score: the scoring team's number "pops" (scale + team colour flash)
     const pop = opts.scorePop || null;
     text(c, '–', cx, y + h / 2 + 1, 34, '#0b1a2e', 'center', 800);
@@ -857,7 +962,7 @@
     // aggregate
     if (m.leg === 'LEG 2') {
       const ag = [m.prev[0] + sc[0], m.prev[1] + sc[1]];
-      c.fillStyle = 'rgba(8,20,38,0.80)'; rrect(c, cx - 58, y + h + 4, 116, 26, 9); c.fill();
+      uiPanel(c, cx - 58, y + h + 4, 116, 26, 9, 'rgba(8,20,38,0.80)');
       text(c, `AGG (${ag[0]}–${ag[1]})`, cx, y + h + 17.5, 16, '#ffd84a', 'center', 700);
     }
     // clock
@@ -869,11 +974,11 @@
       text(c, `GOLDEN BALL · ${ck.main}`, cx, cyk + 15.5, 17, '#2a1a00', 'center', 800); // clock frozen at 90+added
     } else {
       if (ck.phase === 'shots') { // 90+k' and the shot counter
-        c.fillStyle = 'rgba(8,20,38,0.80)'; rrect(c, cx - 82, cyk, 164, 30, 10); c.fill();
+        uiPanel(c, cx - 82, cyk, 164, 30, 10, 'rgba(8,20,38,0.80)');
         text(c, ck.main, cx - 36, cyk + 15.5, 19, '#ffffff', 'center', 700);
         c.fillStyle = '#ffd84a'; rrect(c, cx + 4, cyk + 5, 72, 20, 6); c.fill(); text(c, `SHOT ${ck.shot}/${ck.added}`, cx + 40, cyk + 15.5, 13, '#1a1200', 'center', 800);
       } else {
-        c.fillStyle = 'rgba(8,20,38,0.80)'; rrect(c, cx - 44, cyk, 88, 30, 10); c.fill();
+        uiPanel(c, cx - 44, cyk, 88, 30, 10, 'rgba(8,20,38,0.80)');
         text(c, ck.main, cx - (ck.plus ? 14 : 0), cyk + 15.5, 19, '#ffffff', 'center', 700);
         if (ck.plus) { c.fillStyle = '#ffd84a'; rrect(c, cx + 8, cyk + 5, 34, 20, 6); c.fill(); text(c, `+${ck.plus}`, cx + 25, cyk + 15.5, 15, '#1a1200', 'center', 800); }
       }
@@ -913,6 +1018,12 @@
     c.shadowColor = 'rgba(0,0,0,0.35)'; c.shadowBlur = 18; c.shadowOffsetY = 4;
     c.fillStyle = body; slant(cx - W2, cx + W2, cy - H1, cy + H1, 22); c.fill();
     c.shadowColor = 'transparent';
+    if (PRO) { // P9: glass sheen + a light glint that sweeps across the panel once it has landed
+      const sg = c.createLinearGradient(0, cy - H1, 0, cy + H1); sg.addColorStop(0, 'rgba(255,255,255,0.16)'); sg.addColorStop(0.48, 'rgba(255,255,255,0.03)'); sg.addColorStop(0.5, 'rgba(0,0,0,0)'); sg.addColorStop(1, 'rgba(0,0,0,0.18)');
+      c.fillStyle = sg; slant(cx - W2, cx + W2, cy - H1, cy + H1, 22); c.fill();
+      const q = clamp((u - 0.35) / 0.55, 0, 1);
+      if (q > 0 && q < 1) { c.save(); slant(cx - W2, cx + W2, cy - H1, cy + H1, 22); c.clip(); const gx = cx - W2 - 80 + q * (2 * W2 + 160), gg = c.createLinearGradient(gx - 50, 0, gx + 50, 0); gg.addColorStop(0, 'rgba(255,255,255,0)'); gg.addColorStop(0.5, 'rgba(255,255,255,0.22)'); gg.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = gg; c.fillRect(gx - 50, cy - H1, 100, 2 * H1); c.restore(); }
+    }
     for (const [dx, col] of [[-W2 - 2, kit.primary], [-W2 + 16, kit.secondary], [W2 - 16, kit.secondary], [W2 - 34, kit.primary]]) {
       c.fillStyle = col; slant(cx + dx, cx + dx + 18, cy - H1, cy + H1, 22); c.fill();
     }
@@ -935,7 +1046,7 @@
     const sa = smooth((u - 0.3) / 0.25);
     c.globalAlpha = (1 - outU) * sa;
     const sy = cy + H1 + 30;
-    c.fillStyle = 'rgba(8,20,38,0.92)'; rrect(c, cx - sw / 2, sy, sw, 44, 10); c.fill();
+    uiPanel(c, cx - sw / 2, sy, sw, 44, 10, 'rgba(8,20,38,0.92)');
     text(c, sl, cx, sy + 23, 26, '#ffffff', 'center', 800);
     c.restore();
   }
@@ -970,6 +1081,7 @@
       const gr = c.createRadialGradient(OUT_W / 2, OUT_H / 2, OUT_H * 0.45, OUT_W / 2, OUT_H / 2, OUT_W * 0.65);
       gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, `rgba(0,0,0,${0.38 * w})`);
       c.fillStyle = gr; c.fillRect(0, 0, OUT_W, OUT_H); c.restore();
+      if (PRO) { c.save(); c.setTransform(1, 0, 0, 1, 0, 0); ART.slowmo(c, OUT_W, OUT_H, clamp(w, 0, 1), fr.t); c.restore(); }
     }
     // goal moment (only the latest goal; ~2 s; golden goal ~3 s with its own effect)
     const lg = lastEventBeforeV(m, 'goal', v);
@@ -1005,7 +1117,7 @@
       const lab = `SHOT ${sh.k} OF ${sh.n} · ${teamName(ti).toUpperCase()}`;
       c.font = `800 20px ${FONT}`; const w = c.measureText(lab).width + 60;
       const y = m.leg === 'LEG 2' ? 150 : 120;
-      c.fillStyle = 'rgba(8,20,38,0.88)'; rrect(c, G.W / 2 - w / 2, y, w, 36, 10); c.fill();
+      uiPanel(c, G.W / 2 - w / 2, y, w, 36, 10, 'rgba(8,20,38,0.88)');
       kitDot(c, kit, G.W / 2 - w / 2 + 20, y + 18, 8);
       text(c, lab, G.W / 2 + 10, y + 19, 20, '#ffffff', 'center', 800);
       c.restore();
@@ -1391,7 +1503,8 @@
 
   function matchCard(c, m, title, lines, alpha) {
     c.save(); c.scale(S, S); c.globalAlpha = alpha;
-    c.fillStyle = 'rgba(8,20,38,0.95)'; rrect(c, G.W / 2 - 360, 230, 720, 230, 22); c.fill();
+    if (PRO) { const k = 0.94 + 0.06 * easeOutBack(alpha); c.translate(G.W / 2, 345); c.scale(k, k); c.translate(-G.W / 2, -345); }
+    uiPanel(c, G.W / 2 - 360, 230, 720, 230, 22, 'rgba(8,20,38,0.95)');
     text(c, title, G.W / 2, 275, 22, '#8fb0dc', 'center', 700);
     lines.forEach((l, i) => { const z = fitText(c, l.s, 680, l.size || 40, l.w || 800); text(c, l.s, G.W / 2, 330 + i * 52, z, l.color || '#ffffff', 'center', l.w || 800); });
     c.restore();
@@ -1433,7 +1546,7 @@
   // one table frame. rows: [{ ti, slot (0-based float), pos, p, w, d, l, gd, pts, hl, arrow, pulse, form, a, dx }]
   function drawTable(c, L, rows) {
     const C = L.cols, x = L.x, rh = L.rowH;
-    c.fillStyle = 'rgba(8,20,38,0.88)'; rrect(c, x - 8, L.y - 30, L.w + 16, 20 * rh + 38, 12); c.fill();
+    uiPanel(c, x - 8, L.y - 30, L.w + 16, 20 * rh + 38, 12, 'rgba(8,20,38,0.88)');
     const hy = L.headY;
     c.globalAlpha = 0.85;
     text(c, '#', x + C.pos, hy, L.headFont, '#9fb6d6', 'center', 700); text(c, 'CLUB', x + C.name, hy, L.headFont, '#9fb6d6', 'left', 700);
@@ -1445,14 +1558,14 @@
     for (let i = 0; i < 20; i++) {
       const y = L.y + i * rh, z = zoneAtPos(i + 1);
       if (i % 2 === 0) { c.fillStyle = 'rgba(255,255,255,0.035)'; c.fillRect(x, y, L.w, rh); }
-      if (z) { c.fillStyle = z.colour; c.fillRect(x + C.stripe, y + 2, 5, rh - 4); }
+      if (z) { c.fillStyle = z.colour; if (PRO) { rrect(c, x + C.stripe, y + 2, 5, rh - 4, 2.5); c.fill(); c.fillStyle = 'rgba(255,255,255,0.35)'; c.fillRect(x + C.stripe + 1, y + 3, 1.2, rh - 6); } else c.fillRect(x + C.stripe, y + 2, 5, rh - 4); }
       if (z && lgZones().some((q) => q.to === i + 1 && i < 19)) { c.fillStyle = hexA(z.colour, 0.55); c.fillRect(x, y + rh - 1, L.w, 1.2); }
     }
     const order = rows.slice().sort((a, b) => (a.hl ? 1 : 0) - (b.hl ? 1 : 0));
     for (const r of order) {
       const y = L.y + r.slot * rh, cy = y + rh / 2;
       c.save(); c.globalAlpha = r.a == null ? 1 : r.a; c.translate(r.dx || 0, 0);
-      if (r.hl) { c.fillStyle = 'rgba(47,211,196,0.20)'; rrect(c, x + 7, y + 1, L.w - 9, rh - 2, 5); c.fill(); c.strokeStyle = hexA(LG_ACC, 0.8); c.lineWidth = 1.2; rrect(c, x + 7, y + 1, L.w - 9, rh - 2, 5); c.stroke(); }
+      if (r.hl) { if (PRO) { const hg = c.createLinearGradient(x, 0, x + L.w, 0); hg.addColorStop(0, 'rgba(47,211,196,0.30)'); hg.addColorStop(1, 'rgba(47,211,196,0.10)'); c.fillStyle = hg; } else c.fillStyle = 'rgba(47,211,196,0.20)'; rrect(c, x + 7, y + 1, L.w - 9, rh - 2, 5); c.fill(); c.strokeStyle = hexA(LG_ACC, 0.8); c.lineWidth = 1.2; rrect(c, x + 7, y + 1, L.w - 9, rh - 2, 5); c.stroke(); }
       if (r.pulse) { c.fillStyle = hexA(r.pulse.colour, 0.42 * r.pulse.k); rrect(c, x + 7, y + 1, L.w - 9, rh - 2, 5); c.fill(); }
       const T = show.teams[r.ti];
       text(c, String(r.pos), x + C.pos, cy + 0.5, L.font, '#ffffff', 'center', 800);
@@ -1464,6 +1577,7 @@
       if (C.form && r.form) formDots(c, r.form, x + C.form, cy, 7.5);
       if (r.arrow) {
         const up = r.arrow.d < 0, ax = x + C.arrow, col = up ? '#2fbf71' : '#e5484d';
+        if (PRO) { const k = 0.6 + 0.4 * easeOutBack(r.arrow.a); c.translate(ax, cy); c.scale(k, k); c.translate(-ax, -cy); } // small overshoot as the arrow appears
         c.globalAlpha *= r.arrow.a; c.fillStyle = col; c.beginPath();
         if (up) { c.moveTo(ax - 6, cy + 4); c.lineTo(ax + 6, cy + 4); c.lineTo(ax, cy - 5); } else { c.moveTo(ax - 6, cy - 4); c.lineTo(ax + 6, cy - 4); c.lineTo(ax, cy + 5); }
         c.closePath(); c.fill(); text(c, String(Math.abs(r.arrow.d)), ax + 16, cy + 0.5, 13, col, 'center', 800);
@@ -1566,7 +1680,7 @@
     c.globalAlpha = a;
     // result card (left)
     const x0 = 34, y0 = 82, w = 420, h = 310;
-    c.fillStyle = LG_PANEL; rrect(c, x0, y0, w, h, 18); c.fill();
+    uiPanel(c, x0, y0, w, h, 18, LG_PANEL);
     text(c, 'FULL TIME', x0 + w / 2, y0 + 30, 18, '#ffd84a', 'center', 900);
     text(c, `MATCHWEEK ${m.week} · MATCH ${seg.match + 1} OF ${show.matches.length}`, x0 + w / 2, y0 + 54, 13, '#9fc7ff', 'center', 700);
     crest(c, m.ta, x0 + 90, y0 + 120, 30); crest(c, m.tb, x0 + w - 90, y0 + 120, 30);
@@ -2002,6 +2116,7 @@
     }));
   };
   // P7 §7b test hooks: background layer order and the cover-fit actually used
+  window.artInfo = () => ({ pro: PRO, skyLive: SKY_PRO, sway: lastSway, bgBuilds, bgFast, bgOut: bgOut ? [bgOut.width, bgOut.height] : null, stats: ART ? ART.stats() : null, layers: bgLayers.slice() }); // P9 tests
   window.bgLayerInfo = () => ({ image: !!bgImg, layers: bgLayers.slice(), fit: bgImg ? bgFitInfo() : null, imgSize: bgImg ? [bgImg.naturalWidth, bgImg.naturalHeight] : null });
   window.stadiumInfo = () => (stadLive ? { fans: stadLive.fans.length, flags: stadLive.flags.length, curves: { roofInner: STAD.roofInner(640), rib1: STAD.rib1(640), rib2: STAD.rib2(640), boards: STAD.boards(640), pitch: STAD.pitch } } : null); // P8 tests
   window.fallbackDecalOf = (id) => (logoImgs[id] && logoImgs[id].fallback ? logoImgs[id].toDataURL('image/png') : null);
@@ -2058,12 +2173,12 @@
   }
   function reelScoreboard(c, m, sc, clock, extra) {
     const x = SAFE.x0, y = 168, w = SAFE.x1 - SAFE.x0, h = 210, cx = x + w / 2;
-    c.fillStyle = 'rgba(8,20,38,0.92)'; rrect(c, x, y, w, h, 22); c.fill(); box('scoreboard', x, y, w, h);
+    uiPanel(c, x, y, w, h, 22, 'rgba(8,20,38,0.92)'); box('scoreboard', x, y, w, h);
     const L = x + 22, R = x + w - 22;
     kitDot(c, m.kits.A, L + 10, y + 36, 10); kitDot(c, m.kits.B, R - 10, y + 36, 10);
     let z = fitText(c, teamName(m.ta), w / 2 - 50, 28, 800); text(c, teamName(m.ta), L + 28, y + 37, z, '#ffffff', 'left', 800);
     z = fitText(c, teamName(m.tb), w / 2 - 50, 28, 800); text(c, teamName(m.tb), R - 28, y + 37, z, '#ffffff', 'right', 800);
-    c.fillStyle = '#ffffff'; rrect(c, cx - 125, y + 64, 250, 92, 16); c.fill();
+    uiScoreBox(c, cx - 125, y + 64, 250, 92, 16);
     text(c, `${sc[0]} – ${sc[1]}`, cx, y + 112, 78, '#0b1a2e', 'center', 900);
     c.fillStyle = 'rgba(255,255,255,0.12)'; rrect(c, L, y + 88, 104, 44, 12); c.fill();
     text(c, clock, L + 52, y + 111, fitText(c, clock, 94, 28), '#ffffff', 'center', 800);
@@ -2077,7 +2192,7 @@
   // below the field: info strip (always) + comeback badge (once the winner has come from behind)
   function reelInfo(c, m, comebackNow) {
     const y = 905, x = SAFE.x0, w = SAFE.x1 - SAFE.x0;
-    c.fillStyle = 'rgba(8,20,38,0.80)'; rrect(c, x, y, w, 46, 12); c.fill(); box('info', x, y, w, 46);
+    uiPanel(c, x, y, w, 46, 12, 'rgba(8,20,38,0.80)'); box('info', x, y, w, 46);
     const t = m.league ? `${m.stage.toLowerCase().replace(/^m/, 'M')} · ${show.league.season} · computer simulation` : `${(m.roundName || m.stage)} · ${m.leg === 'FINAL' ? 'final' : m.leg.toLowerCase()} · computer simulation`;
     text(c, t, x + w / 2, y + 24, fitText(c, t, w - 30, 18, 700), '#c9dcff', 'center', 700);
     if (comebackNow) {
