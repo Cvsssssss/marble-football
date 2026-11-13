@@ -86,7 +86,7 @@ async function buildMatchweek(opts) {
         run([path.join('audio', 'make_audio.py'), rj, wav], 'audio reel', py);
         BR.mux(vid, wav, path.join(dir, 'reel.mp4'));
       }
-      const info = { rank: 1, id: r.id, rendered: !opts.dryRun, seconds: reel.seconds, seed: reel.seed, timeline_hash: reel.timeline_hash, ffStretches: reel.ffStretches, ffSpeed: reel.ffSpeed || 2,
+      const info = { rank: 1, id: r.id, rendered: !opts.dryRun, seconds: reel.seconds, seed: reel.seed, timeline_hash: reel.timeline_hash, ffStretches: 0, speed: 1, extras: reel.extras,
         segments: reel.segments.map((x) => ({ type: x.type, start: x.start, len: x.len })) };
       fs.writeFileSync(path.join(dir, 'reel_info.json'), JSON.stringify(info, null, 1));
       reelsInfo.push(Object.assign({ dir: `reels/reel_${r.id}`, sel: r }, info));

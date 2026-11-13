@@ -92,8 +92,8 @@ async function main() {
   const showFile = path.join(BUILD, 'show.json');
   const { show } = TOUR.buildAll(compFile, showFile, { map: MAP });
   const index = TOUR.matchesIndex(show);
-  // only matches whose reel fits the 30..55 s spec are candidates (P5: was <= 60 s; a busy match may not fit even fast-forwarded)
-  const fitIndex = Object.assign({}, index, { matches: index.matches.filter((m) => !m.goals.length || buildReel(show, m.index).seconds <= TARGET_MAX + 1) });
+  // P8: only matches whose reel (whole match at normal speed + shortened extras) fits <= 59 s are candidates; a longer one is skipped, never sped up
+  const fitIndex = Object.assign({}, index, { matches: index.matches.filter((m) => !m.goals.length || buildReel(show, m.index).fits) });
   const sel = selectReel(fitIndex);
   // exactly one reel per run: folders of earlier reels (P3-P5 made three) are removed from this run's reels/ folder
   for (const d of fs.readdirSync(OUT)) if (/^reel/.test(d) && fs.statSync(path.join(OUT, d)).isDirectory() && (!sel.reels[0] || d !== `reel_${sel.reels[0].id}`)) fs.rmSync(path.join(OUT, d), { recursive: true, force: true });

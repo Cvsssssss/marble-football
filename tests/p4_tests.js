@@ -95,7 +95,9 @@ const runs = fs.existsSync(runsDir) ? fs.readdirSync(runsDir).filter((r) => fs.e
 // P5: runs whose videos still exist first (Max's own runs), else the newest dry run (`generate.js --dry-run`, no videos)
 const hasVideo = (r) => { try { const j = JSON.parse(fs.readFileSync(path.join(runsDir, r, 'run.json'), 'utf8')); return fs.existsSync(path.join(runsDir, r, j.long_video.file)); } catch (e) { return false; } };
 // P6: only runs made by the current pipeline (one reel + publish/ texts); older 3-reel runs are legacy
-const current = (r) => fs.existsSync(path.join(runsDir, r, 'publish', 'long_title.txt'));
+// P8: league matchweek runs (run.league) are checked by the P7/P8 tests, not here (this block checks a cup run)
+const isLeague = (r) => { try { return !!JSON.parse(fs.readFileSync(path.join(runsDir, r, 'run.json'), 'utf8')).league; } catch (e) { return false; } };
+const current = (r) => fs.existsSync(path.join(runsDir, r, 'publish', 'long_title.txt')) && !isLeague(r);
 const pick = runs.filter(current).find((r) => hasVideo(r) && r.endsWith('_preview')) || runs.filter(current).find(hasVideo) || runs.filter((r) => current(r) && r.endsWith('_dryrun')).sort().pop();
 const runDir = pick ? path.join(runsDir, pick) : null;
 if (!runDir) check('a generated run folder exists (npm run generate -- ... --preview)', false);
@@ -165,8 +167,9 @@ console.log('== reels <= 60 s for every match');
     const R = require('../sim/reels');
     const lens = S.matches.map((m, i) => (m.goals.length ? R.buildReel(S, i).seconds : 0));
     const sel = require('../sim/selectReels').selectReels(Object.assign({}, require('../sim/tournament').matchesIndex(S), {}), 3);
-    const fits = lens.filter((x) => x <= 60).length;
-    check('reels: most matches fit in 60 s (shorter protected windows when there are many goals); build_reels only selects matches that fit', fits >= lens.length - 2 && /fitIndex/.test(fs.readFileSync(path.join(ROOT, 'build_reels.js'), 'utf8')), { fits, of: lens.length, max: Math.max(...lens), unfiltered_pick: sel.reels.map((r) => r.index) });
+    const fits = lens.filter((x) => x > 0 && x <= 59).length;
+    // P8: whole match at normal speed; a match that does not fit in 59 s is skipped by the selection (never sped up)
+    check('reels: several matches fit in 59 s at normal speed; build_reels only selects matches that fit (.fits)', fits >= 3 && /fitIndex/.test(fs.readFileSync(path.join(ROOT, 'build_reels.js'), 'utf8')) && /\.fits\)/.test(fs.readFileSync(path.join(ROOT, 'build_reels.js'), 'utf8')), { fits, of: lens.length, max: Math.max(...lens), unfiltered_pick: sel.reels.map((r) => r.index) });
   }
 }
 

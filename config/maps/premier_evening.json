@@ -1,5 +1,5 @@
 {
-  "_comment": "P7 §7 Premier League map, floodlit evening. Uses assets/backgrounds/premier_evening.png if Max adds it, else the procedural bowl stadium.",
+  "_comment": "P7 §7 Premier League map, floodlit evening. P8 (13 Nov 2026): procedural stadium drawn in render/draw.js (drawBowl); background_image kept only as a visual reference, use_background_image false.",
   "id": "premier_evening",
   "name": "Premier Pitchside (floodlit evening)",
   "sky": ["#1b1f4a", "#5a3b78", "#e2875a"],
@@ -18,8 +18,9 @@
   "platform_style": "blocks",
   "goal_style": "deep",
   "background_image": "assets/backgrounds/premier_evening.png",
+  "use_background_image": false,
   "bg_pitch_top": 0.83,
   "bg_ground_inset": 6,
   "center_screen_rect": [530, 250, 220, 62],
-  "music": { "transpose": 3, "bpm": 112, "progression": "stride", "arp": "down" }
+  "music": {"transpose": 3, "bpm": 112, "progression": "stride", "arp": "down"}
 }

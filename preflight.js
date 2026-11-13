@@ -130,11 +130,14 @@ function preflight(runDir) {
   const chOk = ch.length >= 3 && secs[0] === 0 && secs.every((s, i) => Number.isFinite(s) && (i === 0 || s - secs[i - 1] >= 10)) && secs[secs.length - 1] < run.long_video.seconds;
   add('chapters.txt valid (începe la 0:00, crescător, ≥ 10 s între capitole)', chOk, 'Capitolele nu respectă regulile YouTube (prima la 0:00, minim 3, crescător, cel puțin 10 s între ele).', { lines: ch.length });
   // 6. uniqueness vs the last 5 runs in plan/history.json
+  const leagueWeekKey = (r) => { const m = String(r).match(/^\d{4}-\d{2}-\d{2}_(.+_mw\d+)_/); return m ? m[1] : null; };
   const PV = require('./plan/validate');
   const hf = path.join(ROOT, 'plan', 'history.json');
   const hist = fs.existsSync(hf) ? JSON.parse(fs.readFileSync(hf, 'utf8')).runs.filter((h) => h.run !== run.run && h.status !== 'discarded' && h.fingerprint
     // previews are never published, and a preview + final of the same tournament are one video
-    && h.quality !== 'preview_720p' && h.run.replace(/_preview$/, '') !== run.run.replace(/_preview$/, '')) : [];
+    && h.quality !== 'preview_720p' && h.run.replace(/_preview$/, '') !== run.run.replace(/_preview$/, '')
+    // P8: a regenerated league matchweek replaces the earlier run of the same week (same league + same mwNN): not a repeat
+    && !(leagueWeekKey(h.run) && leagueWeekKey(h.run) === leagueWeekKey(run.run))) : [];
   const prev = hist.slice(-5).map((h) => ({ run: h.run, s: PV.similarity(run.fingerprint, h.fingerprint) }));
   const maxS = prev.length ? Math.max(...prev.map((x) => x.s)) : 0;
   add(`unicitate: similaritate ≤ ${PV.THRESHOLD} față de ultimele 5 rulări`, maxS <= PV.THRESHOLD, `Videoul seamănă prea mult cu ${prev.filter((x) => x.s > PV.THRESHOLD).map((x) => x.run).join(', ')} (scor ${maxS}). Alege altă hartă sau altă competiție.`, prev);

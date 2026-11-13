@@ -7,7 +7,7 @@ START.bat → **7. PREMIER LEAGUE**. Vezi „Următoarea: Etapa N din 38” și 
 
 | Opțiune | Ce face |
 |---|---|
-| 1. Generează următoarea etapă | Simulează cele 10 meciuri ale etapei N, salvează rezultatele și clasamentul, apoi face **videoul lung (~20–22 min, 1080p) + 1 reel + textele de publicare** într-un folder nou din `output/runs/`. Etapa precedentă devine **blocată**. |
+| 1. Generează următoarea etapă | Simulează cele 10 meciuri ale etapei N, salvează rezultatele și clasamentul, apoi face **videoul lung (~13–15 min, 1080p) + 1 reel + textele de publicare** într-un folder nou din `output/runs/`. Etapa precedentă devine **blocată**. |
 | 2. Regenerează DOAR ultima etapă | Refaci ultima etapă generată (de ex. cu altă hartă). Aceleași seed-uri → **aceleași scoruri**. Etapele dinainte nu se pot reface, pentru că clasamentul continuă din ele. |
 | 3. Arată clasamentul complet | Tabelul cu 20 de echipe, formă (ultimele 5) și zone. |
 | 4. Alege harta | Implicit: următoarea din cele 4 hărți „premier” (alta decât săptămâna trecută). |
@@ -30,20 +30,23 @@ Nu alegi meciuri sau echipe: programul celor 38 de etape e fix, făcut o singur�
 - `league/premier_league_2026_27/calibration.json` — cifrele de calibrare (vezi raportul P7).
 - `assets/logos/<id>.png` — siglele celor 20 de cluburi (doar pe bile); sursele în `assets/logos/manifest.json` și `LOGO_USAGE.md`. Dacă lipsește un fișier, apare `assets/logos/MISSING.md` și pe bilă se vede codul de 3 litere. Oprești toate siglele cu `logos_on_balls: false`.
 
+## După P8 (13 nov 2026): refă etapa 1
+Etapa 1 pe care ai generat-o a fost făcută cu ceasul vechi (lent). Rezultatele ei nu se mai pot transforma în video cu regulile noi, așa că alege **START → 7 → 2 (Regenerează DOAR ultima etapă)**: etapa 1 se simulează din nou cu regulile noi (scorurile vor fi altele) și se face videoul nou. Apoi continui normal cu opțiunea 1.
+
 ## Videoul etapei
 Ordinea: intro cu cele 10 meciuri → pentru fiecare meci: card înainte (locul în clasament, forma) → meciul → final → reluarea golului → omul meciului → **clasamentul animat** (4–6 s) → la final: clasamentul complet, toate rezultatele, golgheterii, **Golul etapei** (card + reluare), anunțul etapei următoare.
-- **Ceasul e mai lent** (decizia ta din 13 nov 2026): 1 minut de joc = 1 secundă, deci 90 s de joc pe meci → video de ~20–22 min. Forța echipelor a fost recalibrată pentru asta (cifrele în raportul P7).
+- **Ceasul e ca la MARBLE CHAMPIONS** (P8, 13 nov 2026): meciurile de ligă se joacă exact ca în turnee (aceeași viteză a ceasului, bilele aruncate la fel de des), deci un meci durează ~45–50 s și videoul unei etape ~13–15 min. Nu se mai adaugă nimic ca să ajungă la 20 min. Forța echipelor a fost recalibrată (cifrele în `reports/P8_REPORT.md`); golurile sunt mai multe decât în fotbalul real (~5 pe meci, ca în turnee).
 - **Golul etapei**: punctaj fix — portar sărit +3, portar ghemuit +2, gol decisiv +2, gol de egalare +1,5, șut în prelungiri +1, plus minutul/45. Câștigă cel mai mare.
 - **Etapa 38**: în loc de anunț vin campioana, **ceremonia trofeului (30 s, 3 unghiuri de cameră, artificii, muzică proprie)**, locurile europene + retrogradatele, Gheata de aur, podiumul și statisticile sezonului.
-- **Reel-ul** (unul pe etapă, ≤ 55 s, tot terenul în cadru, derulare x4): cea mai spectaculoasă revenire; altfel meciul cu cel mai târziu gol decisiv; altfel meciul cu cele mai multe goluri.
+- **Reel-ul** (unul pe etapă, ≤ 59 s, tot terenul în cadru, **centrat**): meciul **întreg, de la început până la fluierul final, la viteză normală** (fără derulare rapidă; doar încetinitorul la golurile frumoase). Ca să încapă, intro-ul, reluarea și cartonașul „omul meciului” se scurtează sau dispar; un meci care tot nu încape nu e ales. Alegerea: cea mai spectaculoasă revenire; altfel meciul cu cel mai târziu gol decisiv; altfel meciul cu cele mai multe goluri.
 - **Textele** sunt în `publish/` din folderul rulării: titlu „Premier League Matchweek N | Marble Football Simulation 2026/27” (+2 variante), descriere cu rezultatele simulate, top 5, capitole, disclaimer, hashtag-uri (#PremierLeague #EPL #MarbleFootball…). Fără nume de jucători.
 - Thumbnail-ul îl faci tu.
 
-## Hărțile „premier” și fundalul tău
-Se rotesc pe săptămâni: `premier_pitchside` (ziua, cu imaginea ta `assets/backgrounds/premier_day.png`), `premier_overcast` (după-amiază înnorată), `premier_evening` (seară cu reflectoare), `premier_night` (noapte cu burniță). Toate au platforme din blocuri de piatră, poartă adâncă cu plasă care se mișcă și moara roșu-alb. Terenul de joc (porți, moară, portar) e **identic** cu celelalte hărți.
-- Imaginea ta e scalată fără deformare, aliniată jos și tăiată egal stânga/dreapta; e mărită puțin (~20%) ca linia terenului din joc să cadă pe gazonul din imagine.
-- Dacă vrei imagine și pe celelalte 3: pune `assets/backgrounds/premier_overcast.png`, `premier_evening.png`, `premier_night.png` (aceeași formă panoramică). Fără ele se desenează un stadion procedural.
-- Dacă imaginea lipsește sau e stricată, harta folosește automat stadionul procedural (nu se oprește nimic).
+## Hărțile „premier” (stadion desenat de program)
+Se rotesc pe săptămâni: `premier_pitchside` (zi însorită), `premier_overcast` (după-amiază înnorată), `premier_evening` (seară cu reflectoare), `premier_night` (noapte cu burniță). Toate au platforme din blocuri de piatră, poartă adâncă cu plasă care se mișcă și moara roșu-alb. Terenul de joc (porți, moară, portar) e **identic** cu celelalte hărți.
+- **Fără fotografie de fundal** (P8): imaginea `assets/backgrounds/premier_day.png` arăta neclară în video (era panoramică 2,4:1, așa că se tăiau ~430 px pe fiecare parte și restul era mărit ~1,8× → pixeli moi, iar mulțimea foarte detaliată se strica la compresia video). Acum stadionul e **desenat de program** după aceeași idee: tribună curbă pe 3 niveluri cu public (unii fani și steaguri se mișcă), benzi mov luminoase, acoperiș din grinzi de oțel, reflectoare cu strălucire, cer albastru cu nori, gazon în dungi cu cercul central. E clar la 1080p și pe reel.
+- Imaginea rămâne doar ca referință. Dacă totuși vrei fotografia: în `config/maps/premier_pitchside.json` pune `"use_background_image": true` (implicit e `false`).
+- Cele 4 variante (zi, înnorat, seară, noapte) folosesc același desen, cu altă lumină și alte culori. Pe panourile de lângă teren scrie doar „PREMIER LEAGUE” (text simplu, fără sigle).
 
 ## Din linia de comandă (opțional)
 - `node build_matchweek.js --week N --dry-run` — doar textele/checklist-ul, fără audio și video (verificare rapidă)

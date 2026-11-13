@@ -95,7 +95,7 @@ async function simulateWeek(C, fx, week, opts) {
       const goals = [];
       for (let k = 0; k < hg + ag; k++) goals.push({ side: k < hg ? 'home' : 'away', t: +(rng() * 50).toFixed(2), shot: null, ball: (k < hg ? 0 : 1) + 2 * Math.floor(rng() * 3) });
       goals.sort((a, b) => a.t - b.t);
-      out.push(finishMatch(m, i, seed, 0, `stub-${seed}`, goals, hg, ag, ST.edgeFor(C.league.strength, rat(m.home), rat(m.away)), null, scorerOf));
+      out.push(finishMatch(m, i, seed, 0, `stub-${seed}`, goals, hg, ag, ST.edgeFor(C.league.strength, rat(m.home), rat(m.away)), null, scorerOf, C.rc.GAME_MIN_PER_SEC));
     });
     return out;
   }
@@ -110,17 +110,18 @@ async function simulateWeek(C, fx, week, opts) {
       const p = pending[k];
       if (r.gate) { if (p.attempt + 1 >= MAX_ATTEMPTS) throw new LeagueError(`match ${p.m.home}-${p.m.away}: ${MAX_ATTEMPTS} seeds failed the technical gate`); next.push(Object.assign({}, p, { attempt: p.attempt + 1, lastGate: r.gate })); return; }
       const goals = r.goals.map((g) => ({ side: g.team === 'A' ? 'home' : 'away', t: g.t, shot: g.shot, ball: g.ball }));
-      done[p.i] = finishMatch(p.m, p.i, r.seed, p.attempt, r.hash, goals, r.A, r.B, ST.edgeFor(C.league.strength, rat(p.m.home), rat(p.m.away)), r.addedTime, scorerOf);
+      done[p.i] = finishMatch(p.m, p.i, r.seed, p.attempt, r.hash, goals, r.A, r.B, ST.edgeFor(C.league.strength, rat(p.m.home), rat(p.m.away)), r.addedTime, scorerOf, C.rc.GAME_MIN_PER_SEC);
     });
     pending = next;
   }
   return done;
 }
-function finishMatch(m, i, seed, attempt, hash, goals, hg, ag, E, addedTime, scorerOf) {
+// gmps = game minutes per second of the league rules (P8: was hard-coded 2, which gave 135' with the P7 slow clock)
+function finishMatch(m, i, seed, attempt, hash, goals, hg, ag, E, addedTime, scorerOf, gmps) {
   return {
     idx: i, home: m.home, away: m.away, hg, ag, seed, attempt, timeline_hash: hash, added_time: addedTime,
     strength: { fav: E.fav ? (E.fav === 'A' ? 'home' : 'away') : null, edge: E.edge },
-    goals: goals.map((g) => Object.assign({ side: g.side, club: g.side === 'home' ? m.home : m.away, t: g.t, minute: g.shot ? `90+${g.shot}'` : `${Math.max(1, Math.floor(g.t * 2) + 1)}'`, shot: g.shot || null, ball: g.ball },
+    goals: goals.map((g) => Object.assign({ side: g.side, club: g.side === 'home' ? m.home : m.away, t: g.t, minute: g.shot ? `90+${g.shot}'` : `${Math.min(90, Math.max(1, Math.floor(g.t * (gmps || 2)) + 1))}'`, shot: g.shot || null, ball: g.ball },
       scorerOf(g.side === 'home' ? m.home : m.away, g.ball))),
   };
 }

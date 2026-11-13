@@ -52,8 +52,8 @@
  ],
  "strength": {
   "_comment": "rating = 2025/26 points / 38 (points per game). Promoted clubs get the rating of the weakest club that stayed up (Tottenham, 41 pts). eff(r) compresses the gaps among the top clubs (r > 1.8: 1.8 + 0.3*(r-1.8)). Signed edge = beta*(eff(home)-eff(away)) + home_advantage; the favourite (sign) takes the spout release turn with probability min(edge_max, |edge|). Values chosen with tools/league_calibrate.js --search (see league/premier_league_2026_27/calibration.json).",
-  "beta": 0.7,
-  "home_advantage": 0.16,
+  "beta": 0.5,
+  "home_advantage": 0.08,
   "edge_max": 0.9,
   "promoted_rating_from": "tottenham",
   "top_compress": {

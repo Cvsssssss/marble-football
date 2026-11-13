@@ -11,10 +11,10 @@ const PUB = require('../publish');
 const { dramaScore, decisiveMinute } = require('../selectReels');
 const { buildReel, TARGET_MAX } = require('../reels');
 
-const REEL_OPTS = { ffSpeed: 4, ffMaxOut: 2.5 }; // league matches are 90 s of play: stronger fast-forward than the cups (x2)
+const REEL_OPTS = {}; // P8: no fast-forward anywhere; the league reel is the whole match at normal speed (sim/reels.js)
 
 function selectLeagueReel(show, index) {
-  const fits = (m) => buildReel(show, m.index, REEL_OPTS).seconds <= TARGET_MAX + 1;
+  const fits = (m) => buildReel(show, m.index, REEL_OPTS).fits; // whole match at 1x + extras <= 59 s (P8)
   const cand = index.matches.filter((m) => m.goals.length > 0 && fits(m));
   const later = (a, b) => b.m.index - a.m.index;
   let pick = null, rule;

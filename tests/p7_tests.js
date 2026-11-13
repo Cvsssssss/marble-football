@@ -170,7 +170,9 @@ const tmp = (n) => { const d = fs.mkdtempSync(path.join(os.tmpdir(), 'p7_' + n +
     check('engine grid: favourite win share rises with the edge (0 -> 0.9)', g.grid[g.grid.length - 1].W > g.grid[0].W + 0.3 && cal.fit.favWin.b > 0);
     const es = cal.engine_season;
     console.log(`   engine season (380 fixtures): goals ${es.avgGoals}, draws ${es.draws}, 0-0 ${es.nilNil}, home wins ${es.homeWin}, away wins ${es.awayWin}, technical rejects ${es.rejectedByTechnicalGate}`);
-    check('single matches: average goals 2.5-3.2', es.avgGoals >= 2.5 && es.avgGoals <= 3.2);
+    // P8 (Max, 13 Nov 2026): league matches use the cups' clock + launch cadence, so the goal rate is the cups' rate; the P7
+    // target 2.5-3.2 cannot be met without slowing the throws again (documented in reports/P8_REPORT.md)
+    check(`single matches: average goals = cup rate with the UCL cadence (${es.avgGoals}; P7 target 2.5-3.2 dropped in P8)`, es.avgGoals >= 4 && es.avgGoals <= 6.5);
     check('single matches: draws 18-28 %', es.draws >= 0.18 && es.draws <= 0.28);
     check('single matches: 0-0 at most 8 %', es.nilNil <= 0.08);
     check('home-win share 40-50 %', es.homeWin >= 0.40 && es.homeWin <= 0.50);

@@ -1,5 +1,5 @@
 {
-  "_comment": "P7 §7/7b Premier League map, bright sunny day. Background = Max's image assets/backgrounds/premier_day.png (no centre screen -> center_screen_rect null); missing image -> procedural bowl stadium. Play layout identical to every other map (visual only).",
+  "_comment": "P7 §7/7b Premier League map, bright sunny day. P8 (13 Nov 2026): procedural stadium drawn in render/draw.js (drawBowl); background_image kept only as a visual reference, use_background_image false.",
   "id": "premier_pitchside",
   "name": "Premier Pitchside (sunny day)",
   "sky": ["#1f5fd6", "#4f8fe8", "#a9cdf2"],
@@ -18,8 +18,9 @@
   "platform_style": "blocks",
   "goal_style": "deep",
   "background_image": "assets/backgrounds/premier_day.png",
+  "use_background_image": false,
   "bg_pitch_top": 0.83,
   "bg_ground_inset": 6,
   "center_screen_rect": null,
-  "music": { "transpose": 1, "bpm": 118, "progression": "warm", "arp": "up" }
+  "music": {"transpose": 1, "bpm": 118, "progression": "warm", "arp": "up"}
 }

@@ -22,7 +22,7 @@ Generarea arată progresul și timpul rămas. O poți opri oricând (închizi fe
 ## Unde apar rezultatele
 `output/runs/<data>_<competiție>_<hartă>/` (cu `_preview` la final pentru preview). `output/latest` arată mereu ultima rulare.
 - videoul lung (`long_video_1080p.mp4` sau `long_video_preview_720p.mp4`) + `chapters.txt` (capitole de lipit în descriere)
-- `reels/reel_<meci>/reel.mp4` — **un singur** reel vertical (≤ 60 s) per video: cea mai spectaculoasă revenire din optimi/sferturi (dacă nu există, meciul cu golul decisiv cel mai târziu). Terenul întreg se vede tot timpul (moara și poarta), camera nu se mișcă.
+- `reels/reel_<meci>/reel.mp4` — **un singur** reel vertical (≤ 59 s, meciul întreg la viteză normală, fără derulare rapidă) per video: cea mai spectaculoasă revenire din optimi/sferturi (dacă nu există, meciul cu golul decisiv cel mai târziu). Terenul întreg se vede tot timpul (moara și poarta), camera nu se mișcă.
 - `publish/` — textele gata de copiat: `long_title.txt` (3 variante de titlu), `long_description.txt` (descrierea completă, cu capitolele), `reel_title.txt` (3 variante), `reel_description.txt`, `README_publish.txt` (unde lipești și ce setări alegi)
 - thumbnail: **îl faci tu** — generatorul nu mai creează thumbnail-uri (`generate_thumbnails: false` în `config/rules/base.json`; pune `true` dacă vrei înapoi cele 3 imagini automate în `thumbnails/`)
 - `PREFLIGHT.md` — verificarea automată (verde/roșu, cu motive)

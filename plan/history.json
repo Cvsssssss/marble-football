@@ -287,6 +287,50 @@
      "az-union_sg"
     ]
    }
+  },
+  {
+   "run": "2026-11-13_premier_league_mw01_premier_pitchside",
+   "generated_at": "2026-11-13T06:55:10.854Z",
+   "competition": "premier_league_2026_27",
+   "map": "premier_pitchside",
+   "accent": "#2FD3C4",
+   "quality": "final_1080p",
+   "status": "generated",
+   "forced_pair": null,
+   "fingerprint": {
+    "id": "2026-11-13_premier_league_mw01_premier_pitchside",
+    "competition": "premier_league_2026_27",
+    "competition_name": "PREMIER LEAGUE",
+    "map": "premier_pitchside",
+    "accent": "#2FD3C4",
+    "colours": [
+     "#2FD3C4",
+     "#4f8fe8",
+     "#d7263d"
+    ],
+    "music": "warm/up/1/118/week1",
+    "bracket": [
+     "hull-ipswich",
+     "coventry-leeds",
+     "sunderland-tottenham",
+     "brighton-nottingham_forest",
+     "brentford-crystal_palace",
+     "everton-newcastle",
+     "chelsea-fulham",
+     "aston_villa-bournemouth",
+     "liverpool-man_city",
+     "arsenal-man_utd"
+    ]
+   },
+   "published_long": null,
+   "published_reels": []
   }
+ ],
+ "recent_titles": [
+  "Premier League Matchweek 1 | Marble Football Simulation 2026/27",
+  "Premier League Matchweek 1: All 10 Matches | Marble Football Simulation",
+  "Matchweek 1 – Premier League Marble Race Simulation 2026/27",
+  "Hull City 0–1 Ipswich Town | Premier League Matchweek 1 Marble Simulation",
+  "Hull City vs Ipswich Town: Matchweek 1 Drama | Marble Football Simulation"
  ]
 }

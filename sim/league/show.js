@@ -28,6 +28,9 @@ const DUR = {
   intro: 10.5, pre: 2.6, fulltime: 2.2, motm: 2.6, table: 5.0, tableFull: 9.0, results: 8.0, scorers: 7.0, gotwCard: 2.4, next: 6.0,
   champion: 5.0, ceremony: 30.0, europe: 8.0, boot: 6.5, podium: 7.5, stats: 8.0,
 };
+// P8: league video length gate (minutes). Matches play exactly like the cups (~45-50 s), so a normal matchweek is
+// ~13-15 min; there is NO 20 min minimum and no filler (Max, 13 Nov 2026). The finale adds the ceremony.
+const LENGTH_GATE_MIN = [10, 20];
 // ceremony: 3 camera angles (wide stadium, low-angle trophy lift, top-down orbit), seconds inside the 30 s segment
 const CEREMONY_SHOTS = [
   { angle: 'wide', from: 0, to: 10 },
@@ -93,7 +96,7 @@ function weekAudioMap(map, week) {
 // background image of a map (P7 §7/7b): embedded as a JPEG data URL (a canvas loaded from file:// cannot export pixels
 // drawn from file images). Missing file -> null (the renderer draws the procedural stadium).
 function backgroundPart(map) {
-  if (!map.background_image) return null;
+  if (!map.background_image || map.use_background_image !== true) return null; // P8: image layer off by default (premier maps draw the procedural stadium)
   const f = path.join(ROOT, map.background_image);
   if (!fs.existsSync(f)) return null;
   const ffmpeg = require('ffmpeg-static');
@@ -132,7 +135,7 @@ function buildMatchweekShow(C, week, opts) {
   const matches = wr.matches.map((res, k) => {
     const ctx = ST.leagueCtx(lg.strength, rat(res.home), rat(res.away), R);
     const r = simulateMatch(res.seed, ctx, C.rc);
-    if (r.hash !== res.timeline_hash) throw new SEASON.LeagueError(`match ${res.home}-${res.away}: re-simulation hash differs from results (config changed?)`);
+    if (r.hash !== res.timeline_hash) throw new SEASON.LeagueError(`match ${res.home}-${res.away}: re-simulation hash differs from results (config changed?). Etapa a fost generată cu reguli vechi: regenereaz-o (START → 7 → 2)`);
     if (r.score.A !== res.hg || r.score.B !== res.ag) throw new SEASON.LeagueError(`match ${res.home}-${res.away}: score differs from results`);
     const ta = idxOf[res.home], tb = idxOf[res.away];
     const kits = L.matchKits(C.teams[ta], C.teams[tb], { logos });
@@ -269,4 +272,4 @@ function matchesIndexLeague(show) {
   };
 }
 
-module.exports = { buildMatchweekShow, matchesIndexLeague, pickGoalOfWeek, gotwScore, decisiveIdx, seasonScorers, packTable, backgroundPart, loadMap, weekAudioMap, DUR, CEREMONY_SHOTS };
+module.exports = { LENGTH_GATE_MIN, buildMatchweekShow, matchesIndexLeague, pickGoalOfWeek, gotwScore, decisiveIdx, seasonScorers, packTable, backgroundPart, loadMap, weekAudioMap, DUR, CEREMONY_SHOTS };

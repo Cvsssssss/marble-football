@@ -45,10 +45,11 @@ const UCL = path.join(ROOT, 'config', 'competitions', 'ucl_2026_top16.json');
     return { id: r.id, same: reel.seed === r.seed && reel.timeline_hash === r.timeline_hash && again.hash === r.timeline_hash };
   });
   check('determinism: reel seed = long-video seed and the re-simulated match has the same timeline hash', det.every((d) => d.same), det);
-  check('reel length 30..55 s; structure hook -> match -> replay -> motm -> end', reels.every(({ reel }) => reel.seconds >= 30 && reel.seconds <= 55 && reel.segments.map((s) => s.type).join() === 'hook,match,replay,motm,end'), reels.map(({ reel }) => reel.seconds));
-  check('fast-forward: x2 only, each stretch <= 1.5 s of output, never over a goal', reels.every(({ reel }) => {
-    const plan = reel.segments[1].plan, m = show.matches[reel.matchIndex];
-    let run = 0, ok = true;
+  // P8: reel <= 59 s; extras (hook, replay, MOTM) may be shortened / dropped so the whole match fits at normal speed
+  check('reel length 30..59 s; structure [hook] -> match -> [replay] -> [motm] -> end', reels.every(({ reel }) => reel.seconds >= 30 && reel.seconds <= 59 && /^(hook,)?match,(replay,)?(motm,)?end$/.test(reel.segments.map((s) => s.type).join())), reels.map(({ reel }) => reel.seconds));
+  check('P8: no fast-forward - the whole match at 1x, every goal frame present', reels.every(({ reel }) => {
+    const plan = reel.segments.find((s) => s.type === 'match').plan, m = show.matches[reel.matchIndex];
+    let run = 0, ok = plan.length === m.frames.length && plan.every((p, k) => p.src === k && !p.ff);
     // P5: frame times are read from the frames (with slow motion, frame index / 30 is not the match time)
     const tOf = (src) => m.frames[Math.min(m.frames.length - 1, Math.round(src))].t;
     for (const p of plan) { run = p.ff ? run + 1 : 0; if (run > 1.5 * 30 + 1) ok = false; if (p.ff && m.goals.some((g) => Math.abs(tOf(p.src) - g.t) < 1.0)) ok = false; }

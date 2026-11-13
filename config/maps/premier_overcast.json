@@ -1,5 +1,5 @@
 {
-  "_comment": "P7 §7 Premier League map, overcast afternoon. Uses assets/backgrounds/premier_overcast.png if Max adds it, else the procedural bowl stadium. PREMIER LEAGUE plain text only on center_screen_rect.",
+  "_comment": "P7 §7 Premier League map, overcast afternoon. P8 (13 Nov 2026): procedural stadium drawn in render/draw.js (drawBowl); background_image kept only as a visual reference, use_background_image false.",
   "id": "premier_overcast",
   "name": "Premier Pitchside (overcast afternoon)",
   "sky": ["#7d8794", "#a3acb7", "#cdd3da"],
@@ -18,9 +18,10 @@
   "platform_style": "blocks",
   "goal_style": "deep",
   "background_image": "assets/backgrounds/premier_overcast.png",
+  "use_background_image": false,
   "bg_pitch_top": 0.83,
   "bg_ground_inset": 6,
   "center_screen_rect": [530, 250, 220, 62],
   "tint": ["rgba(160,170,185,0.10)", "rgba(40,50,60,0.08)"],
-  "music": { "transpose": -2, "bpm": 108, "progression": "open", "arp": "wave" }
+  "music": {"transpose": -2, "bpm": 108, "progression": "open", "arp": "wave"}
 }

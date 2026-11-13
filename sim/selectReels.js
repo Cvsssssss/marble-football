@@ -46,6 +46,11 @@ function selectReel(index) {
       .sort((x, y) => y.late - x.late || y.m.goals.length - x.m.goals.length || x.m.index - y.m.index);
     pick = scored[0] || (early[0] && { m: early[0], s: dramaScore(early[0]) }); rule = 'FALLBACK: no comeback in R16/QF -> latest winning goal';
   }
+  // P8 last resort: no R16/QF match fits <= 59 s at normal speed (index is pre-filtered by the caller) -> any later match
+  if (!pick) {
+    const any = index.matches.filter((m) => m.goals.length > 0 && m.winner).map((m) => ({ m, s: dramaScore(m) })).sort((x, y) => y.s - x.s || x.m.index - y.m.index);
+    if (any.length) { pick = any[0]; rule = 'LAST RESORT: no R16/QF match fits at normal speed -> best drama score of any round'; }
+  }
   const reels = [];
   if (pick) {
     const m = pick.m;

@@ -1,0 +1,338 @@
+{
+ "league": "premier_league_2026_27",
+ "season": "2026/27",
+ "next_week": 2,
+ "last_generated_week": 1,
+ "weeks": [
+  {
+   "week": 1,
+   "map": "premier_pitchside",
+   "generated_at": "2026-11-13T06:39:50.774Z",
+   "results_hash": "833dc388ca6764d0",
+   "mode": "engine"
+  }
+ ],
+ "table": [
+  {
+   "pos": 1,
+   "id": "bournemouth",
+   "p": 1,
+   "w": 1,
+   "d": 0,
+   "l": 0,
+   "gf": 2,
+   "ga": 0,
+   "gd": 2,
+   "pts": 3,
+   "form": [
+    "W"
+   ],
+   "zone": "ucl"
+  },
+  {
+   "pos": 2,
+   "id": "brighton",
+   "p": 1,
+   "w": 1,
+   "d": 0,
+   "l": 0,
+   "gf": 2,
+   "ga": 0,
+   "gd": 2,
+   "pts": 3,
+   "form": [
+    "W"
+   ],
+   "zone": "ucl"
+  },
+  {
+   "pos": 3,
+   "id": "arsenal",
+   "p": 1,
+   "w": 1,
+   "d": 0,
+   "l": 0,
+   "gf": 2,
+   "ga": 1,
+   "gd": 1,
+   "pts": 3,
+   "form": [
+    "W"
+   ],
+   "zone": "ucl"
+  },
+  {
+   "pos": 4,
+   "id": "leeds",
+   "p": 1,
+   "w": 1,
+   "d": 0,
+   "l": 0,
+   "gf": 2,
+   "ga": 1,
+   "gd": 1,
+   "pts": 3,
+   "form": [
+    "W"
+   ],
+   "zone": "ucl"
+  },
+  {
+   "pos": 5,
+   "id": "newcastle",
+   "p": 1,
+   "w": 1,
+   "d": 0,
+   "l": 0,
+   "gf": 1,
+   "ga": 0,
+   "gd": 1,
+   "pts": 3,
+   "form": [
+    "W"
+   ],
+   "zone": "ucl"
+  },
+  {
+   "pos": 6,
+   "id": "ipswich",
+   "p": 1,
+   "w": 1,
+   "d": 0,
+   "l": 0,
+   "gf": 1,
+   "ga": 0,
+   "gd": 1,
+   "pts": 3,
+   "form": [
+    "W"
+   ],
+   "zone": "uel"
+  },
+  {
+   "pos": 7,
+   "id": "tottenham",
+   "p": 1,
+   "w": 0,
+   "d": 1,
+   "l": 0,
+   "gf": 2,
+   "ga": 2,
+   "gd": 0,
+   "pts": 1,
+   "form": [
+    "D"
+   ],
+   "zone": "uel"
+  },
+  {
+   "pos": 8,
+   "id": "sunderland",
+   "p": 1,
+   "w": 0,
+   "d": 1,
+   "l": 0,
+   "gf": 2,
+   "ga": 2,
+   "gd": 0,
+   "pts": 1,
+   "form": [
+    "D"
+   ],
+   "zone": "uecl"
+  },
+  {
+   "pos": 9,
+   "id": "man_city",
+   "p": 1,
+   "w": 0,
+   "d": 1,
+   "l": 0,
+   "gf": 1,
+   "ga": 1,
+   "gd": 0,
+   "pts": 1,
+   "form": [
+    "D"
+   ],
+   "zone": null
+  },
+  {
+   "pos": 10,
+   "id": "liverpool",
+   "p": 1,
+   "w": 0,
+   "d": 1,
+   "l": 0,
+   "gf": 1,
+   "ga": 1,
+   "gd": 0,
+   "pts": 1,
+   "form": [
+    "D"
+   ],
+   "zone": null
+  },
+  {
+   "pos": 11,
+   "id": "fulham",
+   "p": 1,
+   "w": 0,
+   "d": 1,
+   "l": 0,
+   "gf": 0,
+   "ga": 0,
+   "gd": 0,
+   "pts": 1,
+   "form": [
+    "D"
+   ],
+   "zone": null
+  },
+  {
+   "pos": 12,
+   "id": "chelsea",
+   "p": 1,
+   "w": 0,
+   "d": 1,
+   "l": 0,
+   "gf": 0,
+   "ga": 0,
+   "gd": 0,
+   "pts": 1,
+   "form": [
+    "D"
+   ],
+   "zone": null
+  },
+  {
+   "pos": 13,
+   "id": "crystal_palace",
+   "p": 1,
+   "w": 0,
+   "d": 1,
+   "l": 0,
+   "gf": 0,
+   "ga": 0,
+   "gd": 0,
+   "pts": 1,
+   "form": [
+    "D"
+   ],
+   "zone": null
+  },
+  {
+   "pos": 14,
+   "id": "brentford",
+   "p": 1,
+   "w": 0,
+   "d": 1,
+   "l": 0,
+   "gf": 0,
+   "ga": 0,
+   "gd": 0,
+   "pts": 1,
+   "form": [
+    "D"
+   ],
+   "zone": null
+  },
+  {
+   "pos": 15,
+   "id": "coventry",
+   "p": 1,
+   "w": 0,
+   "d": 0,
+   "l": 1,
+   "gf": 1,
+   "ga": 2,
+   "gd": -1,
+   "pts": 0,
+   "form": [
+    "L"
+   ],
+   "zone": null
+  },
+  {
+   "pos": 16,
+   "id": "man_utd",
+   "p": 1,
+   "w": 0,
+   "d": 0,
+   "l": 1,
+   "gf": 1,
+   "ga": 2,
+   "gd": -1,
+   "pts": 0,
+   "form": [
+    "L"
+   ],
+   "zone": null
+  },
+  {
+   "pos": 17,
+   "id": "everton",
+   "p": 1,
+   "w": 0,
+   "d": 0,
+   "l": 1,
+   "gf": 0,
+   "ga": 1,
+   "gd": -1,
+   "pts": 0,
+   "form": [
+    "L"
+   ],
+   "zone": null
+  },
+  {
+   "pos": 18,
+   "id": "hull",
+   "p": 1,
+   "w": 0,
+   "d": 0,
+   "l": 1,
+   "gf": 0,
+   "ga": 1,
+   "gd": -1,
+   "pts": 0,
+   "form": [
+    "L"
+   ],
+   "zone": "rel"
+  },
+  {
+   "pos": 19,
+   "id": "nottingham_forest",
+   "p": 1,
+   "w": 0,
+   "d": 0,
+   "l": 1,
+   "gf": 0,
+   "ga": 2,
+   "gd": -2,
+   "pts": 0,
+   "form": [
+    "L"
+   ],
+   "zone": "rel"
+  },
+  {
+   "pos": 20,
+   "id": "aston_villa",
+   "p": 1,
+   "w": 0,
+   "d": 0,
+   "l": 1,
+   "gf": 0,
+   "ga": 2,
+   "gd": -2,
+   "pts": 0,
+   "form": [
+    "L"
+   ],
+   "zone": "rel"
+  }
+ ],
+ "updated": "2026-11-13T06:39:50.774Z"
+}

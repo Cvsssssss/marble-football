@@ -1,5 +1,5 @@
 {
-  "_comment": "P7 §7 Premier League map, drizzly night. Uses assets/backgrounds/premier_night.png if Max adds it, else the procedural bowl stadium (with light drizzle streaks).",
+  "_comment": "P7 §7 Premier League map, drizzly night. P8 (13 Nov 2026): procedural stadium drawn in render/draw.js (drawBowl); background_image kept only as a visual reference, use_background_image false.",
   "id": "premier_night",
   "name": "Premier Pitchside (drizzly night)",
   "sky": ["#070d1c", "#14223d", "#2b3f60"],
@@ -20,8 +20,9 @@
   "platform_style": "blocks",
   "goal_style": "deep",
   "background_image": "assets/backgrounds/premier_night.png",
+  "use_background_image": false,
   "bg_pitch_top": 0.83,
   "bg_ground_inset": 6,
   "center_screen_rect": [530, 250, 220, 62],
-  "music": { "transpose": -4, "bpm": 100, "progression": "open", "arp": "wave" }
+  "music": {"transpose": -4, "bpm": 100, "progression": "open", "arp": "wave"}
 }

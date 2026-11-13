@@ -48,6 +48,8 @@ const S = {
         progression: { type: 'string', enum: ['v2', 'open', 'stride', 'warm'] }, arp: { type: 'string', enum: ['up', 'down', 'wave'] } } },
       // P7 §7 (visual only): image background layer, stone-block platforms, deeper goal net, striped windmill, bowl stadium
       background_image: { type: 'string', pattern: /^assets\/backgrounds\/[a-z0-9_]+\.png$/ },
+      use_background_image: { type: 'boolean' },              // P8: the image layer is drawn only when true (default off; premier maps: procedural stadium)
+      ribbon: { type: 'hex' },                                  // P8: colour of the glowing tier ribbons / LED boards of the procedural stadium
       bg_pitch_top: { type: 'number', min: 0.4, max: 0.99 },   // fraction of the image height where the pitch begins
       bg_ground_inset: { type: 'number', min: 0, max: 40 },    // design px the map ground line sits inside the pitch
       center_screen_rect: { type: 'array', nullable: true, minItems: 4, maxItems: 4, items: { type: 'number', min: 0, max: 1280 } },
@@ -75,7 +77,6 @@ const S = {
       strength_edge: { type: 'number', min: 0, max: 0.5 },  // P2: invisible strength lever (release-turn probability)
       show_simulation_label: { type: 'boolean' },            // P5: small SIMULATION pill on screen (default false = no label)
       generate_thumbnails: { type: 'boolean' },
-      release_interval: { type: 'array', minItems: 2, maxItems: 2, items: { type: 'number', min: 1, max: 15 } }, // P7 league: s between spout releases (default engine [1.6, 2.4])              // P7: Max makes thumbnails himself; true = the old 3 auto thumbnails (default false)
     },
   },
   audio: {
@@ -274,7 +275,6 @@ function rulesToCfg(rules) {
     GOALS_MAX: rules.GOALS_MAX !== undefined ? rules.GOALS_MAX : 10,
     BALL_RADIUS: rules.ball_radius !== undefined ? rules.ball_radius : 18,
     STRENGTH_EDGE: rules.strength_edge !== undefined ? rules.strength_edge : 0.15,
-    ...(rules.release_interval ? { RELEASE_INTERVAL: rules.release_interval.slice() } : {}), // P7 league only
   };
 }
 

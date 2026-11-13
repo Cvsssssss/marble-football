@@ -13,10 +13,14 @@ const SH = require('../sim/league/show');
 async function scratchSeason(C, name, upTo, engineFrom) {
   const dir = path.join(ROOT, 'build', name);
   const st = fs.existsSync(path.join(dir, 'state.json')) ? JSON.parse(fs.readFileSync(path.join(dir, 'state.json'), 'utf8')) : null;
-  if (!st || st.last_generated_week !== upTo) {
+  // P8: rebuilt when the league rules / strength / engine change (old seeds would no longer re-simulate to the same hash)
+  const key = require('crypto').createHash('sha256').update(JSON.stringify([C.rc, C.league.strength, require('../sim/config').ENGINE_VERSION])).digest('hex').slice(0, 16);
+  const kf = path.join(dir, 'cfg.key');
+  if (!st || st.last_generated_week !== upTo || !fs.existsSync(kf) || fs.readFileSync(kf, 'utf8') !== key) {
     fs.rmSync(dir, { recursive: true, force: true }); fs.mkdirSync(dir, { recursive: true });
     fs.copyFileSync(path.join(ROOT, 'league', C.league.id, 'fixtures.json'), path.join(dir, 'fixtures.json'));
     for (let w = 1; w <= upTo; w++) await SEASON.playWeek(C, w, { dir, mode: w >= engineFrom ? 'engine' : 'stub' });
+    fs.writeFileSync(kf, key);
   }
   return dir;
 }

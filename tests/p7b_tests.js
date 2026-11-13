@@ -44,7 +44,7 @@ const sha = (x) => crypto.createHash('sha256').update(typeof x === 'string' ? x 
   check(`map ground line (y ${G.GROUND_Y}) is inside the pitch area of the image (pitch top at y ${F.pitchTopY.toFixed(1)}), with minimal extra zoom`, F.pitchTopY <= G.GROUND_Y && F.pitchTopY >= G.GROUND_Y - 12 && F.s >= F.cover, F);
   console.log(`   fit: cover ${F.cover.toFixed(3)} -> scale ${F.s.toFixed(3)}, crop ${F.cropLeft.toFixed(0)} px each side and ${F.cropTop.toFixed(0)} px of sky (image px)`);
   check('missing background image -> no image layer (procedural fallback)', SH.backgroundPart(Object.assign({}, maps[1], { background_image: 'assets/backgrounds/premier_does_not_exist.png' })) === null && SH.backgroundPart(maps[1]) === (fs.existsSync(path.join(ROOT, 'assets/backgrounds/premier_overcast.png')) ? SH.backgroundPart(maps[1]) : null));
-  const bgp = SH.backgroundPart(maps[0]);
+  const bgp = SH.backgroundPart(Object.assign({}, maps[0], { use_background_image: true })); // P8: image layer off by default; code path kept
   check('Max\'s image is embedded unchanged in size (JPEG data URL of the same file, size read from the PNG)', bgp && bgp.size[0] === IW && bgp.size[1] === IH && /^data:image\/jpeg;base64,/.test(bgp.src));
 
   // ---------- shows (scratch seasons: engine week 1; stub weeks 1-37 + engine week 38) ----------
@@ -52,14 +52,14 @@ const sha = (x) => crypto.createHash('sha256').update(typeof x === 'string' ? x 
   const { C, week, finale } = await P7S.shows();
   const d1 = path.join(ROOT, 'build', 'p7_scratch'), d38 = path.join(ROOT, 'build', 'p7_finale');
   const wr1 = JSON.parse(fs.readFileSync(SEASON.resultsFile(C, 1, { dir: d1 }), 'utf8'));
-  check('rules: league clock 1 game minute / s (90 s of play, Max 13 Nov 2026), release interval recalibrated', C.rules.GAME_MIN_PER_SEC === 1 && JSON.stringify(C.rules.release_interval) === '[7.6,11.4]');
+  check('rules (P8): league clock = cups (2.4 game min / s), no league-specific release interval', C.rules.GAME_MIN_PER_SEC === 2.4 && C.rules.release_interval === undefined);
   check('every match re-simulated from its seed: same timeline hash and score as results/week_01.json', week.matches.every((m, i) => m.hash === wr1.matches[i].timeline_hash && m.score[0] === wr1.matches[i].hg && m.score[1] === wr1.matches[i].ag));
   check('every goal scorer is a player of the scoring club', week.matches.every((m) => m.goals.every((g) => { const t = week.teams[g.team === 'A' ? m.ta : m.tb]; return t.players[g.player] && t.players[g.player].team === t.name; })));
   const again = SH.buildMatchweekShow(C, 1, { dir: d1 });
   check('show is deterministic (same results + config -> identical show)', sha(again) === sha(week));
   const mins = (s) => s.totalFrames / s.fps / 60;
   console.log(`   durations: week 1 ${mins(week).toFixed(2)} min, finale week 38 ${mins(finale).toFixed(2)} min`);
-  check('matchweek video length 20-28 min (week 1 and the finale)', mins(week) >= 20 && mins(week) <= 28 && mins(finale) >= 20 && mins(finale) <= 28);
+  check(`matchweek video length within the P8 gate ${SH.LENGTH_GATE_MIN.join('-')} min (week 1 and the finale)`, [week, finale].every((s) => mins(s) >= SH.LENGTH_GATE_MIN[0] && mins(s) <= SH.LENGTH_GATE_MIN[1]));
   const segs = week.segments, types = segs.map((s) => s.type);
   check('timeline: intro (fixtures grid) first, then per match pre-card -> match -> full time -> [replay] -> [MOTM] -> table update', types[0] === 'lgIntro' && week.matches.every((m, mi) => {
     const own = segs.filter((s) => s.match === mi && ['lgPre', 'match', 'fulltime', 'replay', 'motm', 'lgTable'].includes(s.type) && !s.gotw).map((s) => s.type);
@@ -117,8 +117,14 @@ const sha = (x) => crypto.createHash('sha256').update(typeof x === 'string' ? x 
     const known = await page.evaluate(() => window.LEAGUE_SEGMENTS);
     check(`week ${sh.league.week}: every segment type renders headless without page errors (${tys.length} types)`, errors.length === 0 && tys.every((t) => ['match', 'fulltime', 'replay', 'motm'].includes(t) || known.includes(t)), errors.slice(0, 3));
     if (sh === week) {
-      const li = await page.evaluate(() => window.bgLayerInfo());
-      check('with Max\'s image: layer order image -> platforms -> pipe; no procedural sky / stadium; no centre-screen text', info.background && li.image && li.layers[0] === 'image' && !li.layers.some((x) => /^sky$|^scenery/.test(x)) && li.layers.indexOf('platforms') > 0 && !li.layers.includes('center_screen'), li.layers);
+      // P8: the premier maps draw the procedural stadium; the image code path is still tested with use_background_image true
+      const li0 = await page.evaluate(() => window.bgLayerInfo());
+      check('P8 default: no image layer, procedural stadium (sky -> scenery:bowl)', !info.background && !li0.image && li0.layers[0] === 'sky' && li0.layers[1] === 'scenery:bowl', li0.layers);
+      const withImg = Object.assign({}, week, { background: bgp, map: Object.assign({}, week.map, { use_background_image: true }) });
+      const P2 = await P7S.openPage(browser, withImg, [1280, 720]);
+      await P2.page.evaluate((g) => window.renderFrame(g), week.segments.find((x) => x.type === 'match').start + 50);
+      const li = await P2.page.evaluate(() => window.bgLayerInfo()); await P2.page.close();
+      check('with Max\'s image: layer order image -> platforms -> pipe; no procedural sky / stadium; no centre-screen text', P2.info.background && li.image && li.layers[0] === 'image' && !li.layers.some((x) => /^sky$|^scenery/.test(x)) && li.layers.indexOf('platforms') > 0 && !li.layers.includes('center_screen'), li.layers);
       check('renderer uses the same cover-fit as the tested math', li.fit && Math.abs(li.fit.s - F.s) < 1e-9 && Math.abs(li.fit.dx - F.dx) < 1e-6 && li.imgSize[0] === IW);
     } else {
       const angles = await page.evaluate((st0) => [2, 12, 22].map((s) => window.ceremonyAngleAt(Math.round(s * 30))), cer.start);
@@ -143,12 +149,12 @@ const sha = (x) => crypto.createHash('sha256').update(typeof x === 'string' ? x 
   const sel = LP.selectLeagueReel(week, idx), sel2 = LP.selectLeagueReel(week, idx);
   check('one reel, deterministic selection', sel.reels.length === 1 && JSON.stringify(sel) === JSON.stringify(sel2));
   const reel = buildReel(week, sel.reels[0].index, LP.REEL_OPTS);
-  check(`reel <= 55 s (${reel.seconds} s) with the static full-pitch P6 layout`, reel.seconds <= TARGET_MAX + 1 && reel.seconds >= 30 && reel.camera.mode === 'static' && reel.camTrack.changes === 0);
+  check(`reel <= 59 s at normal speed (${reel.seconds} s) with the static full-pitch P6 layout`, reel.fits && reel.seconds <= 59 && reel.seconds >= 30 && reel.camera.mode === 'static' && reel.camTrack.changes === 0);
   const mk = (i, o) => Object.assign({ id: 'M' + i, index: i, stage: 'MATCHWEEK 1', leg: 'LEAGUE', team_a: 'A' + i, team_b: 'B' + i, score: [1, 0], winner: 'A' + i, comeback: false, comeback_depth: 0, goals: [{ team: 'A' + i, minute: "50'" }] }, o);
   const cbm = mk(0, { score: [2, 1], comeback: true, comeback_depth: 1, goals: [{ team: 'B0', minute: "10'" }, { team: 'A0', minute: "40'" }, { team: 'A0', minute: "70'" }] });
   const late = mk(1, { goals: [{ team: 'A1', minute: "88'" }] });
   const draw = mk(2, { score: [2, 2], winner: null, goals: [{ team: 'A2', minute: "5'" }, { team: 'B2', minute: "6'" }, { team: 'A2', minute: "7'" }, { team: 'B2', minute: "8'" }] });
-  const fits = week.matches.map((m, i) => i).filter((i) => week.matches[i].goals.length && buildReel(week, i, LP.REEL_OPTS).seconds <= TARGET_MAX + 1);
+  const fits = week.matches.map((m, i) => i).filter((i) => week.matches[i].goals.length && buildReel(week, i, LP.REEL_OPTS).fits);
   if (fits.length >= 1) {
     const at = (m) => Object.assign({}, m, { index: fits[0] });
     const r1 = LP.selectLeagueReel(week, { matches: [at(late), at(cbm), at(draw)] }), r2 = LP.selectLeagueReel(week, { matches: [at(late), at(draw)] }), r3 = LP.selectLeagueReel(week, { matches: [at(draw)] });
@@ -177,7 +183,7 @@ const sha = (x) => crypto.createHash('sha256').update(typeof x === 'string' ? x 
   try { r = await BM.buildMatchweek({ week: 1, dir: d1, dryRun: true, date: '2026-11-13', outRoot }); } finally { console.log = log; }
   const rd = r.runDir;
   check('dry run writes chapters, LOGO_USAGE, checklist, publish/, reels/selection.json, run.json; no thumbnails folder', ['chapters.txt', 'LOGO_USAGE.md', 'PUBLISH_CHECKLIST.md', 'publish/long_title.txt', 'publish/long_description.txt', 'publish/reel_title.txt', 'reels/selection.json', 'run.json'].every((f) => fs.existsSync(path.join(rd, f))) && !fs.existsSync(path.join(rd, 'thumbnails')));
-  check('run.json: league week, results hash, background file, thumbnails false, one reel', r.runJson.league.week === 1 && r.runJson.league.results_hash === wr1.results_hash && r.runJson.league.background === 'assets/backgrounds/premier_day.png' && r.runJson.thumbnails === false && r.runJson.reels.length === 1);
+  check('run.json: league week, results hash, no background image (P8), thumbnails false, one reel', r.runJson.league.week === 1 && r.runJson.league.results_hash === wr1.results_hash && r.runJson.league.background === null && r.runJson.thumbnails === false && r.runJson.reels.length === 1);
   check('preflight green on the dry run (names, chapters, publish lint, uniqueness, manifest)', r.preflight.ok, r.preflight.checks.filter((c) => !c.ok).map((c) => c.name));
   check('LOGO_USAGE.md lists the source of every club crest used (20 clubs)', (() => { const t = fs.readFileSync(path.join(rd, 'LOGO_USAGE.md'), 'utf8'); return C.teams.every((tm) => t.includes(tm.name)) && /wikipedia/i.test(t); })());
   check('checklist uses the league wording (animated table, PREMIER LEAGUE plain text)', /clasamentul animat/.test(fs.readFileSync(path.join(rd, 'PUBLISH_CHECKLIST.md'), 'utf8')) && /PREMIER LEAGUE/.test(fs.readFileSync(path.join(rd, 'PUBLISH_CHECKLIST.md'), 'utf8')));

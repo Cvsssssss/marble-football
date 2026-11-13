@@ -1,0 +1,732 @@
+{
+ "league": "premier_league_2026_27",
+ "season": "2026/27",
+ "week": 1,
+ "map": "premier_pitchside",
+ "mode": "engine",
+ "stub": false,
+ "generated_at": "2026-11-13T06:39:50.774Z",
+ "rules": "league",
+ "strength": {
+  "_comment": "rating = 2025/26 points / 38 (points per game). Promoted clubs get the rating of the weakest club that stayed up (Tottenham, 41 pts). eff(r) compresses the gaps among the top clubs (r > 1.8: 1.8 + 0.3*(r-1.8)). Signed edge = beta*(eff(home)-eff(away)) + home_advantage; the favourite (sign) takes the spout release turn with probability min(edge_max, |edge|). Values chosen with tools/league_calibrate.js --search (see league/premier_league_2026_27/calibration.json).",
+  "beta": 0.7,
+  "home_advantage": 0.16,
+  "edge_max": 0.9,
+  "promoted_rating_from": "tottenham",
+  "top_compress": {
+   "above": 1.8,
+   "factor": 0.3
+  }
+ },
+ "matches": [
+  {
+   "idx": 0,
+   "home": "hull",
+   "away": "ipswich",
+   "hg": 0,
+   "ag": 1,
+   "seed": 2838106292,
+   "attempt": 0,
+   "timeline_hash": "3e33a140fcdd87114fa935fcfb8929ae3590309264a1f93262b47182cd9b76ab",
+   "added_time": 2,
+   "strength": {
+    "fav": "home",
+    "edge": 0.16
+   },
+   "goals": [
+    {
+     "side": "away",
+     "club": "ipswich",
+     "t": 67.14,
+     "minute": "135'",
+     "shot": null,
+     "ball": 3,
+     "player": 1,
+     "scorer": "C. Akpom",
+     "scorer_team": "Ipswich Town"
+    }
+   ]
+  },
+  {
+   "idx": 1,
+   "home": "coventry",
+   "away": "leeds",
+   "hg": 1,
+   "ag": 2,
+   "seed": 4096929093,
+   "attempt": 0,
+   "timeline_hash": "4e1efa7523cdacc0346465031fb3bc1be82078974ab9209cd06fa5fa63c2619f",
+   "added_time": 3,
+   "strength": {
+    "fav": "home",
+    "edge": 0.04947
+   },
+   "goals": [
+    {
+     "side": "away",
+     "club": "leeds",
+     "t": 30.12,
+     "minute": "61'",
+     "shot": null,
+     "ball": 3,
+     "player": 1,
+     "scorer": "N. Okafor",
+     "scorer_team": "Leeds United"
+    },
+    {
+     "side": "away",
+     "club": "leeds",
+     "t": 94.46,
+     "minute": "90+1'",
+     "shot": 1,
+     "ball": 3,
+     "player": 1,
+     "scorer": "N. Okafor",
+     "scorer_team": "Leeds United"
+    },
+    {
+     "side": "home",
+     "club": "coventry",
+     "t": 98.23,
+     "minute": "90+2'",
+     "shot": 2,
+     "ball": 0,
+     "player": 0,
+     "scorer": "H. Wright",
+     "scorer_team": "Coventry City"
+    }
+   ]
+  },
+  {
+   "idx": 2,
+   "home": "tottenham",
+   "away": "sunderland",
+   "hg": 2,
+   "ag": 2,
+   "seed": 2216268269,
+   "attempt": 0,
+   "timeline_hash": "2bc5daa5b73196a222261067398c1dc7c95044f8651df9dace4753f4efab0e1d",
+   "added_time": 1,
+   "strength": {
+    "fav": "away",
+    "edge": 0.07954
+   },
+   "goals": [
+    {
+     "side": "home",
+     "club": "tottenham",
+     "t": 2.52,
+     "minute": "6'",
+     "shot": null,
+     "ball": 0,
+     "player": 0,
+     "scorer": "D. Solanke",
+     "scorer_team": "Tottenham Hotspur"
+    },
+    {
+     "side": "away",
+     "club": "sunderland",
+     "t": 30.6,
+     "minute": "62'",
+     "shot": null,
+     "ball": 3,
+     "player": 1,
+     "scorer": "B. Brobbey",
+     "scorer_team": "Sunderland"
+    },
+    {
+     "side": "away",
+     "club": "sunderland",
+     "t": 85.95,
+     "minute": "172'",
+     "shot": null,
+     "ball": 3,
+     "player": 1,
+     "scorer": "B. Brobbey",
+     "scorer_team": "Sunderland"
+    },
+    {
+     "side": "home",
+     "club": "tottenham",
+     "t": 94.68,
+     "minute": "90+1'",
+     "shot": 1,
+     "ball": 4,
+     "player": 2,
+     "scorer": "Richarlison",
+     "scorer_team": "Tottenham Hotspur"
+    }
+   ]
+  },
+  {
+   "idx": 3,
+   "home": "brighton",
+   "away": "nottingham_forest",
+   "hg": 2,
+   "ag": 0,
+   "seed": 2862949318,
+   "attempt": 0,
+   "timeline_hash": "516bd178022a11ecf6df35990a08428d0100085610c5828acd1bbb0cdbcdc5d3",
+   "added_time": 1,
+   "strength": {
+    "fav": "home",
+    "edge": 0.32576
+   },
+   "goals": [
+    {
+     "side": "home",
+     "club": "brighton",
+     "t": 66.46,
+     "minute": "133'",
+     "shot": null,
+     "ball": 2,
+     "player": 1,
+     "scorer": "Y. Minteh",
+     "scorer_team": "Brighton & Hove Albion"
+    },
+    {
+     "side": "home",
+     "club": "brighton",
+     "t": 75.28,
+     "minute": "151'",
+     "shot": null,
+     "ball": 4,
+     "player": 2,
+     "scorer": "S. Tzimas",
+     "scorer_team": "Brighton & Hove Albion"
+    }
+   ]
+  },
+  {
+   "idx": 4,
+   "home": "brentford",
+   "away": "crystal_palace",
+   "hg": 0,
+   "ag": 0,
+   "seed": 1317313283,
+   "attempt": 0,
+   "timeline_hash": "275253e59c0d5ee6a959a98d4959bd73a825988a5c121f1d8924e8771248aa3c",
+   "added_time": 2,
+   "strength": {
+    "fav": "home",
+    "edge": 0.30735
+   },
+   "goals": []
+  },
+  {
+   "idx": 5,
+   "home": "everton",
+   "away": "newcastle",
+   "hg": 0,
+   "ag": 1,
+   "seed": 706582156,
+   "attempt": 0,
+   "timeline_hash": "72b8c114a25557cb61182d4bf3ae3b6b377bc9524f0130a92199ce1f89ccc40f",
+   "added_time": 1,
+   "strength": {
+    "fav": "home",
+    "edge": 0.16
+   },
+   "goals": [
+    {
+     "side": "away",
+     "club": "newcastle",
+     "t": 13.15,
+     "minute": "27'",
+     "shot": null,
+     "ball": 1,
+     "player": 0,
+     "scorer": "Y. Wissa",
+     "scorer_team": "Newcastle United"
+    }
+   ]
+  },
+  {
+   "idx": 6,
+   "home": "fulham",
+   "away": "chelsea",
+   "hg": 0,
+   "ag": 0,
+   "seed": 3689520469,
+   "attempt": 0,
+   "timeline_hash": "a697138ad73eb9ab4dc4f4f10067cb329be45b312a65696b64751c9ee3847b6a",
+   "added_time": 1,
+   "strength": {
+    "fav": "home",
+    "edge": 0.16
+   },
+   "goals": []
+  },
+  {
+   "idx": 7,
+   "home": "bournemouth",
+   "away": "aston_villa",
+   "hg": 2,
+   "ag": 0,
+   "seed": 3785130954,
+   "attempt": 0,
+   "timeline_hash": "a768d0d04ce0579bd0210a0829c8001a5a9d23f65293253eb0c6c2e6166c0333",
+   "added_time": 1,
+   "strength": {
+    "fav": "home",
+    "edge": 0.01265
+   },
+   "goals": [
+    {
+     "side": "home",
+     "club": "bournemouth",
+     "t": 2.42,
+     "minute": "5'",
+     "shot": null,
+     "ball": 0,
+     "player": 0,
+     "scorer": "Evanilson",
+     "scorer_team": "Bournemouth"
+    },
+    {
+     "side": "home",
+     "club": "bournemouth",
+     "t": 80.88,
+     "minute": "162'",
+     "shot": null,
+     "ball": 2,
+     "player": 1,
+     "scorer": "J. Kluivert",
+     "scorer_team": "Bournemouth"
+    }
+   ]
+  },
+  {
+   "idx": 8,
+   "home": "liverpool",
+   "away": "man_city",
+   "hg": 1,
+   "ag": 1,
+   "seed": 361318563,
+   "attempt": 0,
+   "timeline_hash": "8612a0fcfb2d1db6d7ec7c9cc5a670a5e5d1f18036e9cac7813288811c3e3aea",
+   "added_time": 3,
+   "strength": {
+    "fav": "away",
+    "edge": 0.04782
+   },
+   "goals": [
+    {
+     "side": "home",
+     "club": "liverpool",
+     "t": 2.92,
+     "minute": "6'",
+     "shot": null,
+     "ball": 0,
+     "player": 0,
+     "scorer": "A. Isak",
+     "scorer_team": "Liverpool"
+    },
+    {
+     "side": "away",
+     "club": "man_city",
+     "t": 87.52,
+     "minute": "176'",
+     "shot": null,
+     "ball": 3,
+     "player": 1,
+     "scorer": "J. Doku",
+     "scorer_team": "Manchester City"
+    }
+   ]
+  },
+  {
+   "idx": 9,
+   "home": "arsenal",
+   "away": "man_utd",
+   "hg": 2,
+   "ag": 1,
+   "seed": 745093182,
+   "attempt": 0,
+   "timeline_hash": "2d7ddd82b6b9826f1bbd548c508e70d3cf57ac1f8ae10b300c8dcc8beb33c53e",
+   "added_time": 3,
+   "strength": {
+    "fav": "home",
+    "edge": 0.23736
+   },
+   "goals": [
+    {
+     "side": "home",
+     "club": "arsenal",
+     "t": 22.52,
+     "minute": "46'",
+     "shot": null,
+     "ball": 2,
+     "player": 1,
+     "scorer": "V. Gyökeres",
+     "scorer_team": "Arsenal"
+    },
+    {
+     "side": "away",
+     "club": "man_utd",
+     "t": 51.02,
+     "minute": "103'",
+     "shot": null,
+     "ball": 5,
+     "player": 2,
+     "scorer": "B. Šeško",
+     "scorer_team": "Manchester United"
+    },
+    {
+     "side": "home",
+     "club": "arsenal",
+     "t": 62.23,
+     "minute": "125'",
+     "shot": null,
+     "ball": 0,
+     "player": 0,
+     "scorer": "B. Saka",
+     "scorer_team": "Arsenal"
+    }
+   ]
+  }
+ ],
+ "standings": [
+  {
+   "id": "bournemouth",
+   "p": 1,
+   "w": 1,
+   "d": 0,
+   "l": 0,
+   "gf": 2,
+   "ga": 0,
+   "gd": 2,
+   "pts": 3,
+   "form": [
+    "W"
+   ],
+   "pos": 1,
+   "zone": "ucl",
+   "prev_pos": null
+  },
+  {
+   "id": "brighton",
+   "p": 1,
+   "w": 1,
+   "d": 0,
+   "l": 0,
+   "gf": 2,
+   "ga": 0,
+   "gd": 2,
+   "pts": 3,
+   "form": [
+    "W"
+   ],
+   "pos": 2,
+   "zone": "ucl",
+   "prev_pos": null
+  },
+  {
+   "id": "arsenal",
+   "p": 1,
+   "w": 1,
+   "d": 0,
+   "l": 0,
+   "gf": 2,
+   "ga": 1,
+   "gd": 1,
+   "pts": 3,
+   "form": [
+    "W"
+   ],
+   "pos": 3,
+   "zone": "ucl",
+   "prev_pos": null
+  },
+  {
+   "id": "leeds",
+   "p": 1,
+   "w": 1,
+   "d": 0,
+   "l": 0,
+   "gf": 2,
+   "ga": 1,
+   "gd": 1,
+   "pts": 3,
+   "form": [
+    "W"
+   ],
+   "pos": 4,
+   "zone": "ucl",
+   "prev_pos": null
+  },
+  {
+   "id": "newcastle",
+   "p": 1,
+   "w": 1,
+   "d": 0,
+   "l": 0,
+   "gf": 1,
+   "ga": 0,
+   "gd": 1,
+   "pts": 3,
+   "form": [
+    "W"
+   ],
+   "pos": 5,
+   "zone": "ucl",
+   "prev_pos": null
+  },
+  {
+   "id": "ipswich",
+   "p": 1,
+   "w": 1,
+   "d": 0,
+   "l": 0,
+   "gf": 1,
+   "ga": 0,
+   "gd": 1,
+   "pts": 3,
+   "form": [
+    "W"
+   ],
+   "pos": 6,
+   "zone": "uel",
+   "prev_pos": null
+  },
+  {
+   "id": "tottenham",
+   "p": 1,
+   "w": 0,
+   "d": 1,
+   "l": 0,
+   "gf": 2,
+   "ga": 2,
+   "gd": 0,
+   "pts": 1,
+   "form": [
+    "D"
+   ],
+   "pos": 7,
+   "zone": "uel",
+   "prev_pos": null
+  },
+  {
+   "id": "sunderland",
+   "p": 1,
+   "w": 0,
+   "d": 1,
+   "l": 0,
+   "gf": 2,
+   "ga": 2,
+   "gd": 0,
+   "pts": 1,
+   "form": [
+    "D"
+   ],
+   "pos": 8,
+   "zone": "uecl",
+   "prev_pos": null
+  },
+  {
+   "id": "man_city",
+   "p": 1,
+   "w": 0,
+   "d": 1,
+   "l": 0,
+   "gf": 1,
+   "ga": 1,
+   "gd": 0,
+   "pts": 1,
+   "form": [
+    "D"
+   ],
+   "pos": 9,
+   "zone": null,
+   "prev_pos": null
+  },
+  {
+   "id": "liverpool",
+   "p": 1,
+   "w": 0,
+   "d": 1,
+   "l": 0,
+   "gf": 1,
+   "ga": 1,
+   "gd": 0,
+   "pts": 1,
+   "form": [
+    "D"
+   ],
+   "pos": 10,
+   "zone": null,
+   "prev_pos": null
+  },
+  {
+   "id": "fulham",
+   "p": 1,
+   "w": 0,
+   "d": 1,
+   "l": 0,
+   "gf": 0,
+   "ga": 0,
+   "gd": 0,
+   "pts": 1,
+   "form": [
+    "D"
+   ],
+   "pos": 11,
+   "zone": null,
+   "prev_pos": null
+  },
+  {
+   "id": "chelsea",
+   "p": 1,
+   "w": 0,
+   "d": 1,
+   "l": 0,
+   "gf": 0,
+   "ga": 0,
+   "gd": 0,
+   "pts": 1,
+   "form": [
+    "D"
+   ],
+   "pos": 12,
+   "zone": null,
+   "prev_pos": null
+  },
+  {
+   "id": "crystal_palace",
+   "p": 1,
+   "w": 0,
+   "d": 1,
+   "l": 0,
+   "gf": 0,
+   "ga": 0,
+   "gd": 0,
+   "pts": 1,
+   "form": [
+    "D"
+   ],
+   "pos": 13,
+   "zone": null,
+   "prev_pos": null
+  },
+  {
+   "id": "brentford",
+   "p": 1,
+   "w": 0,
+   "d": 1,
+   "l": 0,
+   "gf": 0,
+   "ga": 0,
+   "gd": 0,
+   "pts": 1,
+   "form": [
+    "D"
+   ],
+   "pos": 14,
+   "zone": null,
+   "prev_pos": null
+  },
+  {
+   "id": "coventry",
+   "p": 1,
+   "w": 0,
+   "d": 0,
+   "l": 1,
+   "gf": 1,
+   "ga": 2,
+   "gd": -1,
+   "pts": 0,
+   "form": [
+    "L"
+   ],
+   "pos": 15,
+   "zone": null,
+   "prev_pos": null
+  },
+  {
+   "id": "man_utd",
+   "p": 1,
+   "w": 0,
+   "d": 0,
+   "l": 1,
+   "gf": 1,
+   "ga": 2,
+   "gd": -1,
+   "pts": 0,
+   "form": [
+    "L"
+   ],
+   "pos": 16,
+   "zone": null,
+   "prev_pos": null
+  },
+  {
+   "id": "everton",
+   "p": 1,
+   "w": 0,
+   "d": 0,
+   "l": 1,
+   "gf": 0,
+   "ga": 1,
+   "gd": -1,
+   "pts": 0,
+   "form": [
+    "L"
+   ],
+   "pos": 17,
+   "zone": null,
+   "prev_pos": null
+  },
+  {
+   "id": "hull",
+   "p": 1,
+   "w": 0,
+   "d": 0,
+   "l": 1,
+   "gf": 0,
+   "ga": 1,
+   "gd": -1,
+   "pts": 0,
+   "form": [
+    "L"
+   ],
+   "pos": 18,
+   "zone": "rel",
+   "prev_pos": null
+  },
+  {
+   "id": "nottingham_forest",
+   "p": 1,
+   "w": 0,
+   "d": 0,
+   "l": 1,
+   "gf": 0,
+   "ga": 2,
+   "gd": -2,
+   "pts": 0,
+   "form": [
+    "L"
+   ],
+   "pos": 19,
+   "zone": "rel",
+   "prev_pos": null
+  },
+  {
+   "id": "aston_villa",
+   "p": 1,
+   "w": 0,
+   "d": 0,
+   "l": 1,
+   "gf": 0,
+   "ga": 2,
+   "gd": -2,
+   "pts": 0,
+   "form": [
+    "L"
+   ],
+   "pos": 20,
+   "zone": "rel",
+   "prev_pos": null
+  }
+ ],
+ "results_hash": "833dc388ca6764d0"
+}

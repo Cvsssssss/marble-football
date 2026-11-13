@@ -121,62 +121,186 @@
     const z = fitText(c, label, w - 18, h * 0.42, 900); text(c, label, x + w / 2, y + h * 0.52, z, SC[1], 'center', 900);
     c.fillStyle = hexA(SC[1], 0.5); c.fillRect(x + 10, y + h - 7, w - 20, 2);
   }
+  // ---------- P8 §3: procedural Premier League stadium (replaces the background photo; sharp at any size) ----------
+  // Composition from the reference image (assets/backgrounds/premier_day.png, never drawn): blue sky with clouds, steel
+  // truss roof ring, rows of floodlights with bloom, three curved tiers full of small fans, purple glowing ribbons along
+  // the tier fronts, LED boards with plain "PREMIER LEAGUE", striped pitch with the centre circle. The static part is
+  // drawn once into the 2x background cache; flags and a few hundred fans move per frame (drawStadiumLive).
+  const SCX = 640;
+  const cv = (yc, ys) => (x) => yc + (ys - yc) * Math.pow((x - SCX) / SCX, 2); // curve: centre y -> side y
+  const STAD = {
+    roofOuter: cv(205, 34), roofMid: cv(236, 128), roofInner: cv(262, 178),
+    rib1: cv(352, 304), rib2: cv(462, 430), boards: cv(536, 526), pitch: 552,
+  };
+  let stadLive = null; // per-frame fans + flags (positions fixed, deterministic)
+  function stadLook(MAP) {
+    const night = !!MAP.night, skyL = lum(MAP.sky[1]), sk = hexRgb(MAP.sky[1]);
+    return {
+      night, glow: night ? 1 : skyL < 0.35 ? 0.85 : skyL < 0.62 ? 0.65 : 0.5,
+      overcast: !night && Math.abs(sk[2] - sk[0]) < 40 && skyL >= 0.45,
+      evening: !night && skyL < 0.35,
+      ribbon: MAP.ribbon || '#7d3cf0', FL: MAP.floodlight || '#ffffff', ST: MAP.stand || ['#4a3d78', '#2e2552'],
+      CR: MAP.crowd || ['#6b4fb3', '#e8e2f4', '#3a2c6e', '#c9b6ef'], RF: MAP.roof || ['#c9d3e2', '#7f8da3'],
+      dim: night ? 0.62 : skyL < 0.35 ? 0.8 : 1,
+    };
+  }
+  function bandPath(c, top, bot) {
+    c.beginPath(); c.moveTo(0, top(0)); for (let x = 0; x <= G.W; x += 8) c.lineTo(x, top(x));
+    for (let x = G.W; x >= 0; x -= 8) c.lineTo(x, bot(x)); c.closePath();
+  }
+  function cloud(c, x, y, s, col, a) {
+    const puffs = [[0, 0, 1], [-0.9, 0.25, 0.7], [0.95, 0.2, 0.75], [-0.4, -0.35, 0.75], [0.45, -0.3, 0.8], [1.6, 0.35, 0.5], [-1.55, 0.4, 0.45]];
+    for (const [dx, dy, r] of puffs) {
+      const R = r * s, g = c.createRadialGradient(x + dx * s, y + dy * s - R * 0.2, R * 0.1, x + dx * s, y + dy * s, R);
+      g.addColorStop(0, hexA(col, a)); g.addColorStop(0.65, hexA(col, a * 0.75)); g.addColorStop(1, hexA(col, 0));
+      c.fillStyle = g; c.beginPath(); c.arc(x + dx * s, y + dy * s, R, 0, Math.PI * 2); c.fill();
+    }
+  }
+  const SKIN = ['#f1c7a5', '#e0a882', '#c68a62', '#9a6544', '#6e452d', '#f5d6bd'];
+  function fan(c, x, y, sz, shirt, skin, arms) {
+    c.fillStyle = shirt; rrect(c, x - sz * 0.95, y, sz * 1.9, sz * 1.9, sz * 0.6); c.fill();
+    if (arms) { c.fillRect(x - sz * 1.05, y - sz * 1.5 - arms, sz * 0.42, sz * 1.7); c.fillRect(x + sz * 0.63, y - sz * 1.5 - arms, sz * 0.42, sz * 1.7); }
+    c.fillStyle = skin; c.beginPath(); c.arc(x, y - sz * 0.45, sz * 0.62, 0, Math.PI * 2); c.fill();
+  }
   function drawBowl(c, MAP) {
-    const night = !!MAP.night, ST = MAP.stand || ['#4a3d78', '#2e2552'], CR = MAP.crowd || ['#6b4fb3', '#e8e2f4', '#3a2c6e', '#c9b6ef'];
-    const RF = MAP.roof || ['#c9d3e2', '#7f8da3'], FL = MAP.floodlight || '#ffffff';
-    const arc = (y0, sag) => (x) => y0 + sag * Math.pow((x - G.W / 2) / (G.W / 2), 2); // curved bowl rows (higher at the sides)
-    // tiers (back to front): 3 curved stands full of procedural crowd
-    const tiers = [[arc(250, -70), arc(330, -60)], [arc(338, -55), arc(420, -45)], [arc(430, -40), arc(520, -30)]];
+    const L = stadLook(MAP), CR = L.CR, ST = L.ST;
+    // sky detail: clouds (day / evening), a grey deck (overcast); night stars come from drawScenery
+    if (!L.night) {
+      const ccol = L.overcast ? '#e9edf2' : L.evening ? '#f2b9a0' : '#ffffff';
+      const CL = [[150, 70, 46], [330, 112, 30], [560, 48, 22], [800, 92, 34], [1010, 60, 26], [1170, 120, 40], [455, 170, 20], [905, 175, 22]];
+      for (const [x, y, s] of CL) cloud(c, x, y, s, ccol, L.overcast ? 0.55 : 0.85);
+      if (L.overcast) { const g = c.createLinearGradient(0, 0, 0, 220); g.addColorStop(0, 'rgba(120,128,140,0.45)'); g.addColorStop(1, 'rgba(120,128,140,0)'); c.fillStyle = g; c.fillRect(0, 0, G.W, 220); }
+    }
+    // stand structure behind the crowd (tier backs)
+    const tiers = [[STAD.roofInner, STAD.rib1, 1.25, 4.6], [(x) => STAD.rib1(x) + 7, STAD.rib2, 1.7, 6.0], [(x) => STAD.rib2(x) + 7, STAD.boards, 2.15, 7.4]];
     tiers.forEach(([top, bot], ti) => {
-      c.fillStyle = ti % 2 ? ST[1] : ST[0];
-      c.beginPath(); c.moveTo(0, top(0)); for (let x = 0; x <= G.W; x += 16) c.lineTo(x, top(x)); for (let x = G.W; x >= 0; x -= 16) c.lineTo(x, bot(x)); c.closePath(); c.fill();
-      for (let i = 0; i < 1500; i++) {
-        const hx = hash(ti * 7919 + i * 13 + 1), hy = hash(ti * 104729 + i * 7 + 3), hc = hash(i * 31 + ti);
-        const x = hx * G.W, y = top(x) + 4 + hy * (bot(x) - top(x) - 8);
-        c.fillStyle = CR[Math.floor(hc * CR.length)]; c.globalAlpha = night ? 0.55 : 0.85;
-        c.fillRect(x, y, 2.2, 2.6);
-      }
-      c.globalAlpha = 1;
-      c.fillStyle = 'rgba(0,0,0,0.25)'; c.beginPath(); for (let x = 0; x <= G.W; x += 16) c.lineTo(x, bot(x)); for (let x = G.W; x >= 0; x -= 16) c.lineTo(x, bot(x) + 5); c.closePath(); c.fill();
+      const g = c.createLinearGradient(0, top(SCX), 0, bot(SCX)); g.addColorStop(0, shade(ST[1], -0.35)); g.addColorStop(1, ST[ti % 2]);
+      c.fillStyle = g; bandPath(c, top, bot); c.fill();
     });
-    // roof with truss structure + rows of floodlights
-    const rtop = arc(150, -120), rbot = arc(232, -80);
-    c.fillStyle = night ? shade(RF[1], -0.5) : RF[1];
-    c.beginPath(); for (let x = 0; x <= G.W; x += 16) c.lineTo(x, rtop(x)); for (let x = G.W; x >= 0; x -= 16) c.lineTo(x, rbot(x)); c.closePath(); c.fill();
-    c.strokeStyle = night ? 'rgba(200,215,235,0.35)' : RF[0]; c.lineWidth = 1.4;
-    c.beginPath(); for (let x = 0; x <= G.W; x += 16) c.lineTo(x, rtop(x)); c.stroke();
-    c.beginPath(); for (let x = 0; x <= G.W; x += 16) c.lineTo(x, rbot(x)); c.stroke();
-    for (let x = 0; x < G.W; x += 32) { c.beginPath(); c.moveTo(x, rtop(x)); c.lineTo(x + 16, rbot(x + 16)); c.lineTo(x + 32, rtop(x + 32)); c.stroke(); }
-    for (let x = 24; x < G.W; x += 44) {
-      const y = rbot(x) - 4;
-      const g = c.createRadialGradient(x, y, 0.5, x, y, night ? 26 : 12); g.addColorStop(0, hexA(FL, night ? 0.75 : 0.6)); g.addColorStop(1, hexA(FL, 0)); c.fillStyle = g; c.fillRect(x - 26, y - 26, 52, 52);
-      c.fillStyle = FL; c.beginPath(); c.arc(x, y, 2.4, 0, Math.PI * 2); c.fill();
+    // crowd: small figures in curved rows, nearer tiers bigger; ~3 % are kept for the per-frame layer (they move)
+    const live = [];
+    tiers.forEach(([top, bot, sz, rowH], ti) => {
+      const rows = Math.floor((bot(SCX) - top(SCX) - 4) / rowH);
+      for (let r = 0; r < rows; r++) {
+        const u = (r + 0.85) / rows, step = sz * 2.25;
+        for (let x = (r % 2) * step / 2 - 2, k = 0; x < G.W + 4; x += step, k++) {
+          const h = hash(ti * 1000003 + r * 7919 + k * 31 + 17), h2 = hash(ti * 7 + r * 104729 + k * 13 + 5);
+          if (h2 < 0.04) continue; // empty seat
+          const xx = x + (h - 0.5) * step * 0.35, yy = top(xx) + u * (bot(xx) - top(xx)) - sz * 0.6;
+          const shirt = h < 0.5 ? CR[0] : h < 0.62 ? CR[1] : CR[Math.floor(hash(k * 3 + r * 11 + ti) * CR.length)];
+          const skin = SKIN[Math.floor(h2 * SKIN.length)];
+          if (ti > 0 && h2 > 0.965 && xx > 70 && xx < G.W - 10) { live.push([xx, yy, sz, shirt, skin, h * 6.283]); continue; }
+          fan(c, xx, yy, sz, shirt, skin, 0);
+        }
+      }
+    });
+    // aisles (stairs) radiating from the pitch centre + dark vomitories, then a soft depth haze per tier
+    tiers.forEach(([top, bot], ti) => {
+      const n = ti === 0 ? 14 : 12;
+      for (let i = 1; i < n; i++) {
+        const xm = (i / n) * G.W, slope = (xm - SCX) / 900;
+        const y0 = top(xm) + 2, y1 = bot(xm) - 1, dx = slope * (y1 - y0);
+        c.fillStyle = shade(ST[0], 0.18); c.beginPath(); c.moveTo(xm - 3, y0); c.lineTo(xm + 3, y0); c.lineTo(xm + 3 + dx * 1.2, y1); c.lineTo(xm - 3 + dx * 1.2, y1); c.closePath(); c.fill();
+        c.strokeStyle = 'rgba(255,255,255,0.12)'; c.lineWidth = 0.6;
+        for (let y = y0 + 3; y < y1; y += 3) { const f = (y - y0) / (y1 - y0); c.beginPath(); c.moveTo(xm - 3 + dx * 1.2 * f, y); c.lineTo(xm + 3 + dx * 1.2 * f, y); c.stroke(); }
+        if (ti === 1 && i % 3 === 1) { const yv = y1 - 13; c.fillStyle = '#0b0b16'; rrect(c, xm + 7, yv, 15, 12, 2); c.fill(); c.fillStyle = 'rgba(255,255,255,0.18)'; c.fillRect(xm + 7, yv - 2, 15, 2); }
+      }
+      const hz = c.createLinearGradient(0, top(SCX), 0, bot(SCX)); hz.addColorStop(0, `rgba(15,20,45,${0.22 - ti * 0.06})`); hz.addColorStop(1, 'rgba(15,20,45,0)');
+      c.fillStyle = hz; bandPath(c, top, bot); c.fill();
+    });
+    if (L.dim < 1) { c.fillStyle = `rgba(6,10,26,${(1 - L.dim) * 0.9})`; bandPath(c, STAD.roofInner, STAD.boards); c.fill(); }
+    // purple ribbons (LED fascias) along the tier fronts, with glow
+    for (const rb of [STAD.rib1, STAD.rib2]) {
+      c.save(); c.globalCompositeOperation = 'lighter';
+      c.fillStyle = hexA(L.ribbon, 0.28 * L.glow + 0.12); bandPath(c, (x) => rb(x) - 5, (x) => rb(x) + 12); c.fill(); c.restore();
+      const g = c.createLinearGradient(0, rb(SCX), 0, rb(SCX) + 7); g.addColorStop(0, shade(L.ribbon, 0.35)); g.addColorStop(0.5, L.ribbon); g.addColorStop(1, shade(L.ribbon, -0.35));
+      c.fillStyle = g; bandPath(c, rb, (x) => rb(x) + 7); c.fill();
+      c.fillStyle = 'rgba(255,255,255,0.55)'; bandPath(c, rb, (x) => rb(x) + 1.2); c.fill();
+      c.fillStyle = 'rgba(0,0,0,0.35)'; bandPath(c, (x) => rb(x) + 7, (x) => rb(x) + 10); c.fill();
     }
-    // advertising boards angled in a V towards the centre screen (fictional brands only) + the centre screen
-    const SCR = MAP.center_screen_rect || [530, 250, 220, 62];
-    const boards = ['NOVA ENERGY', 'KESTREL AIR', 'BRIXTON BANK', 'MARBLE FC', 'ORBIT MOBILE', 'HALCYON TEA'];
-    const by1 = 548;
-    for (let i = 0; i < 6; i++) {
-      const left = i < 3, k = left ? i : i - 3;
-      const xa = left ? 20 + k * 165 : 1260 - (k + 1) * 165, xb = xa + 150;
-      const rise = left ? k : 2 - k; // V: boards rise towards the middle
-      const ya = 528 - rise * 3, yb = 528 - (left ? rise + 1 : rise - 1) * 3;
-      c.fillStyle = i % 2 ? '#13324f' : '#0f263f';
-      c.beginPath(); c.moveTo(xa, ya); c.lineTo(xb, yb); c.lineTo(xb, by1); c.lineTo(xa, by1); c.closePath(); c.fill();
-      const z = fitText(c, boards[i], 130, 11, 800); text(c, boards[i], (xa + xb) / 2, (Math.min(ya, yb) + by1) / 2 + 1, z, i % 2 ? '#8fe3d9' : '#ffffff', 'center', 800);
+    // LED boards at pitch level: purple with plain "PREMIER LEAGUE" panels (no logos, no brands)
+    const label = (show.league && show.league.display_name) || 'PREMIER LEAGUE';
+    {
+      const g = c.createLinearGradient(0, 526, 0, STAD.pitch); g.addColorStop(0, shade(L.ribbon, -0.15)); g.addColorStop(1, shade(L.ribbon, -0.55));
+      c.fillStyle = g; bandPath(c, STAD.boards, () => STAD.pitch); c.fill();
+      c.fillStyle = 'rgba(255,255,255,0.45)'; bandPath(c, STAD.boards, (x) => STAD.boards(x) + 1); c.fill();
+      for (let i = 0; i < 5; i++) { const x = 395 + i * 122.5, y = (STAD.boards(x) + STAD.pitch) / 2 + 0.5; const z = fitText(c, label, 104, 9, 900); text(c, label, x, y, z, 'rgba(255,255,255,0.88)', 'center', 900); }
     }
-    centerScreenText(c, SCR);
-    // the real pitch, seen through the gap between the platforms: stripes, centre circle, halfway line
-    const py = 552;
-    const pg = c.createLinearGradient(0, py, 0, G.H); pg.addColorStop(0, shade(MAP.grass[1], 0.05)); pg.addColorStop(1, MAP.grass[2]);
+    // roof: steel truss lattice against the sky (outer), solid underside (inner), front edge with floodlights
+    {
+      const g = c.createLinearGradient(0, 120, 0, 270); g.addColorStop(0, shade(L.RF[1], -0.25)); g.addColorStop(1, shade(L.RF[1], -0.55));
+      c.fillStyle = g; bandPath(c, STAD.roofMid, STAD.roofInner); c.fill();
+    }
+    c.save(); c.strokeStyle = L.night ? 'rgba(190,205,230,0.55)' : L.RF[0]; c.lineCap = 'round';
+    const ro = STAD.roofOuter, rm = STAD.roofMid;
+    for (const [f, w] of [[0, 2.4], [0.5, 1.2], [1, 2.4]]) { c.lineWidth = w; c.beginPath(); for (let x = 0; x <= G.W; x += 8) { const y = ro(x) + f * (rm(x) - ro(x)); if (x === 0) c.moveTo(x, y); else c.lineTo(x, y); } c.stroke(); }
+    c.lineWidth = 1.1;
+    for (let x = 0; x < G.W; x += 22) { // triangulated lattice between the chords
+      const a = ro(x), b = rm(x), a2 = ro(x + 22), b2 = rm(x + 22), mid = (a + b + a2 + b2) / 4;
+      c.beginPath(); c.moveTo(x, a); c.lineTo(x + 11, mid); c.lineTo(x + 22, a2); c.moveTo(x, b); c.lineTo(x + 11, mid); c.lineTo(x + 22, b2); c.moveTo(x, a); c.lineTo(x, b); c.stroke();
+    }
+    for (let x = 30; x < G.W; x += 96) { c.lineWidth = 1.6; c.beginPath(); c.moveTo(x, ro(x)); c.lineTo(x + 40, rm(x + 40)); c.stroke(); } // radial girders
+    c.restore();
+    c.strokeStyle = 'rgba(255,255,255,0.35)'; c.lineWidth = 1.3; c.beginPath(); for (let x = 0; x <= G.W; x += 8) c.lineTo(x, STAD.roofInner(x)); c.stroke();
+    // floodlights: two rows along the roof with bloom (additive) and star glints on some
+    c.save(); c.globalCompositeOperation = 'lighter';
+    const lights = [];
+    for (let x = 14; x < G.W; x += 26) lights.push([x, STAD.roofInner(x) - 6, 1]);
+    for (let x = 40; x < G.W; x += 64) lights.push([x, STAD.roofMid(x) + 8, 0.7]);
+    for (const [x, y, k] of lights) {
+      const R = (L.night ? 30 : 20) * k * (0.6 + L.glow * 0.6), g = c.createRadialGradient(x, y, 0.5, x, y, R);
+      g.addColorStop(0, hexA(L.FL, 0.85 * L.glow)); g.addColorStop(0.25, hexA(L.FL, 0.28 * L.glow)); g.addColorStop(1, hexA(L.FL, 0));
+      c.fillStyle = g; c.fillRect(x - R, y - R, 2 * R, 2 * R);
+    }
+    for (const [x, y, k] of lights) {
+      c.fillStyle = L.FL; c.beginPath(); c.arc(x, y, 2.6 * k, 0, Math.PI * 2); c.fill();
+      if (k === 1 && hash(Math.round(x) * 7 + 3) < 0.45) { c.strokeStyle = hexA(L.FL, 0.5 * L.glow + 0.15); c.lineWidth = 0.8; c.beginPath(); c.moveTo(x - 11, y); c.lineTo(x + 11, y); c.moveTo(x, y - 8); c.lineTo(x, y + 8); c.stroke(); }
+    }
+    const sp = c.createLinearGradient(0, 262, 0, 340); sp.addColorStop(0, hexA(L.FL, 0.16 * L.glow)); sp.addColorStop(1, hexA(L.FL, 0));
+    c.fillStyle = sp; bandPath(c, STAD.roofInner, STAD.rib1); c.fill(); // light spill on the upper tier
+    c.restore();
+    // pitch below the boards: mown stripes in perspective, halfway line, centre circle
+    const py = STAD.pitch;
+    const pg = c.createLinearGradient(0, py, 0, G.H); pg.addColorStop(0, shade(MAP.grass[1], 0.08)); pg.addColorStop(1, MAP.grass[2]);
     c.fillStyle = pg; c.fillRect(0, py, G.W, G.H - py);
-    for (let i = 0; i < 16; i += 2) { c.fillStyle = 'rgba(255,255,255,0.06)'; c.beginPath(); const x0 = i * 80 - 40, x1 = x0 + 80; c.moveTo(G.W / 2 + (x0 - G.W / 2) * 0.55, py); c.lineTo(G.W / 2 + (x1 - G.W / 2) * 0.55, py); c.lineTo(G.W / 2 + (x1 - G.W / 2) * 1.6, G.H); c.lineTo(G.W / 2 + (x0 - G.W / 2) * 1.6, G.H); c.closePath(); c.fill(); }
-    c.strokeStyle = 'rgba(255,255,255,0.75)'; c.lineWidth = 1.6;
-    c.beginPath(); c.moveTo(G.W / 2, py); c.lineTo(G.W / 2, G.H); c.stroke();
-    c.beginPath(); c.ellipse(G.W / 2, 640, 120, 30, 0, 0, Math.PI * 2); c.stroke();
-    c.beginPath(); c.moveTo(0, py + 1); c.lineTo(G.W, py + 1); c.stroke();
-    if (night) { const g = c.createLinearGradient(0, 0, 0, G.H); g.addColorStop(0, 'rgba(5,10,25,0.15)'); g.addColorStop(1, 'rgba(5,10,25,0)'); c.fillStyle = g; c.fillRect(0, 0, G.W, G.H); }
+    for (let i = -8; i < 8; i += 2) { const x0 = i * 80, x1 = x0 + 80; c.fillStyle = 'rgba(255,255,255,0.07)'; c.beginPath(); c.moveTo(SCX + x0 * 0.9, py); c.lineTo(SCX + x1 * 0.9, py); c.lineTo(SCX + x1 * 1.9, G.H); c.lineTo(SCX + x0 * 1.9, G.H); c.closePath(); c.fill(); }
+    c.strokeStyle = 'rgba(255,255,255,0.85)'; c.lineWidth = 1.8;
+    c.beginPath(); c.moveTo(SCX, py + 2); c.lineTo(SCX, G.H); c.stroke();
+    c.beginPath(); c.ellipse(SCX, 612, 132, 26, 0, 0, Math.PI * 2); c.stroke();
+    c.fillStyle = '#ffffff'; c.beginPath(); c.ellipse(SCX, 612, 3, 1.4, 0, 0, Math.PI * 2); c.fill();
+    c.fillStyle = 'rgba(0,0,0,0.22)'; c.fillRect(0, py, G.W, 3); // board shadow on the grass
+    // soft vignette (scenery only; the play objects are drawn above it)
+    const vg = c.createRadialGradient(SCX, 380, 260, SCX, 380, 820); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, `rgba(5,8,20,${L.night ? 0.42 : 0.28})`);
+    c.fillStyle = vg; c.fillRect(0, 0, G.W, G.H);
     if (MAP.tint) { c.fillStyle = MAP.tint[0]; c.fillRect(0, 0, G.W, G.H); }
+    // per-frame layer: the kept fans + waving flags (purple / white / crowd colours)
+    const flags = [];
+    for (let i = 0; i < 34; i++) {
+      const ti = 1 + (i % 2), x = 80 + hash(i * 97 + 11) * (G.W - 120);
+      const top = ti === 1 ? (x2) => STAD.rib1(x2) + 7 : (x2) => STAD.rib2(x2) + 7, bot = ti === 1 ? STAD.rib2 : STAD.boards;
+      const y = top(x) + (0.35 + hash(i * 31 + 7) * 0.5) * (bot(x) - top(x));
+      flags.push([x, y, ti === 1 ? 9 : 12, [L.ribbon, '#ffffff', CR[1], shade(L.ribbon, 0.3)][i % 4], hash(i * 13 + 1) * 6.283]);
+    }
+    stadLive = { fans: live, flags, dim: L.dim };
+  }
+  // moving part of the stadium, drawn every frame right after the cached background (t = match time, so slow motion
+  // slows the crowd too). Deterministic: depends only on t.
+  function drawStadiumLive(c, t) {
+    if (!stadLive) return;
+    for (const [x, y, sz, shirt, skin, ph] of stadLive.fans) {
+      const bob = Math.max(0, Math.sin(t * 2.6 + ph)) * sz * 0.7, up = Math.sin(t * 1.3 + ph * 1.7) > 0.55;
+      fan(c, x, y - bob, sz, shirt, skin, up ? 1 + Math.sin(t * 7 + ph) * 0.6 : 0);
+    }
+    for (const [x, y, w, col, ph] of stadLive.flags) {
+      const h = w * 0.62, pole = w * 1.5, px = x + Math.sin(t * 1.8 + ph) * 2, py = y - pole;
+      c.strokeStyle = '#d9d9e0'; c.lineWidth = 0.9; c.beginPath(); c.moveTo(x, y); c.lineTo(px, py); c.stroke();
+      c.fillStyle = col; c.beginPath(); c.moveTo(px, py);
+      for (let k = 1; k <= 4; k++) c.lineTo(px + (w * k) / 4, py + Math.sin(t * 6 + ph + k * 1.1) * 1.6 * (k / 4));
+      for (let k = 4; k >= 0; k--) c.lineTo(px + (w * k) / 4, py + h + Math.sin(t * 6 + ph + k * 1.1) * 1.6 * (k / 4));
+      c.closePath(); c.fill();
+      c.fillStyle = 'rgba(0,0,0,0.18)'; c.fillRect(px, py + h * 0.62, w, h * 0.12);
+    }
+    if (stadLive.dim < 1) { c.fillStyle = `rgba(6,10,26,${(1 - stadLive.dim) * 0.5})`; for (const [x, y, sz] of stadLive.fans) c.fillRect(x - sz * 1.1, y - sz * 3.4, sz * 2.2, sz * 5.4); }
   }
   // stone-block platform with a grass top (P7 premier maps); same outline as drawPlatform (the play layout is unchanged)
   function drawPlatformBlocks(c, x0, x1, seed) {
@@ -582,6 +706,7 @@
     c.scale(S, S);
     c.translate(G.W / 2 + shx, G.H / 2 + shy); c.scale(zoom, zoom); c.translate(-cx, -cy);
     c.drawImage(bgCanvas, 0, 0, G.W, G.H);
+    if (!bgImg && show.map.scenery === 'bowl') drawStadiumLive(c, t); // P8: moving fans + flags
     // balls inside the pipe (dim), then pipe glass over them
     fr.b.forEach((b, i) => { if (b[3] === 0 || b[3] === 1) drawBall(c, b[0], b[1], ballR(m, i) * 0.97, b[2], styleOf(m, i), 0.55); });
     drawPipeGlass(c);
@@ -1878,6 +2003,7 @@
   };
   // P7 §7b test hooks: background layer order and the cover-fit actually used
   window.bgLayerInfo = () => ({ image: !!bgImg, layers: bgLayers.slice(), fit: bgImg ? bgFitInfo() : null, imgSize: bgImg ? [bgImg.naturalWidth, bgImg.naturalHeight] : null });
+  window.stadiumInfo = () => (stadLive ? { fans: stadLive.fans.length, flags: stadLive.flags.length, curves: { roofInner: STAD.roofInner(640), rib1: STAD.rib1(640), rib2: STAD.rib2(640), boards: STAD.boards(640), pitch: STAD.pitch } } : null); // P8 tests
   window.fallbackDecalOf = (id) => (logoImgs[id] && logoImgs[id].fallback ? logoImgs[id].toDataURL('image/png') : null);
   window.renderFrame = renderFrame;
 
@@ -1887,7 +2013,10 @@
   // goal/scorer caption, comeback badge, info strip. Background: the map scene, extended and softly blurred (cached).
   // Key text stays inside SAFE (out of the bottom 25 % and the right 12 %: YouTube Shorts overlays, approximate).
   const RW = 720, RH = 1280, FIELD = { x: 0, y: 400, w: 720, h: 405 };
-  const SAFE = { x0: 40, x1: Math.floor(RW * 0.88) - 4, y0: 100, y1: Math.floor(RH * 0.75) - 4 };
+  // P8: the text column is symmetric around the frame centre (x0 = RW - x1), so scoreboard, captions and cards are
+  // horizontally centred like the full-width scene band; x1 stays out of the right 12 % (Shorts buttons)
+  const SAFE_X1 = Math.floor(RW * 0.88) - 4;
+  const SAFE = { x0: RW - SAFE_X1, x1: SAFE_X1, y0: 100, y1: Math.floor(RH * 0.75) - 4 };
   let reel = null, RS = 1.5, reelBgCanvas = null, boxes = [];
   window.initReel = function (r) {
     reel = r; RS = OUT_W / RW; reelBgCanvas = null;
@@ -2007,10 +2136,6 @@
       fieldScene(ctx, m, fr, { frameIndex: p.src, v, trailStep: p.ff ? 2 : 1 });
       ctx.save(); ctx.scale(RS, RS);
       reelScoreboard(ctx, m, fr.sc || scoreAt(m, fr.t), CL(fr.t), XT(fr.t));
-      if (p.ff) { // fast-forward indicator (top-left of the field, away from the Shorts buttons on the right)
-        ctx.fillStyle = 'rgba(8,20,38,0.85)'; rrect(ctx, SAFE.x0, FIELD.y + 10, 96, 36, 12); ctx.fill();
-        text(ctx, p.ff > 1 ? `>> x${p.ff}` : '>> x2', SAFE.x0 + 48, FIELD.y + 28.5, 20, '#ffd84a', 'center', 900); box('ff', SAFE.x0, FIELD.y + 10, 96, 36);
-      }
       const lg = lastEventBeforeV(m, 'goal', v);
       let capOn = false;
       if (lg && v - evV(lg) < 2.2) { // goal: team + minute only (no player names during play)
