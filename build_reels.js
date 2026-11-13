@@ -127,5 +127,5 @@ async function main() {
   }
   console.log('reels done');
 }
-module.exports = { suggestions, lintSuggestion, BANNED };
+module.exports = { suggestions, lintSuggestion, BANNED, renderReel, mux }; // P7: renderReel + mux reused by build_matchweek.js
 if (require.main === module) main().catch((e) => { console.error(e); process.exit(1); });

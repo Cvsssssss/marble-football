@@ -60,5 +60,16 @@ function checklistMd(runDir, run) {
     '',
   ].join('\n');
 }
-function writeChecklist(runDir, run) { fs.writeFileSync(path.join(runDir, 'PUBLISH_CHECKLIST.md'), checklistMd(runDir, run)); }
-module.exports = { writeChecklist, checklistMd, schedule };
+// P7 league run: same list, with the league wording (animated table instead of the bracket, PREMIER LEAGUE allowed as plain text)
+function leagueMd(md, run) {
+  return md
+    .replace('un singur reel per video, ales din optimi/sferturi (cea mai spectaculoasă revenire).', 'un singur reel per etapă (cea mai spectaculoasă revenire a etapei; altfel cel mai târziu gol decisiv; altfel meciul cu cele mai multe goluri).')
+    .replace('tabloul (bracket) după fiecare tur', 'clasamentul animat după fiecare meci, cardurile etapei')
+    .replace('- [ ] Fără nume oficiale de competiții și fără sigle (Champions League, Europa League, UEFA, FIFA, World Cup…). Numele noastre (MARBLE …) sunt OK.',
+      `- [ ] Numele **${run.league.display_name}** apare doar ca text simplu (decizia ta din 13 nov 2026; riscul e al tău). Fără sigla competiției, fără trofeul real, fără alte nume oficiale (UEFA, FIFA…).`)
+    + `
+Etapa ${run.league.week} din 38 · rezultatele sunt salvate în \`league/${run.league.id}/results/week_${String(run.league.week).padStart(2, '0')}.json\`.
+`;
+}
+function writeChecklist(runDir, run) { const md = checklistMd(runDir, run); fs.writeFileSync(path.join(runDir, 'PUBLISH_CHECKLIST.md'), run.league ? leagueMd(md, run) : md); }
+module.exports = { writeChecklist, checklistMd, schedule, leagueMd };

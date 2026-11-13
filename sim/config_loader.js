@@ -39,13 +39,22 @@ const S = {
       grass: { type: 'array', minItems: 3, maxItems: 3, items: { type: 'hex' } },
       grass_blades: { type: 'hex' },
       // P3 theme parameters (visual only; the physics layout is identical for every theme)
-      scenery: { type: 'string', enum: ['none', 'stadium', 'sunset'] }, night: { type: 'boolean' },
+      scenery: { type: 'string', enum: ['none', 'stadium', 'sunset', 'bowl'] }, night: { type: 'boolean' },
       stand: { type: 'array', minItems: 2, maxItems: 2, items: { type: 'hex' } }, floodlight: { type: 'hex' },
       sun: { type: 'hex' }, hills: { type: 'array', minItems: 2, maxItems: 2, items: { type: 'hex' } },
       windmill: { type: 'array', minItems: 2, maxItems: 2, items: { type: 'hex' } },
       keeper: { type: 'array', minItems: 2, maxItems: 2, items: { type: 'hex' } },
       music: { type: 'object', props: { transpose: { type: 'integer', min: -7, max: 7 }, bpm: { type: 'number', min: 90, max: 130 },
         progression: { type: 'string', enum: ['v2', 'open', 'stride', 'warm'] }, arp: { type: 'string', enum: ['up', 'down', 'wave'] } } },
+      // P7 §7 (visual only): image background layer, stone-block platforms, deeper goal net, striped windmill, bowl stadium
+      background_image: { type: 'string', pattern: /^assets\/backgrounds\/[a-z0-9_]+\.png$/ },
+      bg_pitch_top: { type: 'number', min: 0.4, max: 0.99 },   // fraction of the image height where the pitch begins
+      bg_ground_inset: { type: 'number', min: 0, max: 40 },    // design px the map ground line sits inside the pitch
+      center_screen_rect: { type: 'array', nullable: true, minItems: 4, maxItems: 4, items: { type: 'number', min: 0, max: 1280 } },
+      platform_style: { type: 'string', enum: ['rock', 'blocks'] }, goal_style: { type: 'string', enum: ['classic', 'deep'] },
+      windmill_stripes: { type: 'boolean' }, crowd: { type: 'array', minItems: 2, maxItems: 6, items: { type: 'hex' } },
+      roof: { type: 'array', minItems: 2, maxItems: 2, items: { type: 'hex' } }, screen: { type: 'array', minItems: 2, maxItems: 2, items: { type: 'hex' } },
+      tint: { type: 'array', minItems: 2, maxItems: 2, items: { type: 'string' } }, rain: { type: 'boolean' },
     },
   },
   rules: {
@@ -66,7 +75,7 @@ const S = {
       strength_edge: { type: 'number', min: 0, max: 0.5 },  // P2: invisible strength lever (release-turn probability)
       show_simulation_label: { type: 'boolean' },            // P5: small SIMULATION pill on screen (default false = no label)
       generate_thumbnails: { type: 'boolean' },
-      release_interval: { type: 'array', minItems: 2, maxItems: 2, items: { type: 'number', min: 1, max: 8 } }, // P7 league: s between spout releases (default engine [1.6, 2.4])              // P7: Max makes thumbnails himself; true = the old 3 auto thumbnails (default false)
+      release_interval: { type: 'array', minItems: 2, maxItems: 2, items: { type: 'number', min: 1, max: 15 } }, // P7 league: s between spout releases (default engine [1.6, 2.4])              // P7: Max makes thumbnails himself; true = the old 3 auto thumbnails (default false)
     },
   },
   audio: {
@@ -99,6 +108,7 @@ const S = {
 
 function validate(val, sch, where, errs) {
   const bad = (msg) => errs.push(`${where}: ${msg}`);
+  if (sch.nullable && val === null) return; // P7: explicit "none" (e.g. center_screen_rect: null)
   switch (sch.type) {
     case 'string':
       if (typeof val !== 'string') return bad(`must be a text string, got ${JSON.stringify(val)}`);

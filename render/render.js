@@ -129,14 +129,14 @@ async function stills(list, dir) {
 // ---- render cache: blocks of segments ----
 function rendererHash() {
   const h = crypto.createHash('sha256');
-  for (const f of ['render/draw.js', 'render/index.html', 'render/bracket_layout.js', 'sim/geometry.js', 'sim/clock.js']) h.update(fs.readFileSync(path.join(ROOT, f)));
+  for (const f of ['render/draw.js', 'render/index.html', 'render/bracket_layout.js', 'render/bg_fit.js', 'render/league_layout.js', 'sim/geometry.js', 'sim/clock.js']) h.update(fs.readFileSync(path.join(ROOT, f)));
   return h.digest('hex').slice(0, 12);
 }
 function blocks(show) {
   const out = [];
   let cur = null;
   for (const s of show.segments) {
-    if (!cur || ['intro', 'roundCard', 'matchPre', 'winner'].includes(s.type) && !(s.type === 'matchPre' && cur.segs.length === 1 && cur.segs[0].type === 'bracket' && cur.segs[0].caption === 'THE FINALISTS')) {
+    if (!cur || ['intro', 'roundCard', 'matchPre', 'winner', 'lgIntro', 'lgPre', 'lgTableFull', 'lgChampion', 'ceremony'].includes(s.type) && !(s.type === 'matchPre' && cur.segs.length === 1 && cur.segs[0].type === 'bracket' && cur.segs[0].caption === 'THE FINALISTS')) {
       cur = { segs: [] }; out.push(cur);
     }
     cur.segs.push(s);
@@ -145,6 +145,7 @@ function blocks(show) {
   const teamPart = show.teams.map((t) => [t.name, t.short_name, t.primary, t.secondary, t.players.map((p) => p.name + p.number)]);
   const logoHash = crypto.createHash('sha1').update(JSON.stringify(show.logos || {})).digest('hex').slice(0, 10);
   const common = { rh, size: SIZE, comp: show.competition, teams: teamPart, logos: logoHash, logosOn: show.logosOnBalls, map: show.map, cfg: show.cfg, style: show.bracketStyle };
+  if (show.league) { common.league = show.league; common.bg = show.background ? show.background.hash : null; } // P7 (absent for the cups: their keys are unchanged)
   for (const b of out) {
     b.start = b.segs[0].start; b.len = b.segs.reduce((a, s) => a + s.len, 0);
     const deps = b.segs.map((s) => {

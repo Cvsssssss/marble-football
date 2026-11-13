@@ -1,8 +1,39 @@
-P7 sesiunea 1 (secțiunile 0–4): modul PREMIER LEAGUE există în START.bat → 7 (etapa următoare, regenerarea ultimei etape, clasament, alegerea hărții); 20 de cluburi 2026/27, câte 3 atacanți, program de 38 de etape, model de forță calibrat.
-Thumbnail-urile sunt oprite peste tot (`generate_thumbnails: false`); le faci tu. Videoul etapei, finala sezonului și harta nouă (secțiunile 5–7) NU sunt făcute încă.
-De verificat de tine: `config/players_review.md` (secțiunea PREMIER LEAGUE), `assets/logos/MISSING.md` (13 cluburi cu decal de rezervă), `docs/LIGA.md`.
-Calibrare (motorul real, fără randare): 3,0 goluri/meci, 21,8 % egaluri, 3,5 % 0–0, 46,6 % victorii acasă; toate țintele de sezon trec (5000 de sezoane).
-Neverificat: niciun video (nu s-a randat nimic); datele jucătorilor sunt doar cât de corecte sunt sursele (premierleague.com, 13 nov 2026); culorile noilor cluburi sunt din cunoștințe generale.
+P7 complet: START.bat → 7 → 1 generează etapa următoare = rezultate + video lung (~20–22 min, clasament animat după fiecare meci, Golul etapei) + 1 reel + texte în `publish/`; etapa 38 are ceremonia trofeului (30 s, 3 unghiuri).
+Siglele celor 20 de cluburi sunt pe bile (13 descărcate azi de pe Wikipedia, surse în `assets/logos/manifest.json` și `LOGO_USAGE.md`); ceasul e mai lent (1 min joc = 1 s), forța recalibrată: 3,0 goluri/meci, 26,5 % egaluri, 42,7 % victorii acasă.
+4 hărți „premier” se rotesc; `premier_pitchside` folosește imaginea ta `premier_day.png` (fără deformare, aliniată jos, tăiată stânga/dreapta, mărită ~20%); celelalte 3 au stadion procedural până pui imaginile lor.
+De văzut: `docs/LIGA.md`, apoi generează etapa 1 și uită-te la tot videoul înainte de publicare (clasamentul animat, golul etapei, plasa porții, sunetul).
+Neverificat: niciun video/reel randat și nimic ascultat (regula ta); doar 8 cadre PNG; stadionul procedural și ceremonia în mișcare nu au fost văzute; datele jucătorilor sunt cât de corecte sunt sursele.
+
+# P7 report, session 2 (sections 5, 6, 7, 7b + crests + slower clock), 13 Nov 2026
+
+## Decisions
+- **Crests**: Max authorised downloading the 13 missing club crests this session, as ball decals only. `tools/fetch_logos_p7.py` took each from the club's English Wikipedia file page (960 px PNG render); every source/download/article URL, retrieval date and licence note is in `assets/logos/manifest.json`; `assets/logos/LOGO_USAGE.md` lists all 20 (also copied into every run folder). `MISSING.md` is deleted automatically when nothing is missing; the 3-letter fallback decal still works (tested with simulated missing files). `logos_on_balls: false` switches all off.
+- **Slower clock (Max's answer: "~21 min")**: `GAME_MIN_PER_SEC: 1` (90 s of play per match, was faster → 13.2 min video), `release_interval [7.6, 11.4]` (schema max raised to 15). Recalibrated with 400 seeds/team-pair grid + 5000 Monte-Carlo seasons; the strength parameters stayed (beta 0.7, home 0.16, compress 1.8/0.3; the search's best was beta 0.6 but 0.7 also passes every target and keeps the old calibration's spread). Old file kept as `build/calibration_session1.json` (not committed).
+- **Physics geometry unchanged** on the new maps (goals, windmill, keeper, ground identical) → no physics recalibration needed; the premier look is pure drawing (stone platform blocks, deep goal with swaying/rippling net, red-white windmill stripes, rain on the night map).
+- **Background image (7b)**: cover-fit (scale to height, symmetric left/right crop, bottom aligned), then the minimal extra zoom that puts the map ground line 6 px inside the image's pitch (`bg_pitch_top 0.83`, measured row 678/817): scale 1.195 vs plain cover 0.881. Never stretched. Missing/broken image → procedural bowl stadium. No centre screen on that map (`center_screen_rect: null`).
+- **Map rotation**: the 4 premier maps rotate week by week (week 1 = `premier_pitchside`); 3 of them are procedural until Max adds `premier_overcast/evening/night.png`.
+- **Timeline**: intro 10.5 s (fixtures grid), per match pre-card → match → full time → replay → MOTM → animated table (5 s); end: full table, all results, top 5 scorers, Goal of the Week card + replay, next-week teaser. Week 38: champion, 30 s ceremony (wide 0–10 s, low-angle lift 10–20 s, top-down orbit 20–30 s; fireworks, cheers, original sting), European places + relegated, Golden Boot, podium, season stats.
+- **Goal of the Week score**: +3 keeper in the air, +2 keeper crouched, +2 winning goal, +1.5 equaliser, +1 added-time shot, + minute/45; highest wins (deterministic).
+- **Reel**: one per week; comeback (drama score) → latest winning goal → highest-scoring match; must fit ≤ 55 s; league fast-forward x4 (cups keep x2), static full-pitch P6 layout.
+- **Publish texts**: title `Premier League Matchweek N | Marble Football Simulation 2026/27` + 2 variants, results labelled "Simulated results … not real results", top 5 as text, chapters, disclaimer; hashtags start `#PremierLeague #EPL #MarbleFootball` ("EPL" allowed by the lint as part of the league name decision). No player names (lint-checked).
+- **Music**: per-week transpose/tempo cycle so consecutive weeks sound different; new synthesised sounds (firework with its own RNG so the cups' audio stays byte-identical, ceremony sting).
+- **Render cache**: `bg_fit.js` and `league_layout.js` are part of the renderer hash, so all existing cup render caches are invalidated once (cup sim hashes unchanged).
+
+## Files
+`build_matchweek.js`, `sim/league/show.js`, `sim/league/publish.js`, `render/bg_fit.js`, `render/league_layout.js`, `config/maps/premier_*.json`, changes in `render/draw.js`, `render/render.js`, `render/index.html`, `sim/reels.js`, `build_reels.js`, `audio/make_audio.py`, `preflight.js`, `sim/checklist.js`, `sim/config_loader.js`, `sim/league/config.js`; tools `tools/p7_stills.js`, `tools/fetch_logos_p7.py`; tests `tests/p7b_tests.js`; doc `docs/LIGA.md`.
+
+## Tests
+`npm test`: run_tests 59/59, P2 30/30, P3 24/24, P4 24/24, P5 26/26, P6 35/35, P7 66/66, **P7b 57/57** — all green. P7b covers: cover-fit math (only side crop, bottom aligned, ground line inside pitch, no stretch), layer order with/without image (headless), map schema, table layout readability at 1080p, show rebuilt from saved seeds (hash + score equal), timeline order, table chain = saved standings, GOTW formula, scorer-in-team, durations (week 1 20.4 min, week 38 22.1 min), ceremony 25–35 s with 3 angles + sounds (short wav synthesised and deleted), every segment type draws headless without page errors, reel rules + ≤ 55 s, publish lint/title/hashtags/no names, `build_matchweek` dry run + preflight green.
+Stills used (8 of 8): table update, match on Max's background, goal close-up, ceremony lift (×2 after a framing fix), ceremony wide, ceremony orbit, full table (`build/p7_stills/`, not committed).
+
+## Known problems / not verified
+- No video, reel or audio was rendered or heard (Max's rule). Net sway, rain, fireworks, table animation and ceremony camera moves are only checked as single frames/headless.
+- Two late layout tweaks were not re-checked with a still (trophy moved onto the stage in the wide shot; full-table title moved up) because the 8-still budget was used.
+- The procedural bowl stadium (3 maps) was never seen as a PNG.
+- The 1080p render of a ~21 min video takes longer than the old 13 min one (more frames).
+- Player data is only as correct as the sources (premierleague.com, 13 Nov 2026).
+
+---
 
 # P7 report: Premier League season mode, session 1 (sections 0–4 + thumbnails flag)
 

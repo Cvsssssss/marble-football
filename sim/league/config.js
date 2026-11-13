@@ -62,15 +62,16 @@ function loadLeague(file, opts) {
 
 // assets/logos/MISSING.md: clubs of the league without a crest file -> they get the fallback decal
 // (3-letter code on a disc in the club's primary colour, same ring; render/draw.js). No crest is downloaded
-// unless Max explicitly authorises it in a session.
+// unless Max explicitly authorises it in a session. When every club has a crest the file is removed.
 function writeMissingLogos(C) {
   const miss = C.teams.filter((t) => !t.logoFile);
+  const f = path.join(ROOT, 'assets', 'logos', 'MISSING.md');
+  if (!miss.length) { if (fs.existsSync(f)) fs.unlinkSync(f); return { file: null, missing: [] }; }
   const lines = ['# Sigle lipsă (Premier League)', '',
     `Pentru aceste ${miss.length} cluburi nu există fișier în \`assets/logos/\`, așa că pe bile apare **decalul de rezervă**: codul de 3 litere pe un disc în culoarea principală a clubului (bila, mărimea și inelul rămân la fel).`,
     'Dacă vrei sigla adevărată: pune fișierul PNG ca `assets/logos/<id>.png` (numele = id-ul clubului) și notează sursa în `assets/logos/manifest.json`. Siglele nu se descarcă automat fără acordul tău explicit.', '',
     '| id (nume fișier) | Club | Decal de rezervă | Culoare principală |', '|---|---|---|---|',
     ...miss.map((t) => `| \`${t.id}.png\` | ${t.name} | ${t.short} | ${t.primary} |`), ''];
-  const f = path.join(ROOT, 'assets', 'logos', 'MISSING.md');
   fs.writeFileSync(f, lines.join('\n'));
   return { file: f, missing: miss.map((t) => t.id) };
 }

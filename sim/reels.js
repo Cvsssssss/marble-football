@@ -45,6 +45,8 @@ function buildReelOnce(show, matchIndex, opts) {
   opts = opts || {};
   // shortened windows never go below 1.1 s, so goals always keep >= 1 s of normal speed on both sides (P5)
   const QB = Math.max(1.1, QUIET_BEFORE * opts.quietScale), QA = Math.max(1.1, QUIET_AFTER * opts.quietScale);
+  // P7 league (90 s matches): opts.ffSpeed / opts.ffMaxOut give a stronger fast-forward; the cups keep x2 / 1.5 s
+  const FFS = opts.ffSpeed || FF_SPEED, FFM = opts.ffMaxOut || FF_MAX_OUT;
   const m = show.matches[matchIndex];
   const F = m.frames;
   // --- protected (normal speed) windows ---
@@ -69,7 +71,7 @@ function buildReelOnce(show, matchIndex, opts) {
   for (const [i, j] of runs) {
     let k = i + Math.round(0.3 * FPS);
     while (k + Math.round(1.0 * FPS) < j - Math.round(0.3 * FPS)) {
-      const len = Math.min(Math.round(FF_MAX_OUT * FF_SPEED * FPS), j - Math.round(0.3 * FPS) - k);
+      const len = Math.min(Math.round(FFM * FFS * FPS), j - Math.round(0.3 * FPS) - k);
       if (len < Math.round(0.8 * FPS)) break;
       chunks.push([k, k + len]); k += len + Math.round(0.5 * FPS);
     }
@@ -78,10 +80,10 @@ function buildReelOnce(show, matchIndex, opts) {
   for (const [a, b] of chunks) {
     if (fixed + matchOut <= TARGET_MAX) break;
     for (let q = a; q < b; q++) ffMark[q] = 1;
-    matchOut -= (b - a) / FPS * (1 - 1 / FF_SPEED);
+    matchOut -= (b - a) / FPS * (1 - 1 / FFS);
   }
   const plan = [];
-  for (let i = 0; i < F.length; i++) { if (ffMark[i]) { if ((i - (ffStart(i))) % FF_SPEED === 0) plan.push({ src: i, ff: 1 }); } else plan.push({ src: i, ff: 0 }); }
+  for (let i = 0; i < F.length; i++) { if (ffMark[i]) { if ((i - (ffStart(i))) % FFS === 0) plan.push({ src: i, ff: FFS === FF_SPEED ? 1 : FFS }); } else plan.push({ src: i, ff: 0 }); }
   function ffStart(i) { let s = i; while (s > 0 && ffMark[s - 1]) s--; return s; }
   // still too long: start the match part later (only the quiet opening before the first goal is dropped; goals never cut)
   let trimmedStart = 0;
@@ -129,7 +131,7 @@ function buildReelOnce(show, matchIndex, opts) {
     camera: { mode: 'static', scene: SCENE }, camTrack: { frames: total, rect: [SCENE.x, SCENE.y, SCENE.w, SCENE.h], changes: 0 }, segments: segs, audio,
     comebackDepth: m.comeback ? m.comeback_depth : 0,
     decisive: { goal: dg, team: ti(g.team), player: g.player, minute: CLOCK.minuteLabel(m, g.t, show.cfg.GAME_MIN_PER_SEC) },
-    ffStretches: chunks.filter(([a]) => ffMark[a]).length, quietScale: opts.quietScale, trimmedStartS: +(trimmedStart / FPS).toFixed(2),
+    ffStretches: chunks.filter(([a]) => ffMark[a]).length, quietScale: opts.quietScale, ...(FFS !== FF_SPEED ? { ffSpeed: FFS } : {}), trimmedStartS: +(trimmedStart / FPS).toFixed(2),
   };
 }
 

@@ -1,7 +1,7 @@
 {
-  "_comment": "P7 league matches: same physics/windmill/keeper/added-time shots as base.json; draws allowed, no golden ball, technical gate 0-9 goals. release_interval (s between spout releases) is the calibrated league flow lever: ~3 goals per match with the same 45 s of play.",
+  "_comment": "P7 league matches: same physics/windmill/keeper/added-time shots as base.json; draws allowed, no golden ball, technical gate 0-9 goals. release_interval (s between spout releases) is the calibrated league flow lever: ~3 goals per match. P7 session 2 (Max, 13 Nov 2026): league clock 1 game minute per second (90 s of play) so a matchweek video is ~21 min; release_interval recalibrated for it.",
   "BALLS_PER_TEAM": 3,
-  "GAME_MIN_PER_SEC": 2,
+  "GAME_MIN_PER_SEC": 1,
   "ADDED_MIN": [1, 3],
   "windmill_fast_from_min": 60,
   "windmill_boost_ramp_half": 2,
@@ -14,5 +14,5 @@
   "strength_edge": 0,
   "show_simulation_label": false,
   "generate_thumbnails": false,
-  "release_interval": [3.8, 5.6]
+  "release_interval": [7.6, 11.4]
 }

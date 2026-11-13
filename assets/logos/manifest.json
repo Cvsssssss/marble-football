@@ -1,5 +1,5 @@
 {
- "_comment": "Team crests (clubs) and flags (national teams) used ONLY as ball decals (logos_on_balls). Downloaded on Max explicit request in session 2026-11-04.",
+ "_comment": "Team crests (clubs) and flags (national teams) used ONLY as ball decals (logos_on_balls). Downloaded on Max explicit request in session 2026-11-04. Premier League crests added on Max explicit request in session 2026-11-13.",
  "logos": {
   "psg": {
    "file": "psg.png",
@@ -486,6 +486,136 @@
    "retrieved": "2026-11-04",
    "licence": "Public domain",
    "note": "National flag (Wikimedia Commons, public domain / free licence). National teams may show flags (CLAUDE.md)."
+  },
+  "man_utd": {
+   "file": "man_utd.png",
+   "source_url": "https://en.wikipedia.org/wiki/File:Manchester_United_FC_crest.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/7/7a/Manchester_United_FC_crest.svg/960px-Manchester_United_FC_crest.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "article_url": "https://en.wikipedia.org/wiki/Manchester_United_F.C.",
+   "retrieved": "2026-11-13",
+   "licence": "Fair use",
+   "note": "Non-free file on English Wikipedia (fair-use rationale for the article only); club crest is a trademark of the club. Downloaded on Max explicit authorisation (session 2026-11-13); usage risk accepted by Max.",
+   "kind": "crest"
+  },
+  "brighton": {
+   "file": "brighton.png",
+   "source_url": "https://en.wikipedia.org/wiki/File:Brighton_and_Hove_Albion_FC_crest.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/d/d0/Brighton_and_Hove_Albion_FC_crest.svg/960px-Brighton_and_Hove_Albion_FC_crest.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "article_url": "https://en.wikipedia.org/wiki/Brighton_%26_Hove_Albion_F.C.",
+   "retrieved": "2026-11-13",
+   "licence": "Fair use",
+   "note": "Non-free file on English Wikipedia (fair-use rationale for the article only); club crest is a trademark of the club. Downloaded on Max explicit authorisation (session 2026-11-13); usage risk accepted by Max.",
+   "kind": "crest"
+  },
+  "brentford": {
+   "file": "brentford.png",
+   "source_url": "https://en.wikipedia.org/wiki/File:Brentford_FC_crest.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/2/2a/Brentford_FC_crest.svg/960px-Brentford_FC_crest.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "article_url": "https://en.wikipedia.org/wiki/Brentford_F.C.",
+   "retrieved": "2026-11-13",
+   "licence": "Fair use",
+   "note": "Non-free file on English Wikipedia (fair-use rationale for the article only); club crest is a trademark of the club. Downloaded on Max explicit authorisation (session 2026-11-13); usage risk accepted by Max.",
+   "kind": "crest"
+  },
+  "chelsea": {
+   "file": "chelsea.png",
+   "source_url": "https://en.wikipedia.org/wiki/File:Chelsea_FC.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/c/cc/Chelsea_FC.svg/960px-Chelsea_FC.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "article_url": "https://en.wikipedia.org/wiki/Chelsea_F.C.",
+   "retrieved": "2026-11-13",
+   "licence": "Fair use",
+   "note": "Non-free file on English Wikipedia (fair-use rationale for the article only); club crest is a trademark of the club. Downloaded on Max explicit authorisation (session 2026-11-13); usage risk accepted by Max.",
+   "kind": "crest"
+  },
+  "fulham": {
+   "file": "fulham.png",
+   "source_url": "https://en.wikipedia.org/wiki/File:Fulham_FC_(shield).svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/e/eb/Fulham_FC_%28shield%29.svg/960px-Fulham_FC_%28shield%29.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "article_url": "https://en.wikipedia.org/wiki/Fulham_F.C.",
+   "retrieved": "2026-11-13",
+   "licence": "PD",
+   "note": "Non-free file on English Wikipedia (fair-use rationale for the article only); club crest is a trademark of the club. Downloaded on Max explicit authorisation (session 2026-11-13); usage risk accepted by Max.",
+   "kind": "crest"
+  },
+  "newcastle": {
+   "file": "newcastle.png",
+   "source_url": "https://en.wikipedia.org/wiki/File:Newcastle_United_FC_2026_crest.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/8/87/Newcastle_United_FC_2026_crest.svg/960px-Newcastle_United_FC_2026_crest.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "article_url": "https://en.wikipedia.org/wiki/Newcastle_United_F.C.",
+   "retrieved": "2026-11-13",
+   "licence": "Fair use",
+   "note": "Non-free file on English Wikipedia (fair-use rationale for the article only); club crest is a trademark of the club. Downloaded on Max explicit authorisation (session 2026-11-13); usage risk accepted by Max.",
+   "kind": "crest"
+  },
+  "everton": {
+   "file": "everton.png",
+   "source_url": "https://en.wikipedia.org/wiki/File:Everton_FC_logo.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/7/7c/Everton_FC_logo.svg/960px-Everton_FC_logo.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "article_url": "https://en.wikipedia.org/wiki/Everton_F.C.",
+   "retrieved": "2026-11-13",
+   "licence": "Fair use",
+   "note": "Non-free file on English Wikipedia (fair-use rationale for the article only); club crest is a trademark of the club. Downloaded on Max explicit authorisation (session 2026-11-13); usage risk accepted by Max.",
+   "kind": "crest"
+  },
+  "leeds": {
+   "file": "leeds.png",
+   "source_url": "https://en.wikipedia.org/wiki/File:Leeds_United_F.C._logo.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/5/54/Leeds_United_F.C._logo.svg/960px-Leeds_United_F.C._logo.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "article_url": "https://en.wikipedia.org/wiki/Leeds_United_F.C.",
+   "retrieved": "2026-11-13",
+   "licence": "Fair use",
+   "note": "Non-free file on English Wikipedia (fair-use rationale for the article only); club crest is a trademark of the club. Downloaded on Max explicit authorisation (session 2026-11-13); usage risk accepted by Max.",
+   "kind": "crest"
+  },
+  "nottingham_forest": {
+   "file": "nottingham_forest.png",
+   "source_url": "https://en.wikipedia.org/wiki/File:Nottingham_Forest_F.C._logo.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/e/e5/Nottingham_Forest_F.C._logo.svg/960px-Nottingham_Forest_F.C._logo.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "article_url": "https://en.wikipedia.org/wiki/Nottingham_Forest_F.C.",
+   "retrieved": "2026-11-13",
+   "licence": "Fair use",
+   "note": "Non-free file on English Wikipedia (fair-use rationale for the article only); club crest is a trademark of the club. Downloaded on Max explicit authorisation (session 2026-11-13); usage risk accepted by Max.",
+   "kind": "crest"
+  },
+  "tottenham": {
+   "file": "tottenham.png",
+   "source_url": "https://en.wikipedia.org/wiki/File:Tottenham_Hotspur.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/b/b4/Tottenham_Hotspur.svg/960px-Tottenham_Hotspur.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "article_url": "https://en.wikipedia.org/wiki/Tottenham_Hotspur_F.C.",
+   "retrieved": "2026-11-13",
+   "licence": "Fair use",
+   "note": "Non-free file on English Wikipedia (fair-use rationale for the article only); club crest is a trademark of the club. Downloaded on Max explicit authorisation (session 2026-11-13); usage risk accepted by Max.",
+   "kind": "crest"
+  },
+  "coventry": {
+   "file": "coventry.png",
+   "source_url": "https://en.wikipedia.org/wiki/File:Coventry_City_FC_crest.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/7/7b/Coventry_City_FC_crest.svg/960px-Coventry_City_FC_crest.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "article_url": "https://en.wikipedia.org/wiki/Coventry_City_F.C.",
+   "retrieved": "2026-11-13",
+   "licence": "Fair use",
+   "note": "Non-free file on English Wikipedia (fair-use rationale for the article only); club crest is a trademark of the club. Downloaded on Max explicit authorisation (session 2026-11-13); usage risk accepted by Max.",
+   "kind": "crest"
+  },
+  "ipswich": {
+   "file": "ipswich.png",
+   "source_url": "https://en.wikipedia.org/wiki/File:Ipswich_Town.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/4/43/Ipswich_Town.svg/960px-Ipswich_Town.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "article_url": "https://en.wikipedia.org/wiki/Ipswich_Town_F.C.",
+   "retrieved": "2026-11-13",
+   "licence": "Fair use",
+   "note": "Non-free file on English Wikipedia (fair-use rationale for the article only); club crest is a trademark of the club. Downloaded on Max explicit authorisation (session 2026-11-13); usage risk accepted by Max.",
+   "kind": "crest"
+  },
+  "hull": {
+   "file": "hull.png",
+   "source_url": "https://en.wikipedia.org/wiki/File:Hull_City_A.F.C._logo.svg",
+   "download_url": "https://thumb.wikimedia.org/wikipedia/en/thumb/5/54/Hull_City_A.F.C._logo.svg/960px-Hull_City_A.F.C._logo.svg.png?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+   "article_url": "https://en.wikipedia.org/wiki/Hull_City_A.F.C.",
+   "retrieved": "2026-11-13",
+   "licence": "Fair use",
+   "note": "Non-free file on English Wikipedia (fair-use rationale for the article only); club crest is a trademark of the club. Downloaded on Max explicit authorisation (session 2026-11-13); usage risk accepted by Max.",
+   "kind": "crest"
   }
  }
 }

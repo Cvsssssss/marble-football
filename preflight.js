@@ -107,6 +107,7 @@ function preflight(runDir) {
   add('nicio imagine în afara manifestului de resurse (assets/logos/manifest.json)', unlisted.length === 0, `Imagini fără sursă în manifest: ${unlisted.map((p) => path.relative(ROOT, p)).join(', ')}. Șterge-le sau adaugă sursa în manifest.`);
   // 4. no player names in any file name or text file of the run
   const comp = JSON.parse(fs.readFileSync(path.join(ROOT, run.competition.file), 'utf8'));
+  if (run.league && !comp.teams) comp.teams = comp.clubs.map((c) => c.id); // P7 league run: the 20 clubs
   const teams = comp.teams.map((id) => JSON.parse(fs.readFileSync(path.join(ROOT, 'config', 'teams', id + '.json'), 'utf8')));
   const teamText = teams.map((t) => `${t.name} ${t.short_name || ''}`).join(' ').toLowerCase();
   const names = teams.flatMap((t) => t.players.concat(t.fictional_players || []).map((p) => p.name));
@@ -152,7 +153,7 @@ function preflight(runDir) {
     const opts = (f) => fs.readFileSync(rf('publish/' + f), 'utf8').split(/\r?\n/).filter((l) => /^\d\. /.test(l)).map((l) => l.slice(3));
     const P = { longTitles: opts('long_title.txt'), reelTitles: opts('reel_title.txt'), longDescription: fs.readFileSync(rf('publish/long_description.txt'), 'utf8').trim(),
       reelDescription: (run.reels || []).length ? fs.readFileSync(rf('publish/reel_description.txt'), 'utf8').trim() : '' };
-    const errs = PUB.lintPublish(P, { playerNames: names, durationS: run.long_video.seconds, champion: run.champion });
+    const errs = PUB.lintPublish(P, { playerNames: names, durationS: run.long_video.seconds, champion: run.champion, allowNames: run.league ? [run.league.display_name, 'EPL'] : [] }); // P7: PREMIER LEAGUE as plain text (Max, 13 Nov 2026)
     add('textele din publish/ respectă regulile (Simulation, ≤ 100 caractere, capitole, disclaimer, fără nume de jucători / oficiale)', errs.length === 0, `Probleme: ${errs.map((e) => e.replace(/player name: .*/, 'nume de jucător')).join('; ')}`);
   }
   return finish(runDir, C, run);

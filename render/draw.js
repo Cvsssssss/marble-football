@@ -5,7 +5,7 @@
   let OUT_W = 1920, OUT_H = 1080, S = OUT_W / G.W; // preview: 1280x720 (set in initRenderer)
   const BG_SS = 2; // static background cached at 2x design (2560x1440) and downsampled = supersampling
   const FONT = '"Bahnschrift", "Segoe UI", "Arial", sans-serif';
-  let show, canvas, ctx, bgCanvas, segIndex = [];
+  let show, canvas, ctx, bgCanvas, segIndex = [], bgImg = null, bgLayers = [];
   const FPS = 30;
 
   // ---------- helpers ----------
@@ -35,17 +35,26 @@
     const c = bgCanvas.getContext('2d');
     c.scale(BG_SS, BG_SS);
     // sky: clean blue vertical gradient
-    const sky = c.createLinearGradient(0, 0, 0, G.H);
     const MAP = show.map;
-    sky.addColorStop(0, MAP.sky[0]); sky.addColorStop(0.55, MAP.sky[1]); sky.addColorStop(1, MAP.sky[2]);
-    c.fillStyle = sky; c.fillRect(0, 0, G.W, G.H);
-    drawScenery(c, MAP);
+    bgLayers = [];
+    if (bgImg) { // P7 §7b: Max's image as the background layer (cover-fit, bottom-anchored); nothing procedural behind it
+      const F = bgFitInfo();
+      c.drawImage(bgImg, F.dx, F.dy, F.dw, F.dh); bgLayers.push('image');
+      if (MAP.tint) { c.fillStyle = MAP.tint[0]; c.fillRect(0, 0, G.W, G.H); }
+      if (MAP.center_screen_rect) { centerScreenText(c, MAP.center_screen_rect); bgLayers.push('center_screen'); }
+    } else {
+      const sky = c.createLinearGradient(0, 0, 0, G.H);
+      sky.addColorStop(0, MAP.sky[0]); sky.addColorStop(0.55, MAP.sky[1]); sky.addColorStop(1, MAP.sky[2]);
+      c.fillStyle = sky; c.fillRect(0, 0, G.W, G.H); bgLayers.push('sky');
+      drawScenery(c, MAP); bgLayers.push('scenery:' + (MAP.scenery || 'none'));
+    }
     // pipe (vertical part in the sky)
     drawPipeBase(c, 'sky');
     // platforms
-    drawPlatform(c, G.LEFT_PLAT[0] - 20, G.LEFT_PLAT[1], 1);
-    drawPlatform(c, G.RIGHT_PLAT[0], G.RIGHT_PLAT[1] + 20, 2);
-    drawPipeBase(c, 'ground');
+    const plat = MAP.platform_style === 'blocks' ? drawPlatformBlocks : drawPlatform;
+    plat(c, G.LEFT_PLAT[0] - 20, G.LEFT_PLAT[1], 1);
+    plat(c, G.RIGHT_PLAT[0], G.RIGHT_PLAT[1] + 20, 2); bgLayers.push('platforms');
+    drawPipeBase(c, 'ground'); bgLayers.push('pipe');
     // spout hole + collar
     const sx = G.SPOUT_X, gy = G.GROUND_Y;
     c.fillStyle = '#2b2622'; c.beginPath(); c.ellipse(sx, gy + 1, G.BALL_R + 4, 5, 0, 0, Math.PI * 2); c.fill();
@@ -71,6 +80,7 @@
         c.lineTo(G.W, G.H); c.closePath(); c.fill();
       });
     }
+    if (sc === 'bowl') drawBowl(c, MAP);
     if (sc === 'stadium') {
       const st = MAP.stand || ['#a9bfd2', '#93abc1'];
       // two low stands (tiers), clean silhouettes
@@ -95,6 +105,110 @@
         for (let i = 0; i < 4; i++) for (let j = 0; j < 2; j++) { c.beginPath(); c.arc(x - 18 + i * 12, 193 + j * 10, 3.6, 0, Math.PI * 2); c.fill(); }
       }
     }
+  }
+  // ---------- P7 §7: Premier League stadium bowl (procedural fallback when no background image exists) ----------
+  function bgFitInfo() {
+    const MAP = show.map;
+    return window.BGFIT.bgFit(bgImg.naturalWidth || bgImg.width, bgImg.naturalHeight || bgImg.height, G.W, G.H,
+      { pitchTop: MAP.bg_pitch_top != null ? MAP.bg_pitch_top : null, groundY: G.GROUND_Y, inset: MAP.bg_ground_inset || 0 });
+  }
+  function centerScreenText(c, R) { // plain text "PREMIER LEAGUE" in our own font/colours on the configured screen rectangle
+    const [x, y, w, h] = R, SC = show.map.screen || ['#0e2a47', '#19b5a8'];
+    const g = c.createLinearGradient(x, y, x, y + h); g.addColorStop(0, shade(SC[0], 0.12)); g.addColorStop(1, SC[0]);
+    c.fillStyle = g; rrect(c, x, y, w, h, 4); c.fill();
+    c.strokeStyle = 'rgba(255,255,255,0.25)'; c.lineWidth = 1.2; rrect(c, x, y, w, h, 4); c.stroke();
+    const label = (show.league && show.league.display_name) || show.competition.name;
+    const z = fitText(c, label, w - 18, h * 0.42, 900); text(c, label, x + w / 2, y + h * 0.52, z, SC[1], 'center', 900);
+    c.fillStyle = hexA(SC[1], 0.5); c.fillRect(x + 10, y + h - 7, w - 20, 2);
+  }
+  function drawBowl(c, MAP) {
+    const night = !!MAP.night, ST = MAP.stand || ['#4a3d78', '#2e2552'], CR = MAP.crowd || ['#6b4fb3', '#e8e2f4', '#3a2c6e', '#c9b6ef'];
+    const RF = MAP.roof || ['#c9d3e2', '#7f8da3'], FL = MAP.floodlight || '#ffffff';
+    const arc = (y0, sag) => (x) => y0 + sag * Math.pow((x - G.W / 2) / (G.W / 2), 2); // curved bowl rows (higher at the sides)
+    // tiers (back to front): 3 curved stands full of procedural crowd
+    const tiers = [[arc(250, -70), arc(330, -60)], [arc(338, -55), arc(420, -45)], [arc(430, -40), arc(520, -30)]];
+    tiers.forEach(([top, bot], ti) => {
+      c.fillStyle = ti % 2 ? ST[1] : ST[0];
+      c.beginPath(); c.moveTo(0, top(0)); for (let x = 0; x <= G.W; x += 16) c.lineTo(x, top(x)); for (let x = G.W; x >= 0; x -= 16) c.lineTo(x, bot(x)); c.closePath(); c.fill();
+      for (let i = 0; i < 1500; i++) {
+        const hx = hash(ti * 7919 + i * 13 + 1), hy = hash(ti * 104729 + i * 7 + 3), hc = hash(i * 31 + ti);
+        const x = hx * G.W, y = top(x) + 4 + hy * (bot(x) - top(x) - 8);
+        c.fillStyle = CR[Math.floor(hc * CR.length)]; c.globalAlpha = night ? 0.55 : 0.85;
+        c.fillRect(x, y, 2.2, 2.6);
+      }
+      c.globalAlpha = 1;
+      c.fillStyle = 'rgba(0,0,0,0.25)'; c.beginPath(); for (let x = 0; x <= G.W; x += 16) c.lineTo(x, bot(x)); for (let x = G.W; x >= 0; x -= 16) c.lineTo(x, bot(x) + 5); c.closePath(); c.fill();
+    });
+    // roof with truss structure + rows of floodlights
+    const rtop = arc(150, -120), rbot = arc(232, -80);
+    c.fillStyle = night ? shade(RF[1], -0.5) : RF[1];
+    c.beginPath(); for (let x = 0; x <= G.W; x += 16) c.lineTo(x, rtop(x)); for (let x = G.W; x >= 0; x -= 16) c.lineTo(x, rbot(x)); c.closePath(); c.fill();
+    c.strokeStyle = night ? 'rgba(200,215,235,0.35)' : RF[0]; c.lineWidth = 1.4;
+    c.beginPath(); for (let x = 0; x <= G.W; x += 16) c.lineTo(x, rtop(x)); c.stroke();
+    c.beginPath(); for (let x = 0; x <= G.W; x += 16) c.lineTo(x, rbot(x)); c.stroke();
+    for (let x = 0; x < G.W; x += 32) { c.beginPath(); c.moveTo(x, rtop(x)); c.lineTo(x + 16, rbot(x + 16)); c.lineTo(x + 32, rtop(x + 32)); c.stroke(); }
+    for (let x = 24; x < G.W; x += 44) {
+      const y = rbot(x) - 4;
+      const g = c.createRadialGradient(x, y, 0.5, x, y, night ? 26 : 12); g.addColorStop(0, hexA(FL, night ? 0.75 : 0.6)); g.addColorStop(1, hexA(FL, 0)); c.fillStyle = g; c.fillRect(x - 26, y - 26, 52, 52);
+      c.fillStyle = FL; c.beginPath(); c.arc(x, y, 2.4, 0, Math.PI * 2); c.fill();
+    }
+    // advertising boards angled in a V towards the centre screen (fictional brands only) + the centre screen
+    const SCR = MAP.center_screen_rect || [530, 250, 220, 62];
+    const boards = ['NOVA ENERGY', 'KESTREL AIR', 'BRIXTON BANK', 'MARBLE FC', 'ORBIT MOBILE', 'HALCYON TEA'];
+    const by1 = 548;
+    for (let i = 0; i < 6; i++) {
+      const left = i < 3, k = left ? i : i - 3;
+      const xa = left ? 20 + k * 165 : 1260 - (k + 1) * 165, xb = xa + 150;
+      const rise = left ? k : 2 - k; // V: boards rise towards the middle
+      const ya = 528 - rise * 3, yb = 528 - (left ? rise + 1 : rise - 1) * 3;
+      c.fillStyle = i % 2 ? '#13324f' : '#0f263f';
+      c.beginPath(); c.moveTo(xa, ya); c.lineTo(xb, yb); c.lineTo(xb, by1); c.lineTo(xa, by1); c.closePath(); c.fill();
+      const z = fitText(c, boards[i], 130, 11, 800); text(c, boards[i], (xa + xb) / 2, (Math.min(ya, yb) + by1) / 2 + 1, z, i % 2 ? '#8fe3d9' : '#ffffff', 'center', 800);
+    }
+    centerScreenText(c, SCR);
+    // the real pitch, seen through the gap between the platforms: stripes, centre circle, halfway line
+    const py = 552;
+    const pg = c.createLinearGradient(0, py, 0, G.H); pg.addColorStop(0, shade(MAP.grass[1], 0.05)); pg.addColorStop(1, MAP.grass[2]);
+    c.fillStyle = pg; c.fillRect(0, py, G.W, G.H - py);
+    for (let i = 0; i < 16; i += 2) { c.fillStyle = 'rgba(255,255,255,0.06)'; c.beginPath(); const x0 = i * 80 - 40, x1 = x0 + 80; c.moveTo(G.W / 2 + (x0 - G.W / 2) * 0.55, py); c.lineTo(G.W / 2 + (x1 - G.W / 2) * 0.55, py); c.lineTo(G.W / 2 + (x1 - G.W / 2) * 1.6, G.H); c.lineTo(G.W / 2 + (x0 - G.W / 2) * 1.6, G.H); c.closePath(); c.fill(); }
+    c.strokeStyle = 'rgba(255,255,255,0.75)'; c.lineWidth = 1.6;
+    c.beginPath(); c.moveTo(G.W / 2, py); c.lineTo(G.W / 2, G.H); c.stroke();
+    c.beginPath(); c.ellipse(G.W / 2, 640, 120, 30, 0, 0, Math.PI * 2); c.stroke();
+    c.beginPath(); c.moveTo(0, py + 1); c.lineTo(G.W, py + 1); c.stroke();
+    if (night) { const g = c.createLinearGradient(0, 0, 0, G.H); g.addColorStop(0, 'rgba(5,10,25,0.15)'); g.addColorStop(1, 'rgba(5,10,25,0)'); c.fillStyle = g; c.fillRect(0, 0, G.W, G.H); }
+    if (MAP.tint) { c.fillStyle = MAP.tint[0]; c.fillRect(0, 0, G.W, G.H); }
+  }
+  // stone-block platform with a grass top (P7 premier maps); same outline as drawPlatform (the play layout is unchanged)
+  function drawPlatformBlocks(c, x0, x1, seed) {
+    const gy = G.GROUND_Y, MAP = show.map, RK = MAP.rock;
+    c.save();
+    c.beginPath();
+    if (seed === 1) { c.moveTo(x0, gy); c.lineTo(x1 - 6, gy); c.quadraticCurveTo(x1, gy + 4, x1, gy + 18); c.lineTo(x1 - 4, G.H + 10); c.lineTo(x0, G.H + 10); }
+    else { c.moveTo(x1, gy); c.lineTo(x0 + 6, gy); c.quadraticCurveTo(x0, gy + 4, x0, gy + 18); c.lineTo(x0 + 4, G.H + 10); c.lineTo(x1, G.H + 10); }
+    c.closePath(); c.fillStyle = RK[2]; c.fill(); c.clip();
+    const bh = 26, bw = 58;
+    for (let row = 0, y = gy + 14; y < G.H + 10; row++, y += bh) {
+      const off = (row % 2) * bw / 2;
+      for (let x = x0 - bw + off; x < x1 + bw; x += bw) {
+        const h1 = hash(seed * 997 + row * 131 + Math.round(x)), base = h1 < 0.33 ? RK[0] : h1 < 0.7 ? RK[1] : mixHex(RK[1], RK[2], 0.5);
+        const g = c.createLinearGradient(0, y, 0, y + bh); g.addColorStop(0, shade(base, 0.12)); g.addColorStop(1, shade(base, -0.12));
+        c.fillStyle = g; rrect(c, x + 1.5, y + 1.5, bw - 3, bh - 3, 3); c.fill();
+        c.fillStyle = 'rgba(255,255,255,0.10)'; c.fillRect(x + 3, y + 2.5, bw - 6, 1.5);
+        if (h1 > 0.82) { c.strokeStyle = 'rgba(30,25,20,0.25)'; c.lineWidth = 1; c.beginPath(); c.moveTo(x + bw * 0.3, y + 4); c.lineTo(x + bw * 0.45, y + bh * 0.6); c.stroke(); }
+      }
+    }
+    const inner = seed === 1 ? x1 : x0;
+    const eg = seed === 1 ? c.createLinearGradient(inner - 40, 0, inner, 0) : c.createLinearGradient(inner + 40, 0, inner, 0);
+    eg.addColorStop(0, 'rgba(0,0,0,0)'); eg.addColorStop(1, 'rgba(15,10,5,0.35)');
+    c.fillStyle = eg; c.fillRect(x0, gy, x1 - x0, G.H - gy);
+    const gg = c.createLinearGradient(0, gy - 4, 0, gy + 16);
+    gg.addColorStop(0, MAP.grass[0]); gg.addColorStop(0.35, MAP.grass[1]); gg.addColorStop(1, MAP.grass[2]);
+    c.fillStyle = gg; c.fillRect(x0, gy - 1, x1 - x0, 15);
+    for (let x = x0, k = 0; x < x1; x += 12, k++) { if (k % 2) { c.fillStyle = 'rgba(255,255,255,0.07)'; c.fillRect(x, gy - 1, 12, 15); } } // mown stripes
+    c.fillStyle = 'rgba(20,50,15,0.4)'; c.fillRect(x0, gy + 13, x1 - x0, 3);
+    c.restore();
+    c.fillStyle = MAP.grass_blades || MAP.grass[0];
+    for (let x = x0 + 2; x < x1 - 2; x += 4) { const h = 2 + hash(seed * 77 + x) * 3; c.beginPath(); c.moveTo(x - 1.6, gy); c.lineTo(x, gy - h); c.lineTo(x + 1.6, gy); c.fill(); }
   }
   function drawPlatform(c, x0, x1, seed) {
     const gy = G.GROUND_Y;
@@ -281,7 +395,14 @@
     const v2 = col.toLowerCase() === '#e8553e'; // approved v2 look stays bit-identical
     bg.addColorStop(0, v2 ? '#ff8a6b' : mixHex(col, '#ffffff', 0.32)); bg.addColorStop(0.5, col); bg.addColorStop(1, v2 ? '#c23f2a' : mixHex(col, dark, 0.6));
     rrect(c, -G.MILL_HALF - 1, -G.MILL_THICK / 2, 2 * G.MILL_HALF + 2, G.MILL_THICK, 6);
-    c.fillStyle = bg; c.fill(); c.strokeStyle = dark; c.lineWidth = 1.2; c.stroke();
+    c.fillStyle = bg; c.fill();
+    if (show.map && show.map.windmill_stripes) { // P7: red-and-white bands (premier maps)
+      c.save(); rrect(c, -G.MILL_HALF - 1, -G.MILL_THICK / 2, 2 * G.MILL_HALF + 2, G.MILL_THICK, 6); c.clip();
+      for (let x = -G.MILL_HALF + 14; x < G.MILL_HALF - 10; x += 28) { const wg = c.createLinearGradient(0, -G.MILL_THICK / 2, 0, G.MILL_THICK / 2); wg.addColorStop(0, '#ffffff'); wg.addColorStop(1, '#d9dde3'); c.fillStyle = wg; c.fillRect(x, -G.MILL_THICK / 2, 14, G.MILL_THICK); }
+      c.restore();
+      rrect(c, -G.MILL_HALF - 1, -G.MILL_THICK / 2, 2 * G.MILL_HALF + 2, G.MILL_THICK, 6);
+    }
+    c.strokeStyle = dark; c.lineWidth = 1.2; c.stroke();
     c.restore();
     // hub
     const hg = c.createRadialGradient(hx - 3, hy - 3, 1, hx, hy, 11);
@@ -302,6 +423,35 @@
     for (let y = y0 + step; y < y1; y += step) { c.beginPath(); for (let x = x0; x <= x1; x += 6) c.lineTo(x, y + off(x, y) * 0.6); c.stroke(); }
     c.restore();
   }
+  // P7 premier maps: deeper net with perspective (roof + back panel receding up-right), gentle idle sway, ripple on goals.
+  // Visual only: the colliders (bar, post, goal box) are the same as on every map.
+  function drawNetDeep(c, wob, t) {
+    const x0 = G.GOAL_LINE_X, x1 = G.W, y0 = G.BAR_Y, y1 = G.GROUND_Y, dx = 26, dy = -22; // depth offset of the back frame
+    const sway = (x, y) => 0.8 * Math.sin(t * 1.3 + y * 0.05) * ((x - x0) / (x1 - x0));
+    const off = (x, y) => sway(x, y) + (wob ? wob.a * Math.sin(x * 0.12 + wob.p) * Math.sin(y * 0.09 + wob.p * 0.7) * Math.exp(-((x - wob.x) ** 2 + (y - wob.y) ** 2) / 4000) : 0);
+    c.save();
+    // back panel (further away: dimmer, finer mesh)
+    c.fillStyle = 'rgba(230,236,245,0.10)'; c.fillRect(x0 + dx, y0 + dy, x1 - x0, y1 - y0 - dy * 0.3);
+    c.strokeStyle = 'rgba(255,255,255,0.28)'; c.lineWidth = 0.7;
+    for (let x = x0 + dx + 7; x < x1; x += 7) { c.beginPath(); for (let y = y0 + dy; y <= y1; y += 6) c.lineTo(x + off(x, y) * 0.5, y); c.stroke(); }
+    for (let y = y0 + dy + 7; y < y1; y += 7) { c.beginPath(); for (let x = x0 + dx; x <= x1; x += 6) c.lineTo(x, y + off(x, y) * 0.3); c.stroke(); }
+    // roof net (from the crossbar back to the back frame)
+    c.fillStyle = 'rgba(240,244,250,0.12)'; c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1, y0); c.lineTo(x1, y0 + dy); c.lineTo(x0 + dx, y0 + dy); c.closePath(); c.fill();
+    c.strokeStyle = 'rgba(255,255,255,0.45)'; c.lineWidth = 0.8;
+    for (let k = 1; k < 4; k++) { const u = k / 4; c.beginPath(); c.moveTo(x0 + dx * u, y0 + dy * u); c.lineTo(x1, y0 + dy * u); c.stroke(); }
+    for (let x = x0 + 9; x < x1; x += 9) { c.beginPath(); c.moveTo(x, y0); c.lineTo(x + dx * 0.9, y0 + dy); c.stroke(); }
+    c.beginPath(); c.moveTo(x0, y1); c.lineTo(x0 + dx, y1 - 4); c.stroke();
+    // back frame tubes (thicker than the mesh, behind the front frame)
+    c.strokeStyle = 'rgba(205,214,226,0.95)'; c.lineWidth = 4.5; c.lineCap = 'round';
+    c.beginPath(); c.moveTo(x0 + dx, y1 - 3); c.lineTo(x0 + dx, y0 + dy); c.lineTo(x1 + 4, y0 + dy); c.stroke();
+    c.beginPath(); c.moveTo(x0, y0); c.lineTo(x0 + dx, y0 + dy); c.stroke();
+    // front mesh (as the classic net, slightly brighter, with the sway)
+    c.fillStyle = 'rgba(255,255,255,0.06)'; c.fillRect(x0, y0, x1 - x0, y1 - y0);
+    c.strokeStyle = 'rgba(255,255,255,0.6)'; c.lineWidth = 0.95;
+    for (let x = x0 + 9; x < x1; x += 9) { c.beginPath(); for (let y = y0; y <= y1; y += 6) c.lineTo(x + off(x, y), y); c.stroke(); }
+    for (let y = y0 + 9; y < y1; y += 9) { c.beginPath(); for (let x = x0; x <= x1; x += 6) c.lineTo(x, y + off(x, y) * 0.6); c.stroke(); }
+    c.restore();
+  }
   function drawGoalFrame(c, barFlash) {
     const x0 = G.GOAL_LINE_X;
     c.save();
@@ -317,6 +467,11 @@
     pg.addColorStop(0, '#ffffff'); pg.addColorStop(1, '#c9d1da');
     c.fillStyle = pg; c.fillRect(x0 - G.POST_W / 2, G.BAR_Y - G.BAR_THICK / 2, G.POST_W, G.GROUND_Y - G.BAR_Y + G.BAR_THICK / 2);
     c.strokeStyle = 'rgba(80,90,100,0.35)'; c.lineWidth = 1; c.strokeRect(x0 - G.POST_W / 2, G.BAR_Y - G.BAR_THICK / 2, G.POST_W, G.GROUND_Y - G.BAR_Y + G.BAR_THICK / 2);
+    if (show.map && show.map.goal_style === 'deep') { // tube highlights + a dark rim on the far side (rounder, heavier frame look)
+      c.fillStyle = 'rgba(255,255,255,0.9)'; c.fillRect(x0 - G.POST_W / 2 + 1.5, G.BAR_Y, 2, G.GROUND_Y - G.BAR_Y);
+      c.fillStyle = 'rgba(60,70,85,0.45)'; c.fillRect(x0 + G.POST_W / 2 - 2, G.BAR_Y + 3, 2, G.GROUND_Y - G.BAR_Y - 3); c.fillRect(G.BAR_X0 + 3, G.BAR_BOTTOM - 1.6, G.BAR_X1 - G.BAR_X0 - 3, 1.6);
+      c.fillStyle = 'rgba(255,255,255,0.95)'; c.fillRect(G.BAR_X0 + 2, G.BAR_TOP + 1, G.BAR_X1 - G.BAR_X0 - 2, 1.4);
+    }
     c.restore();
   }
 
@@ -451,7 +606,7 @@
     const ne = lastEventBefore(m, 'goal', t);
     let wob = null;
     if (ne && t - ne.t < 0.9) { const u = (t - ne.t) / 0.9; wob = { a: 5 * (1 - u), p: u * 30, x: 1235, y: 500 }; }
-    drawNet(c, wob);
+    if (show.map && show.map.goal_style === 'deep') drawNetDeep(c, wob, t); else drawNet(c, wob);
     const bh = lastEventBefore(m, 'bar', t);
     drawGoalFrame(c, bh && t - bh.t < 0.25 ? 1 - (t - bh.t) / 0.25 : 0);
     // shadows
@@ -475,6 +630,10 @@
     }
     fr.b.forEach((b, i) => { if (b[3] === 3 || b[3] === 5) drawBall(c, b[0], b[1], ballR(m, i), b[2], styleOf(m, i), 1); });
     if (!opts.noFx) goalFx(c, m, v);
+    if (show.map && show.map.rain) { // light drizzle streaks (deterministic in time)
+      c.strokeStyle = 'rgba(200,215,240,0.22)'; c.lineWidth = 1;
+      for (let i = 0; i < 70; i++) { const h1 = hash(i * 17 + 5), h2 = hash(i * 29 + 9); const y = ((h2 * G.H + t * 520) % (G.H + 40)) - 20, x = (h1 * (G.W + 80) - t * 90 + 4000) % (G.W + 80) - 40; c.beginPath(); c.moveTo(x, y); c.lineTo(x - 4, y + 14); c.stroke(); }
+    }
     c.restore();
   }
 
@@ -529,14 +688,14 @@
     c.save(); c.scale(S, S);
     // stage label (top-left)
     const CN = show.competition.name;
-    const label = m.leg === 'FINAL' ? `${CN} · FINAL` : `${CN} · ${m.stage} · ${m.leg}`;
+    const label = m.league ? `${CN} · ${m.stage}` : m.leg === 'FINAL' ? `${CN} · FINAL` : `${CN} · ${m.stage} · ${m.leg}`;
     c.font = `700 15px ${FONT}`; const lw = c.measureText(label).width + 26;
     const maxLW = G.W / 2 - 270 - 16 - 12; // never reach the scoreboard
     if (lw <= maxLW) {
       c.fillStyle = 'rgba(8,20,38,0.72)'; rrect(c, 16, 14, lw, 30, 15); c.fill();
       text(c, label, 16 + lw / 2, 29.5, 15, '#ffffff');
     } else { // long stage names (QUARTER-FINAL n · LEG n): two lines
-      const l1 = CN, l2 = m.leg === 'FINAL' ? 'FINAL' : `${m.stage} · ${m.leg}`;
+      const l1 = CN, l2 = m.league ? m.stage : m.leg === 'FINAL' ? 'FINAL' : `${m.stage} · ${m.leg}`;
       c.font = `700 14px ${FONT}`; const w2 = Math.min(maxLW, Math.max(c.measureText(l1).width, c.measureText(l2).width) + 26);
       c.fillStyle = 'rgba(8,20,38,0.72)'; rrect(c, 16, 12, w2, 46, 14); c.fill();
       text(c, l1, 16 + w2 / 2, 25.5, fitText(c, l1, w2 - 20, 13), 'rgba(255,255,255,0.78)');
@@ -1113,6 +1272,477 @@
     c.restore();
   }
 
+  // ================= P7 §5/§6: Premier League matchweek screens + season finale =================
+  // Plain text "PREMIER LEAGUE" only (our font + colours), never a competition logo. Player names appear only in
+  // replay captions, Man of the Match, top scorers / Golden Boot screens (inside the video).
+  const LG_ACC = '#2fd3c4', LG_PUR = '#7a5cff', LG_PANEL = 'rgba(8,20,38,0.92)';
+  const FORM_COL = { W: '#2fbf71', D: '#9aa5b4', L: '#e5484d' };
+  const ord = (n) => n + (['th', 'st', 'nd', 'rd'][(n % 100 > 10 && n % 100 < 14) ? 0 : (n % 10 < 4 ? n % 10 : 0)] || 'th');
+  function lgZones() { return (show.league && show.league.zones) || []; }
+  function zoneAtPos(pos) { return lgZones().find((z) => pos >= z.from && pos <= z.to) || null; }
+  function crest(c, ti, x, y, r, a) { drawBall(c, x, y, r, 0, kitStyle(show.teams[ti]), a == null ? 1 : a); }
+  function lgBG(c, lf, tint) {
+    darkBG(c, lf);
+    c.save(); c.scale(S, S);
+    const g = c.createRadialGradient(G.W / 2, -80, 40, G.W / 2, -80, 760);
+    g.addColorStop(0, hexA(tint || LG_PUR, 0.32)); g.addColorStop(1, hexA(tint || LG_PUR, 0));
+    c.fillStyle = g; c.fillRect(0, 0, G.W, G.H);
+    c.fillStyle = hexA(LG_ACC, 0.55); c.fillRect(0, 0, G.W, 3);
+    c.restore();
+  }
+  function lgTitle(c, title, sub, a) {
+    c.globalAlpha = a;
+    const z = fitText(c, title, 1100, 36, 900); text(c, title, G.W / 2, 38, z, '#ffffff', 'center', 900);
+    if (sub) text(c, sub, G.W / 2, 66, 15, LG_ACC, 'center', 700);
+    c.globalAlpha = 1;
+  }
+  function formDots(c, form, x, y, r) {
+    for (let i = 0; i < 5; i++) {
+      const f = form[i], cx = x + i * (2 * r + 4);
+      if (f) { c.fillStyle = FORM_COL[f]; c.beginPath(); c.arc(cx, y, r, 0, Math.PI * 2); c.fill(); text(c, f, cx, y + 0.5, r * 1.15, '#0b1a2e', 'center', 900); }
+      else { c.strokeStyle = 'rgba(255,255,255,0.3)'; c.lineWidth = 1.2; c.beginPath(); c.arc(cx, y, r - 0.6, 0, Math.PI * 2); c.stroke(); }
+    }
+  }
+  function unpackRow(r) { return { ti: r[0], pos: r[1], p: r[2], w: r[3], d: r[4], l: r[5], gf: r[6], ga: r[7], gd: r[6] - r[7], pts: r[8], zone: r[9] }; }
+  function gdTxt(gd) { return gd > 0 ? '+' + gd : String(gd); }
+  // one table frame. rows: [{ ti, slot (0-based float), pos, p, w, d, l, gd, pts, hl, arrow, pulse, form, a, dx }]
+  function drawTable(c, L, rows) {
+    const C = L.cols, x = L.x, rh = L.rowH;
+    c.fillStyle = 'rgba(8,20,38,0.88)'; rrect(c, x - 8, L.y - 30, L.w + 16, 20 * rh + 38, 12); c.fill();
+    const hy = L.headY;
+    c.globalAlpha = 0.85;
+    text(c, '#', x + C.pos, hy, L.headFont, '#9fb6d6', 'center', 700); text(c, 'CLUB', x + C.name, hy, L.headFont, '#9fb6d6', 'left', 700);
+    for (const k of ['p', 'w', 'd', 'l']) text(c, k.toUpperCase(), x + C[k], hy, L.headFont, '#9fb6d6', 'center', 700);
+    text(c, 'GD', x + C.gd, hy, L.headFont, '#9fb6d6', 'center', 700); text(c, 'PTS', x + C.pts, hy, L.headFont, '#ffffff', 'center', 800);
+    if (C.form) text(c, 'FORM', x + C.form + 44, hy, L.headFont, '#9fb6d6', 'center', 700);
+    c.globalAlpha = 1;
+    // positional zone stripes + faint row bands (fixed per position)
+    for (let i = 0; i < 20; i++) {
+      const y = L.y + i * rh, z = zoneAtPos(i + 1);
+      if (i % 2 === 0) { c.fillStyle = 'rgba(255,255,255,0.035)'; c.fillRect(x, y, L.w, rh); }
+      if (z) { c.fillStyle = z.colour; c.fillRect(x + C.stripe, y + 2, 5, rh - 4); }
+      if (z && lgZones().some((q) => q.to === i + 1 && i < 19)) { c.fillStyle = hexA(z.colour, 0.55); c.fillRect(x, y + rh - 1, L.w, 1.2); }
+    }
+    const order = rows.slice().sort((a, b) => (a.hl ? 1 : 0) - (b.hl ? 1 : 0));
+    for (const r of order) {
+      const y = L.y + r.slot * rh, cy = y + rh / 2;
+      c.save(); c.globalAlpha = r.a == null ? 1 : r.a; c.translate(r.dx || 0, 0);
+      if (r.hl) { c.fillStyle = 'rgba(47,211,196,0.20)'; rrect(c, x + 7, y + 1, L.w - 9, rh - 2, 5); c.fill(); c.strokeStyle = hexA(LG_ACC, 0.8); c.lineWidth = 1.2; rrect(c, x + 7, y + 1, L.w - 9, rh - 2, 5); c.stroke(); }
+      if (r.pulse) { c.fillStyle = hexA(r.pulse.colour, 0.42 * r.pulse.k); rrect(c, x + 7, y + 1, L.w - 9, rh - 2, 5); c.fill(); }
+      const T = show.teams[r.ti];
+      text(c, String(r.pos), x + C.pos, cy + 0.5, L.font, '#ffffff', 'center', 800);
+      crest(c, r.ti, x + C.crest, cy, rh * 0.36);
+      const nz = fitText(c, T.name, C.nameW, L.font, 700); text(c, T.name, x + C.name, cy + 0.5, nz, '#ffffff', 'left', 700);
+      for (const k of ['p', 'w', 'd', 'l']) text(c, String(r[k]), x + C[k], cy + 0.5, L.font, '#d6e4ff', 'center', 600);
+      text(c, gdTxt(r.gd), x + C.gd, cy + 0.5, L.font, '#d6e4ff', 'center', 600);
+      text(c, String(r.pts), x + C.pts, cy + 0.5, L.font + 1, '#ffffff', 'center', 900);
+      if (C.form && r.form) formDots(c, r.form, x + C.form, cy, 7.5);
+      if (r.arrow) {
+        const up = r.arrow.d < 0, ax = x + C.arrow, col = up ? '#2fbf71' : '#e5484d';
+        c.globalAlpha *= r.arrow.a; c.fillStyle = col; c.beginPath();
+        if (up) { c.moveTo(ax - 6, cy + 4); c.lineTo(ax + 6, cy + 4); c.lineTo(ax, cy - 5); } else { c.moveTo(ax - 6, cy - 4); c.lineTo(ax + 6, cy - 4); c.lineTo(ax, cy + 5); }
+        c.closePath(); c.fill(); text(c, String(Math.abs(r.arrow.d)), ax + 16, cy + 0.5, 13, col, 'center', 800);
+      }
+      c.restore();
+    }
+  }
+  function zoneLegend(c, y) {
+    const Z = lgZones(); let w = 0; c.font = `700 14px ${FONT}`;
+    const items = Z.map((z) => { const label = `${z.from}${z.to > z.from ? '–' + z.to : ''} ${z.label}`; const iw = c.measureText(label).width + 30; w += iw; return { z, label, iw }; });
+    let x = G.W / 2 - w / 2;
+    for (const it of items) { c.fillStyle = it.z.colour; rrect(c, x, y - 6, 14, 12, 3); c.fill(); text(c, it.label, x + 20, y, 14, '#d6e4ff', 'left', 700); x += it.iw; }
+  }
+  function fixturesGrid(c, list, t, y0, opts) {
+    opts = opts || {};
+    const cw = 560, ch = opts.ch || 74, gx = 24, gy = opts.gy || 12, x0 = (G.W - 2 * cw - gx) / 2;
+    list.forEach((fx, i) => {
+      const col = i % 2, row = Math.floor(i / 2);
+      const u = easeOutBack((t - (opts.delay || 0.8) - i * 0.12) / 0.45); if (u <= 0) return;
+      const x = x0 + col * (cw + gx), y = y0 + row * (ch + gy);
+      c.save(); c.globalAlpha = clamp(u, 0, 1); c.translate(x + cw / 2, y + ch / 2); c.scale(0.88 + 0.12 * u, 0.88 + 0.12 * u); c.translate(-(x + cw / 2), -(y + ch / 2));
+      c.fillStyle = 'rgba(255,255,255,0.075)'; rrect(c, x, y, cw, ch, 14); c.fill();
+      teamBar(c, fx[0], x, y, 6, ch); teamBar(c, fx[1], x + cw - 6, y, 6, ch);
+      const r = ch * 0.3, cy = y + ch / 2;
+      crest(c, fx[0], x + 38, cy, r); crest(c, fx[1], x + cw - 38, cy, r);
+      const nw = cw / 2 - 120;
+      let z = fitText(c, show.teams[fx[0]].name, nw, 22, 800); text(c, show.teams[fx[0]].name, x + cw / 2 - 52, cy + 0.5, z, '#ffffff', 'right', 800);
+      z = fitText(c, show.teams[fx[1]].name, nw, 22, 800); text(c, show.teams[fx[1]].name, x + cw / 2 + 52, cy + 0.5, z, '#ffffff', 'left', 800);
+      if (fx.length >= 4) {
+        c.fillStyle = '#ffffff'; rrect(c, x + cw / 2 - 42, cy - 18, 84, 36, 8); c.fill();
+        text(c, `${fx[2]}–${fx[3]}`, x + cw / 2, cy + 1, 24, '#0b1a2e', 'center', 900);
+        if (fx[2] !== fx[3]) { const wl = fx[2] > fx[3] ? 0 : 1; c.fillStyle = LG_ACC; c.fillRect(wl ? x + cw / 2 + 52 : x + cw / 2 - 52 - 40, cy + 14, 40, 2.5); }
+      } else text(c, 'vs', x + cw / 2, cy + 1, 20, LG_ACC, 'center', 800);
+      c.restore();
+    });
+  }
+  const LG = {};
+  LG.lgIntro = (c, seg, lf, g) => {
+    lgBG(c, lf); const t = lf / FPS;
+    c.save(); c.scale(S, S);
+    const a = easeOut(t / 0.8);
+    c.globalAlpha = a; text(c, show.league.display_name, G.W / 2, 74 - 24 * (1 - a), 66, '#ffffff', 'center', 900);
+    text(c, `MATCHWEEK ${seg.week} · ${show.league.season}`, G.W / 2, 128, 24, LG_ACC, 'center', 800);
+    text(c, 'Marble football simulation', G.W / 2, 158, 16, '#9fb6d6', 'center', 600); c.globalAlpha = 1;
+    fixturesGrid(c, seg.fixtures, t, 190, { delay: 0.9 });
+    c.restore(); fadeIn(lf, 10);
+  };
+  LG.lgNext = (c, seg, lf) => {
+    lgBG(c, lf, LG_ACC); const t = lf / FPS;
+    c.save(); c.scale(S, S);
+    lgTitle(c, `NEXT UP · MATCHWEEK ${seg.week}`, `${show.league.display_name} · ${show.league.season} · coming next on the channel`, smooth(t / 0.4));
+    if (seg.fixtures) fixturesGrid(c, seg.fixtures, t, 120, { delay: 0.4, ch: 66, gy: 10 });
+    c.restore(); fadeIn(lf, 8);
+    const segLen = seg.len / FPS; if (t > segLen - 0.8) { c.fillStyle = `rgba(0,0,0,${smooth((t - (segLen - 0.8)) / 0.8)})`; c.fillRect(0, 0, OUT_W, OUT_H); }
+  };
+  LG.lgResults = (c, seg, lf) => {
+    lgBG(c, lf); const t = lf / FPS;
+    c.save(); c.scale(S, S);
+    lgTitle(c, `MATCHWEEK ${seg.week} · ALL RESULTS`, `${show.league.display_name} ${show.league.season} · simulated results`, smooth(t / 0.4));
+    fixturesGrid(c, seg.results, t, 120, { delay: 0.3 });
+    c.restore(); fadeIn(lf, 8);
+  };
+  LG.lgPre = (c, seg, lf) => {
+    const m = show.matches[seg.match], fr = m.frames[0];
+    drawScene(c, m, fr, { noCam: true, noFx: true }); drawHUD(c, m, fr);
+    const a = smooth(lf / 8) * (1 - smooth((lf - seg.len + 8) / 8));
+    c.save(); c.scale(S, S); c.globalAlpha = a;
+    const x0 = G.W / 2 - 400, y0 = 196, w = 800, h = 260;
+    c.fillStyle = 'rgba(8,20,38,0.95)'; rrect(c, x0, y0, w, h, 22); c.fill();
+    c.fillStyle = LG_ACC; c.fillRect(x0 + 30, y0 + 52, w - 60, 2);
+    text(c, `${show.league.display_name} · MATCHWEEK ${m.week} · MATCH ${seg.match + 1} OF ${show.matches.length}`, G.W / 2, y0 + 30, 17, '#9fc7ff', 'center', 800);
+    [[m.ta, 0, x0 + 150], [m.tb, 1, x0 + w - 150]].forEach(([ti, k, cx]) => {
+      crest(c, ti, cx, y0 + 112, 34);
+      const nm = show.teams[ti].name, z = fitText(c, nm, 300, 30, 900); text(c, nm, cx, y0 + 168, z, '#ffffff', 'center', 900);
+      const sub = seg.pos[k] ? `${ord(seg.pos[k])} · ${seg.pts[k]} pts` : 'Season opener';
+      text(c, sub, cx, y0 + 198, 18, '#c9dcff', 'center', 700);
+      formDots(c, seg.form[k], cx - 2 * 22, y0 + 228, 9);
+    });
+    text(c, 'vs', G.W / 2, y0 + 120, 30, LG_ACC, 'center', 900);
+    text(c, 'KICK-OFF', G.W / 2, y0 + 160, 20, '#ffd84a', 'center', 800);
+    text(c, 'last 5', G.W / 2, y0 + 228, 13, '#7f93b3', 'center', 700);
+    c.restore(); fadeIn(lf, 8);
+  };
+  // animated live-table update after a match (rows slide, points count up, arrows, zone pulse)
+  function tableAnimRows(seg, t) {
+    const from = new Map(seg.from.map((r) => [r[0], unpackRow(r)])), to = seg.to.map(unpackRow);
+    const u = smooth((t - 0.55) / 1.1), cu = clamp((t - 0.55) / 1.0, 0, 1);
+    return to.map((tr) => {
+      const fr = from.get(tr.ti), half = u >= 0.5 ? tr : fr;
+      const moved = tr.pos - fr.pos, zoneChanged = fr.zone !== tr.zone;
+      const pz = zoneChanged && t > 1.65 && t < 3.2 ? { colour: tr.zone >= 0 ? lgZones()[tr.zone].colour : '#ffffff', k: 0.5 + 0.5 * Math.sin((t - 1.65) * 9 - Math.PI / 2) } : null;
+      return { ti: tr.ti, slot: lerp(fr.pos - 1, tr.pos - 1, u), pos: half.pos, p: half.p, w: half.w, d: half.d, l: half.l, gd: half.gd,
+        pts: Math.round(lerp(fr.pts, tr.pts, cu)), hl: seg.focus.includes(tr.ti), arrow: moved && t > 1.5 ? { d: moved, a: smooth((t - 1.5) / 0.3) } : null, pulse: pz };
+    });
+  }
+  LG.lgTable = (c, seg, lf) => {
+    lgBG(c, lf); const t = lf / FPS, m = show.matches[seg.match];
+    c.save(); c.scale(S, S);
+    const a = smooth(t / 0.3);
+    c.globalAlpha = a;
+    // result card (left)
+    const x0 = 34, y0 = 82, w = 420, h = 310;
+    c.fillStyle = LG_PANEL; rrect(c, x0, y0, w, h, 18); c.fill();
+    text(c, 'FULL TIME', x0 + w / 2, y0 + 30, 18, '#ffd84a', 'center', 900);
+    text(c, `MATCHWEEK ${m.week} · MATCH ${seg.match + 1} OF ${show.matches.length}`, x0 + w / 2, y0 + 54, 13, '#9fc7ff', 'center', 700);
+    crest(c, m.ta, x0 + 90, y0 + 120, 30); crest(c, m.tb, x0 + w - 90, y0 + 120, 30);
+    c.fillStyle = '#ffffff'; rrect(c, x0 + w / 2 - 58, y0 + 94, 116, 54, 10); c.fill();
+    text(c, `${m.score[0]}–${m.score[1]}`, x0 + w / 2, y0 + 122, 38, '#0b1a2e', 'center', 900);
+    let z = fitText(c, show.teams[m.ta].name, 150, 20, 800); text(c, show.teams[m.ta].name, x0 + 92, y0 + 172, z, '#ffffff', 'center', 800);
+    z = fitText(c, show.teams[m.tb].name, 150, 20, 800); text(c, show.teams[m.tb].name, x0 + w - 92, y0 + 172, z, '#ffffff', 'center', 800);
+    const res = m.winnerSide ? `${show.teams[m.winnerSide === 'A' ? m.ta : m.tb].name} take 3 points` : 'Draw · a point each';
+    z = fitText(c, res, w - 40, 19, 700); text(c, res, x0 + w / 2, y0 + 214, z, LG_ACC, 'center', 700);
+    // position changes of the two clubs
+    const fromPos = (ti) => seg.from.find((r) => r[0] === ti)[1], toPos = (ti) => seg.to.find((r) => r[0] === ti)[1];
+    [m.ta, m.tb].forEach((ti, k) => {
+      const f = fromPos(ti), tt = toPos(ti), y = y0 + 248 + k * 28;
+      const s = `${show.teams[ti].short_name || show.teams[ti].name}: ${ord(f)} → ${ord(tt)}`;
+      const col = tt < f ? '#2fbf71' : tt > f ? '#e5484d' : '#c9dcff';
+      text(c, s, x0 + w / 2, y, fitText(c, s, w - 40, 16, 700), col, 'center', 700);
+    });
+    text(c, `${show.league.display_name} · LIVE TABLE`, 34, 46, 22, '#ffffff', 'left', 900);
+    text(c, `matchweek ${m.week} in progress · ${seg.match + 1} of ${show.matches.length} matches played · simulation`, 34, 72, 14, LG_ACC, 'left', 700);
+    c.globalAlpha = 1;
+    const L = window.LEAGUE_LAYOUT.tableLayout('update');
+    c.globalAlpha = a; drawTable(c, L, tableAnimRows(seg, t)); c.globalAlpha = 1;
+    c.globalAlpha = a; zoneLegend(c, L.legendY + 8); c.globalAlpha = 1;
+    c.restore(); fadeIn(lf, 6);
+  };
+  LG.lgTableFull = (c, seg, lf) => {
+    lgBG(c, lf); const t = lf / FPS;
+    c.save(); c.scale(S, S);
+    lgTitle(c, `TABLE AFTER MATCHWEEK ${seg.week}`, `${show.league.display_name} · ${show.league.season} · simulation`, smooth(t / 0.4));
+    const L = window.LEAGUE_LAYOUT.tableLayout('full');
+    const rows = seg.rows.map(unpackRow).map((r, i) => { const u = easeOut((t - 0.3 - i * 0.05) / 0.4); return Object.assign(r, { slot: r.pos - 1, a: clamp(u, 0, 1), dx: 40 * (1 - clamp(u, 0, 1)), form: (seg.forms && seg.forms[i]) || '' }); });
+    drawTable(c, L, rows);
+    zoneLegend(c, L.legendY + 8);
+    c.restore(); fadeIn(lf, 8);
+  };
+  LG.lgScorers = (c, seg, lf) => {
+    lgBG(c, lf); const t = lf / FPS;
+    c.save(); c.scale(S, S);
+    lgTitle(c, 'TOP SCORERS', `after matchweek ${seg.week} · ${show.league.display_name} ${show.league.season}`, smooth(t / 0.4));
+    const x0 = 250, w = 780, y0 = 140, rh = 92;
+    seg.scorers.forEach((e, i) => {
+      const u = easeOutBack((t - 0.4 - i * 0.18) / 0.45); if (u <= 0) return;
+      const y = y0 + i * rh, T = show.teams[e.team], P = T.players[e.player];
+      c.save(); c.globalAlpha = clamp(u, 0, 1); c.translate(60 * (1 - clamp(u, 0, 1)), 0);
+      c.fillStyle = i === 0 ? 'rgba(255,216,74,0.16)' : 'rgba(255,255,255,0.07)'; rrect(c, x0, y, w, rh - 14, 14); c.fill();
+      teamBar(c, e.team, x0, y, 7, rh - 14);
+      text(c, String(i + 1), x0 + 42, y + 39, 30, i === 0 ? '#ffd84a' : '#ffffff', 'center', 900);
+      crest(c, e.team, x0 + 106, y + 39, 26);
+      const zn = fitText(c, P.name, 380, 28, 800); text(c, P.name, x0 + 150, y + 28, zn, '#ffffff', 'left', 800);
+      text(c, T.name, x0 + 150, y + 56, 17, '#9fb6d6', 'left', 600);
+      c.fillStyle = i === 0 ? '#ffd84a' : 'rgba(255,255,255,0.14)'; rrect(c, x0 + w - 150, y + 20, 124, 38, 10); c.fill();
+      text(c, `${e.goals} GOAL${e.goals === 1 ? '' : 'S'}`, x0 + w - 88, y + 40, 18, i === 0 ? '#2a1a00' : '#ffffff', 'center', 900);
+      c.restore();
+    });
+    c.restore(); fadeIn(lf, 8);
+  };
+  LG.lgGotwCard = (c, seg, lf) => {
+    lgBG(c, lf, '#ffd84a'); const t = lf / FPS, m = show.matches[seg.match], gl = m.goals[seg.goal];
+    const ti = gl.team === 'A' ? m.ta : m.tb, P = show.teams[ti].players[gl.player];
+    c.save(); c.scale(S, S);
+    const u = easeOutBack(t / 0.5);
+    c.globalAlpha = clamp(u, 0, 1);
+    c.save(); c.translate(G.W / 2, 250); c.scale(0.8 + 0.2 * clamp(u, 0, 1.1), 0.8 + 0.2 * clamp(u, 0, 1.1));
+    text(c, 'GOAL OF THE WEEK', 0, 0, 72, '#ffd84a', 'center', 900); c.restore();
+    crest(c, ti, G.W / 2, 370, 38);
+    const nm = P.name, z = fitText(c, nm, 700, 40, 900); text(c, nm, G.W / 2, 445, z, '#ffffff', 'center', 900);
+    const sub = `${show.teams[ti].name} · ${window.CLOCK.minuteLabel(m, gl.t, show.cfg.GAME_MIN_PER_SEC)} · ${show.teams[m.ta].name} ${m.score[0]}–${m.score[1]} ${show.teams[m.tb].name}`;
+    text(c, sub, G.W / 2, 490, fitText(c, sub, 1000, 20, 700), '#c9dcff', 'center', 700);
+    c.restore(); fadeIn(lf, 6);
+  };
+  LG.lgChampion = (c, seg, lf, g) => {
+    const TM = show.teams[seg.team], t = lf / FPS;
+    lgBG(c, lf, TM.primary);
+    c.save(); c.scale(S, S);
+    c.save(); c.translate(G.W / 2, 300); c.rotate(t * 0.18);
+    for (let i = 0; i < 18; i++) { c.rotate(Math.PI / 9); c.fillStyle = i % 2 ? hexA(TM.primary, 0.12) : 'rgba(255,215,90,0.09)'; c.beginPath(); c.moveTo(0, 0); c.lineTo(-70, -900); c.lineTo(70, -900); c.closePath(); c.fill(); }
+    c.restore();
+    const u = easeOutBack((t - 0.2) / 0.7);
+    crest(c, seg.team, G.W / 2, 300, 80 * clamp(u, 0, 1.1));
+    const a = smooth((t - 0.8) / 0.5); c.globalAlpha = a;
+    text(c, `${show.league.display_name} CHAMPIONS ${show.league.season}`, G.W / 2, 90, fitText(c, `${show.league.display_name} CHAMPIONS ${show.league.season}`, 1100, 38, 900), '#ffd84a', 'center', 900);
+    const nm = TM.name.toUpperCase(); text(c, nm, G.W / 2, 450, fitText(c, nm, 1100, 74, 900), '#ffffff', 'center', 900);
+    c.fillStyle = TM.primary; rrect(c, G.W / 2 - 180, 500, 180, 14, 5); c.fill(); c.fillStyle = TM.secondary; rrect(c, G.W / 2, 500, 180, 14, 5); c.fill();
+    const rec = `${seg.pts} points · ${seg.rec[0]}W ${seg.rec[1]}D ${seg.rec[2]}L · ${seg.gap > 0 ? seg.gap + ' clear at the top' : 'on tie-breaks'}`;
+    text(c, rec, G.W / 2, 556, fitText(c, rec, 1000, 24, 700), '#c9dcff', 'center', 700);
+    c.globalAlpha = 1; c.restore(); fadeIn(lf, 8);
+  };
+  LG.lgEurope = (c, seg, lf) => {
+    lgBG(c, lf); const t = lf / FPS;
+    c.save(); c.scale(S, S);
+    lgTitle(c, 'EUROPEAN PLACES AND RELEGATION', `${show.league.display_name} ${show.league.season} · final table`, smooth(t / 0.4));
+    const rows = seg.rows.map(unpackRow);
+    const boxes = [[0, 60, 120, 560, 500], [1, 660, 120, 560, 220], [2, 660, 360, 560, 120], [3, 660, 500, 560, 170]];
+    lgZones().slice(0, 4).forEach((z, zi) => {
+      const b = boxes[zi]; if (!b) return;
+      const [, x, y, w, h] = b, u = easeOut((t - 0.3 - zi * 0.25) / 0.5); if (u <= 0) return;
+      c.save(); c.globalAlpha = u;
+      c.fillStyle = 'rgba(8,20,38,0.9)'; rrect(c, x, y, w, h, 14); c.fill(); c.fillStyle = z.colour; rrect(c, x, y, w, 8, 4); c.fill();
+      text(c, z.label.toUpperCase(), x + 22, y + 32, 20, z.colour === '#D8343B' ? '#ff8a8f' : '#ffffff', 'left', 900);
+      const list = rows.filter((r) => r.pos >= z.from && r.pos <= z.to);
+      const step = Math.min(78, (h - 50) / Math.max(1, list.length));
+      list.forEach((r, k) => {
+        const yy = y + 52 + k * step + step / 2;
+        text(c, String(r.pos), x + 34, yy, 20, '#ffffff', 'center', 800); crest(c, r.ti, x + 76, yy, Math.min(20, step * 0.36));
+        const nm = show.teams[r.ti].name; text(c, nm, x + 106, yy, fitText(c, nm, 300, 22, 800), '#ffffff', 'left', 800);
+        text(c, `${r.pts} pts`, x + w - 26, yy, 18, '#c9dcff', 'right', 700);
+      });
+      c.restore();
+    });
+    c.restore(); fadeIn(lf, 8);
+  };
+  function drawBoot(c, x, y, s) { // original golden boot (stylised football boot, not a copy of any real award)
+    c.save(); c.translate(x, y); c.scale(s, s);
+    const gold = c.createLinearGradient(-90, -60, 90, 60); gold.addColorStop(0, '#fff0a8'); gold.addColorStop(0.45, '#ffcc33'); gold.addColorStop(1, '#a87406');
+    c.fillStyle = gold; c.beginPath();
+    c.moveTo(-70, -70); c.lineTo(-20, -70); c.lineTo(-14, -12); c.quadraticCurveTo(40, -8, 86, 14); c.quadraticCurveTo(100, 22, 92, 40); c.lineTo(-74, 40); c.quadraticCurveTo(-84, 0, -70, -70); c.closePath(); c.fill();
+    c.strokeStyle = '#a87406'; c.lineWidth = 3; c.stroke();
+    c.fillStyle = '#7a5406'; for (let i = 0; i < 5; i++) c.fillRect(-60 + i * 30, 40, 10, 10);
+    c.strokeStyle = 'rgba(255,255,255,0.8)'; c.lineWidth = 2.5; for (let i = 0; i < 4; i++) { c.beginPath(); c.moveTo(-44 + i * 12, -40 + i * 7); c.lineTo(-12 + i * 12, -34 + i * 7); c.stroke(); }
+    c.fillStyle = '#3a2b1a'; rrect(c, -80, 56, 180, 26, 6); c.fill();
+    c.restore();
+  }
+  LG.lgBoot = (c, seg, lf) => {
+    lgBG(c, lf, '#ffd84a'); const t = lf / FPS;
+    c.save(); c.scale(S, S);
+    lgTitle(c, 'GOLDEN BOOT', `top scorer · ${show.league.display_name} ${show.league.season}`, smooth(t / 0.4));
+    const u = easeOutBack((t - 0.2) / 0.6);
+    drawBoot(c, 380, 360, 1.6 * clamp(u, 0, 1.1));
+    const e = seg.scorer;
+    if (e) {
+      const T = show.teams[e.team], P = T.players[e.player], a = smooth((t - 0.8) / 0.5);
+      c.globalAlpha = a;
+      crest(c, e.team, 820, 270, 40);
+      text(c, P.name, 820, 350, fitText(c, P.name, 600, 52, 900), '#ffffff', 'center', 900);
+      text(c, T.name, 820, 400, 24, '#c9dcff', 'center', 700);
+      c.fillStyle = '#ffd84a'; rrect(c, 720, 430, 200, 50, 12); c.fill();
+      text(c, `${e.goals} GOALS`, 820, 456, 26, '#2a1a00', 'center', 900);
+      c.globalAlpha = 1;
+    }
+    c.restore(); fadeIn(lf, 8);
+  };
+  LG.lgPodium = (c, seg, lf) => {
+    lgBG(c, lf); const t = lf / FPS;
+    c.save(); c.scale(S, S);
+    lgTitle(c, 'FINAL PODIUM', `${show.league.display_name} ${show.league.season}`, smooth(t / 0.4));
+    const base = 640, spots = [{ k: 1, dx: -300, h: 200, col: '#c9d3de', d: 0.35 }, { k: 0, dx: 0, h: 280, col: '#ffd84a', d: 0.1 }, { k: 2, dx: 300, h: 150, col: '#d99a62', d: 0.6 }];
+    for (const sp of spots) {
+      const e = seg.top[sp.k]; if (!e) continue;
+      const x = G.W / 2 + sp.dx, k = easeOut((t - 0.4 - sp.d) / 0.6), h = sp.h * k;
+      const pg = c.createLinearGradient(0, base - h, 0, base); pg.addColorStop(0, mixHex(sp.col, '#ffffff', 0.15)); pg.addColorStop(1, mixHex(sp.col, '#1a2433', 0.45));
+      c.fillStyle = pg; rrect(c, x - 120, base - h, 240, h, 10); c.fill();
+      if (k > 0.5) { c.globalAlpha = smooth((k - 0.5) / 0.5); text(c, String(sp.k + 1), x, base - h + 50, 56, 'rgba(20,30,45,0.85)', 'center', 900); c.globalAlpha = 1; }
+      const ea = smooth((t - 1.2 - sp.d) / 0.5); if (ea <= 0) continue;
+      c.save(); c.globalAlpha = ea; c.translate(0, 18 * (1 - ea));
+      const top = base - sp.h;
+      crest(c, e[0], x, top - 110, 42);
+      const nm = show.teams[e[0]].name; text(c, nm, x, top - 50, fitText(c, nm, 260, 26, 900), '#ffffff', 'center', 900);
+      text(c, `${e[1]} pts`, x, top - 22, 18, '#c9dcff', 'center', 700);
+      c.restore();
+    }
+    c.restore(); fadeIn(lf, 8);
+  };
+  LG.lgStats = (c, seg, lf) => {
+    lgBG(c, lf); const t = lf / FPS, s = seg.stats, nm = (ti) => show.teams[ti].name;
+    c.save(); c.scale(S, S);
+    lgTitle(c, 'SEASON IN NUMBERS', `${show.league.display_name} ${show.league.season} · ${s.matches} simulated matches`, smooth(t / 0.4));
+    const tiles = [
+      ['GOALS', String(s.goals), `${s.perMatch} per match`], ['DRAWS', String(s.draws), `${Math.round(100 * s.draws / s.matches)} % of matches`],
+      ['HOME / AWAY WINS', `${s.homeWins} / ${s.awayWins}`, 'home advantage in the model'], ['BEST ATTACK', nm(s.bestAttack[0]), `${s.bestAttack[1]} goals scored`],
+      ['BEST DEFENCE', nm(s.bestDefence[0]), `${s.bestDefence[1]} goals conceded`], ['HIGHEST SCORING', `${nm(s.biggest[0])} ${s.biggest[2]}–${s.biggest[3]} ${nm(s.biggest[1])}`, 'most goals in one match'],
+    ];
+    tiles.forEach((tl, i) => {
+      const col = i % 3, row = Math.floor(i / 3), w = 360, h = 200, x = 70 + col * (w + 25), y = 150 + row * (h + 30);
+      const u = easeOutBack((t - 0.3 - i * 0.15) / 0.45); if (u <= 0) return;
+      c.save(); c.globalAlpha = clamp(u, 0, 1);
+      c.fillStyle = 'rgba(255,255,255,0.075)'; rrect(c, x, y, w, h, 16); c.fill(); c.fillStyle = LG_ACC; c.fillRect(x + 24, y + 22, 40, 3);
+      text(c, tl[0], x + 24, y + 48, 16, '#9fc7ff', 'left', 800);
+      text(c, tl[1], x + w / 2, y + 110, fitText(c, tl[1], w - 40, 40, 900), '#ffffff', 'center', 900);
+      text(c, tl[2], x + w / 2, y + 160, fitText(c, tl[2], w - 40, 17, 600), '#c9dcff', 'center', 600);
+      c.restore();
+    });
+    c.restore(); fadeIn(lf, 8);
+    const segLen = seg.len / FPS; if (t > segLen - 1.0) { c.fillStyle = `rgba(0,0,0,${smooth((t - (segLen - 1.0)) / 1.0)})`; c.fillRect(0, 0, OUT_W, OUT_H); }
+  };
+
+  // ---------- season finale: trophy ceremony, 3 camera angles (wide stadium / low-angle lift / top-down orbit) ----------
+  let cerBg = null;
+  function ceremonyBackdrop() { // stadium for the wide shot: Max's image (plain cover-fit) or the procedural bowl
+    if (cerBg) return cerBg;
+    cerBg = document.createElement('canvas'); cerBg.width = G.W * 2; cerBg.height = G.H * 2;
+    const c = cerBg.getContext('2d'); c.scale(2, 2);
+    if (bgImg) { const F = window.BGFIT.bgFit(bgImg.naturalWidth, bgImg.naturalHeight, G.W, G.H, {}); c.drawImage(bgImg, F.dx, F.dy, F.dw, F.dh); }
+    else { const MAP = show.map; const sky = c.createLinearGradient(0, 0, 0, G.H); sky.addColorStop(0, MAP.sky[0]); sky.addColorStop(0.55, MAP.sky[1]); sky.addColorStop(1, MAP.sky[2]); c.fillStyle = sky; c.fillRect(0, 0, G.W, G.H); drawBowl(c, Object.assign({}, MAP, { center_screen_rect: MAP.center_screen_rect || [530, 250, 220, 62] })); }
+    return cerBg;
+  }
+  function fireworks(c, t, cols, region, n) {
+    for (let k = 0; k < n; k++) {
+      const t0 = 0.3 + k * 0.62 + hash(k * 13 + 2) * 0.3, tt = t - t0; if (tt < 0 || tt > 2.0) continue;
+      const cx = region[0] + hash(k * 7 + 1) * region[2], cy = region[1] + hash(k * 11 + 3) * region[3], col = cols[k % cols.length];
+      if (tt < 0.35) { const u = tt / 0.35; c.fillStyle = 'rgba(255,240,200,0.9)'; c.beginPath(); c.arc(cx, cy + 180 * (1 - u), 2.2, 0, Math.PI * 2); c.fill(); continue; }
+      const u = (tt - 0.35) / 1.65, R = 90 * easeOut(u) + 10, a = 1 - u;
+      if (u < 0.12) { const fl = c.createRadialGradient(cx, cy, 2, cx, cy, 120); fl.addColorStop(0, `rgba(255,255,255,${0.5 * (1 - u / 0.12)})`); fl.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = fl; c.fillRect(cx - 120, cy - 120, 240, 240); }
+      for (let i = 0; i < 44; i++) {
+        const ang = i / 44 * Math.PI * 2 + hash(k * 31 + i) * 0.1, sp = 0.75 + 0.25 * hash(k * 17 + i * 3);
+        const x = cx + Math.cos(ang) * R * sp, y = cy + Math.sin(ang) * R * sp + 40 * u * u;
+        c.strokeStyle = hexA(col, a * 0.5); c.lineWidth = 1.4; c.beginPath(); c.moveTo(x, y); c.lineTo(cx + Math.cos(ang) * R * sp * 0.82, cy + Math.sin(ang) * R * sp * 0.82 + 40 * u * u); c.stroke();
+        c.fillStyle = hexA(i % 5 === 0 ? '#ffffff' : col, a); c.beginPath(); c.arc(x, y, 2.1, 0, Math.PI * 2); c.fill();
+      }
+    }
+  }
+  function confetti(c, t, cols, n, seed, opts) {
+    opts = opts || {};
+    for (let i = 0; i < n; i++) {
+      const h1 = hash(i * 3 + seed), h2 = hash(i * 7 + 2 + seed), h3 = hash(i * 11 + 3 + seed);
+      const tt = t - h1 * 2.5; if (tt < 0) continue;
+      const x = h2 * G.W + Math.sin(tt * (1.5 + h3 * 2) + i) * 30, y = -20 + ((tt * (90 + h3 * 110)) % (G.H + 40));
+      const sz = opts.big ? 2.2 : 1;
+      c.save(); c.translate(x, y); c.rotate(tt * (3 + h1 * 5) + i); c.scale(1, Math.cos(tt * (4 + h2 * 4)));
+      c.fillStyle = cols[i % cols.length]; c.globalAlpha = opts.alpha || 1; c.fillRect(-5 * sz, -3 * sz, 10 * sz, 6 * sz); c.restore();
+    }
+  }
+  function cerShotAt(seg, t) { const sh = seg.shots || (show.ceremony && show.ceremony.shots); return sh.find((s) => t >= s.from && t < s.to) || sh[sh.length - 1]; }
+  window.ceremonyAngleAt = (lf) => { const seg = show.segments.find((s) => s.type === 'ceremony'); return seg ? cerShotAt(seg, lf / FPS).angle : null; };
+  LG.ceremony = (c, seg, lf) => {
+    const t = lf / FPS, TM = show.teams[seg.team], sh = cerShotAt(seg, t), st = t - sh.from, dur = sh.to - sh.from;
+    const cols = [TM.primary, TM.secondary, '#ffd84a', '#ffffff'];
+    c.save(); c.scale(S, S);
+    if (sh.angle === 'wide') {
+      const z = 1 + 0.07 * (st / dur);
+      c.save(); c.translate(G.W / 2, G.H * 0.6); c.scale(z, z); c.translate(-G.W / 2, -G.H * 0.6);
+      c.drawImage(ceremonyBackdrop(), 0, 0, G.W, G.H);
+      c.fillStyle = 'rgba(5,10,30,0.28)'; c.fillRect(0, 0, G.W, G.H); // dusk grade so the fireworks read
+      for (let i = 0; i < 26; i++) { if (hash(i * 97 + lf * 13) > 0.5) continue; const x = hash(i * 5 + lf * 3) * G.W, y = 300 + hash(i * 9 + lf * 7) * 240; const g2 = c.createRadialGradient(x, y, 0, x, y, 7); g2.addColorStop(0, 'rgba(255,255,255,0.95)'); g2.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = g2; c.fillRect(x - 7, y - 7, 14, 14); } // camera flashes in the stands
+      fireworks(c, st, cols, [80, 40, G.W - 160, 220], 16);
+      // stage on the pitch with the champion's three balls and the trophy
+      c.fillStyle = 'rgba(0,0,0,0.35)'; c.beginPath(); c.ellipse(G.W / 2, 664, 190, 30, 0, 0, Math.PI * 2); c.fill();
+      const sg = c.createLinearGradient(0, 620, 0, 668); sg.addColorStop(0, '#2b2f45'); sg.addColorStop(1, '#151829');
+      c.fillStyle = sg; c.beginPath(); c.ellipse(G.W / 2, 640, 180, 26, 0, 0, Math.PI * 2); c.fill(); c.fillRect(G.W / 2 - 180, 640, 360, 18); c.beginPath(); c.ellipse(G.W / 2, 658, 180, 26, 0, 0, Math.PI); c.fill();
+      c.strokeStyle = hexA(TM.primary, 0.9); c.lineWidth = 3; c.beginPath(); c.ellipse(G.W / 2, 640, 180, 26, 0, 0, Math.PI * 2); c.stroke();
+      drawTrophy(c, G.W / 2, 578, 0.58, 1); // stands on the stage
+      const tglow = c.createRadialGradient(G.W / 2, 545, 4, G.W / 2, 545, 90); tglow.addColorStop(0, `rgba(255,225,140,${0.35 + 0.1 * Math.sin(st * 3)})`); tglow.addColorStop(1, 'rgba(255,225,140,0)'); c.fillStyle = tglow; c.fillRect(G.W / 2 - 90, 455, 180, 180);
+      [-130, 130].forEach((dx) => crest(c, seg.team, G.W / 2 + dx, 616, 24));
+      c.restore();
+      confetti(c, st, cols, 160, 11);
+      const a = smooth((st - 0.8) / 0.5);
+      c.globalAlpha = a; c.fillStyle = 'rgba(8,20,38,0.85)'; rrect(c, 60, 60, 560, 74, 12); c.fill(); teamBar(c, seg.team, 60, 60, 10, 74);
+      text(c, `${show.league.display_name} CHAMPIONS ${show.league.season}`, 90, 84, 18, '#ffd84a', 'left', 900);
+      text(c, TM.name, 90, 114, fitText(c, TM.name, 500, 30, 900), '#ffffff', 'left', 900); c.globalAlpha = 1;
+    } else if (sh.angle === 'lift') {
+      const bg = c.createRadialGradient(G.W / 2, 260, 20, G.W / 2, 300, 820); bg.addColorStop(0, mixHex(TM.primary, '#ffd84a', 0.35)); bg.addColorStop(0.45, mixHex(TM.primary, '#0b1020', 0.55)); bg.addColorStop(1, '#05070f');
+      c.fillStyle = bg; c.fillRect(0, 0, G.W, G.H);
+      const rise = easeOutBack(clamp(st / 2.4, 0, 1)), ty = lerp(680, 405, rise) + (st > 2.4 ? 6 * Math.sin((st - 2.4) * 2.2) : 0);
+      c.save(); c.translate(G.W / 2, ty - 60); c.rotate(st * 0.25);
+      for (let i = 0; i < 20; i++) { c.rotate(Math.PI / 10); c.fillStyle = `rgba(255,220,120,${0.06 + 0.03 * Math.sin(st * 3 + i)})`; c.beginPath(); c.moveTo(0, 0); c.lineTo(-50, -1000); c.lineTo(50, -1000); c.closePath(); c.fill(); }
+      c.restore();
+      const glow = c.createRadialGradient(G.W / 2, ty - 60, 10, G.W / 2, ty - 60, 300); glow.addColorStop(0, 'rgba(255,230,150,0.55)'); glow.addColorStop(1, 'rgba(255,230,150,0)'); c.fillStyle = glow; c.fillRect(0, 0, G.W, G.H);
+      // low angle: trophy large, slightly stretched upwards, lifted by the champion's three balls
+      c.save(); c.translate(G.W / 2, ty); c.scale(1, 1.1); drawTrophy(c, 0, -60, 2.05, 1); c.restore();
+      [-104, 0, 104].forEach((dx, k) => crest(c, seg.team, G.W / 2 + dx, ty + 178 - (k === 1 ? 10 : 0), 48));
+      for (let i = 0; i < 30; i++) { const a2 = hash(i * 19) * Math.PI * 2, r = 130 + hash(i * 23) * 160, tw = 0.5 + 0.5 * Math.sin(st * 6 + i * 1.7); const x = G.W / 2 + Math.cos(a2 + st * 0.3) * r, y = ty - 80 + Math.sin(a2 + st * 0.3) * r * 0.7; c.fillStyle = `rgba(255,245,200,${0.8 * tw})`; c.beginPath(); c.moveTo(x, y - 6); c.lineTo(x + 1.6, y); c.lineTo(x, y + 6); c.lineTo(x - 1.6, y); c.closePath(); c.fill(); c.fillRect(x - 6, y - 0.8, 12, 1.6); }
+      // crowd silhouettes in the foreground, scarves in the club colours
+      for (let i = 0; i < 34; i++) { const x = i * 40 - 10 + hash(i) * 20, h = 70 + hash(i * 3) * 40, bob = 6 * Math.sin(st * 5 + i); c.fillStyle = '#04060c'; c.beginPath(); c.arc(x, G.H - h + bob, 15, 0, Math.PI * 2); c.fill(); rrect(c, x - 25, G.H - h + 17 + bob, 50, h + 20, 18); c.fill(); if (i % 4 === 1) { c.strokeStyle = '#04060c'; c.lineWidth = 9; c.lineCap = 'round'; c.beginPath(); c.moveTo(x + 18, G.H - h + 26 + bob); c.lineTo(x + 30, G.H - h - 22 + bob * 1.5); c.stroke(); } if (i % 3 === 0) { c.strokeStyle = i % 2 ? TM.primary : TM.secondary; c.lineWidth = 7; c.beginPath(); c.moveTo(x - 30, G.H - h - 30 + bob); c.lineTo(x + 30, G.H - h - 46 + bob); c.stroke(); } }
+      if (st > 2.3 && st < 2.9) { c.fillStyle = `rgba(255,255,255,${0.75 * (1 - (st - 2.3) / 0.6)})`; c.fillRect(0, 0, G.W, G.H); } // flash as the trophy goes up
+      for (let k = 0; k < 6; k++) { const ft = 3 + k * 1.1; if (st > ft && st < ft + 0.12) { c.fillStyle = 'rgba(255,255,255,0.35)'; c.fillRect(0, 0, G.W, G.H); } }
+      confetti(c, st, cols, 70, 23, { big: true, alpha: 0.9 });
+      const a = smooth((st - 3.0) / 0.5); c.globalAlpha = a;
+      const tbg = c.createLinearGradient(0, 0, 0, 110); tbg.addColorStop(0, 'rgba(4,6,12,0.75)'); tbg.addColorStop(1, 'rgba(4,6,12,0)'); c.fillStyle = tbg; c.fillRect(0, 0, G.W, 110);
+      const ttl = `${TM.name.toUpperCase()} LIFT THE TROPHY`; text(c, ttl, G.W / 2, 48, fitText(c, ttl, 1100, 36, 900), '#ffffff', 'center', 900); c.globalAlpha = 1;
+    } else { // orbit: top-down stadium rotating slowly around the centre
+      c.fillStyle = '#05070f'; c.fillRect(0, 0, G.W, G.H);
+      const ang = st * 0.11, z = 1 + 0.06 * (st / dur);
+      c.save(); c.translate(G.W / 2, G.H / 2); c.scale(z, z); c.rotate(ang);
+      const RX = 560, RY = 400;
+      c.fillStyle = '#20263d'; c.beginPath(); c.ellipse(0, 0, RX, RY, 0, 0, Math.PI * 2); c.fill();
+      for (let i = 0; i < 2600; i++) { const a2 = hash(i * 7 + 1) * Math.PI * 2, rr = 0.66 + hash(i * 13 + 5) * 0.32; const hc = hash(i * 3); c.fillStyle = hc < 0.35 ? TM.primary : hc < 0.6 ? TM.secondary : hc < 0.8 ? '#d6dbe8' : '#3a3f5c'; c.fillRect(Math.cos(a2) * RX * rr, Math.sin(a2) * RY * rr, 3, 3); }
+      c.fillStyle = '#3c9a34'; c.fillRect(-330, -215, 660, 430);
+      for (let i = 0; i < 11; i += 2) { c.fillStyle = 'rgba(255,255,255,0.07)'; c.fillRect(-330 + i * 60, -215, 60, 430); }
+      c.strokeStyle = 'rgba(255,255,255,0.85)'; c.lineWidth = 2.5; c.strokeRect(-330, -215, 660, 430); c.beginPath(); c.moveTo(0, -215); c.lineTo(0, 215); c.stroke(); c.beginPath(); c.arc(0, 0, 70, 0, Math.PI * 2); c.stroke();
+      c.strokeRect(-330, -90, 70, 180); c.strokeRect(260, -90, 70, 180);
+      // waving flags around the ring in the club colours
+      for (let i = 0; i < 24; i++) { const a2 = i / 24 * Math.PI * 2, fx = Math.cos(a2) * RX * 0.62, fy = Math.sin(a2) * RY * 0.62; c.save(); c.translate(fx, fy); c.rotate(a2 + Math.PI / 2); c.fillStyle = i % 2 ? TM.primary : TM.secondary; c.beginPath(); c.moveTo(0, 0); for (let q = 0; q <= 6; q++) c.lineTo(q * 6, -2 + 4 * Math.sin(st * 6 + q * 0.9 + i)); for (let q = 6; q >= 0; q--) c.lineTo(q * 6, 18 + 4 * Math.sin(st * 6 + q * 0.9 + i + 0.4)); c.closePath(); c.fill(); c.fillStyle = '#ddd'; c.fillRect(-1.5, -4, 3, 26); c.restore(); }
+      // champion balls in a circle + trophy seen from above
+      for (let k = 0; k < 6; k++) { const a2 = k / 6 * Math.PI * 2 - ang * 2; crest(c, seg.team, Math.cos(a2) * 120, Math.sin(a2) * 120, 26); }
+      const tg = c.createRadialGradient(-10, -10, 4, 0, 0, 46); tg.addColorStop(0, '#fff3b0'); tg.addColorStop(0.6, '#ffcc33'); tg.addColorStop(1, '#a87406');
+      c.fillStyle = tg; c.beginPath(); c.arc(0, 0, 44, 0, Math.PI * 2); c.fill(); c.strokeStyle = '#d9a520'; c.lineWidth = 9; c.beginPath(); c.arc(-58, 0, 16, 0, Math.PI * 2); c.stroke(); c.beginPath(); c.arc(58, 0, 16, 0, Math.PI * 2); c.stroke();
+      c.fillStyle = '#fff6d0'; c.beginPath(); for (let i = 0; i < 10; i++) { const a3 = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? 8 : 19; c.lineTo(Math.cos(a3) * r, Math.sin(a3) * r); } c.closePath(); c.fill();
+      // confetti swirl
+      for (let i = 0; i < 260; i++) { const a2 = hash(i * 5) * Math.PI * 2 + st * (0.6 + hash(i) * 0.6), rr = 40 + ((hash(i * 9) * 500 + st * 60) % 520); c.save(); c.translate(Math.cos(a2) * rr, Math.sin(a2) * rr * 0.75); c.rotate(st * 4 + i); c.fillStyle = cols[i % cols.length]; c.fillRect(-4, -2.5, 8, 5); c.restore(); }
+      c.restore();
+      const vg = c.createRadialGradient(G.W / 2, G.H / 2, 260, G.W / 2, G.H / 2, 760); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,0.65)'); c.fillStyle = vg; c.fillRect(0, 0, G.W, G.H);
+      const a = smooth((st - 0.6) / 0.5); c.globalAlpha = a;
+      c.fillStyle = 'rgba(8,20,38,0.85)'; rrect(c, G.W / 2 - 330, G.H - 104, 660, 70, 14); c.fill();
+      text(c, `CHAMPIONS · ${TM.name.toUpperCase()}`, G.W / 2, G.H - 69, fitText(c, `CHAMPIONS · ${TM.name.toUpperCase()}`, 620, 30, 900), '#ffd84a', 'center', 900); c.globalAlpha = 1;
+    }
+    // cut between angles: short white flash (0.3 s on both sides of the cut)
+    const cuts = (seg.shots || []).slice(1).map((s) => s.from);
+    for (const ct of cuts) { const d = Math.abs(t - ct); if (d < 0.3) { c.fillStyle = `rgba(255,255,255,${0.85 * (1 - d / 0.3)})`; c.fillRect(0, 0, G.W, G.H); } }
+    c.restore(); fadeIn(lf, 10);
+  };
+  window.LEAGUE_SEGMENTS = Object.keys(LG);
+
   // ---------- main entry ----------
   // small SIMULATION label: only if rules.show_simulation_label is true (P5: default off)
   const simLabelOn = () => !!(show && show.cfg && show.cfg.SHOW_SIM_LABEL);
@@ -1134,6 +1764,7 @@
     if (seg.type === 'bracket') { drawBracket(ctx, seg.step, lf, lf, seg); fadeIn(lf, 8); return; }
     if (seg.type === 'roundCard') { drawRoundCard(ctx, seg, lf, lf); fadeIn(lf, 8); return; }
     if (seg.type === 'winner') { drawWinner(ctx, lf, g); return; }
+    if (LG[seg.type]) { LG[seg.type](ctx, seg, lf, g); return; } // P7 league screens + finale
     const m = show.matches[seg.match];
     const names = `${teamName(m.ta)}  vs  ${teamName(m.tb)}`;
     const stageTitle = m.leg === 'FINAL' ? `${show.competition.name} · FINAL` : `${m.stage} · ${m.leg}`;
@@ -1167,7 +1798,10 @@
       ctx.fillStyle = `rgba(5,12,25,${0.45 * smooth(lf / 10)})`; ctx.fillRect(0, 0, OUT_W, OUT_H);
       const sc = m.score;
       const lines = [{ s: `${teamName(m.ta)}  ${sc[0]}–${sc[1]}  ${teamName(m.tb)}`, size: 38 }];
-      if (m.leg === 'LEG 2') {
+      if (m.league) { // P7: league result flash (draws allowed)
+        lines.push({ s: m.winnerSide ? `${teamName(m.winnerSide === 'A' ? m.ta : m.tb)} win` : 'Draw', size: 26, w: 700, color: '#ffd84a' });
+        lines.push({ s: `${show.league.display_name} · ${m.stage}`, size: 20, w: 600, color: '#c9dcff' });
+      } else if (m.leg === 'LEG 2') {
         const ag = [m.prev[0] + sc[0], m.prev[1] + sc[1]];
         lines.push({ s: `Aggregate ${ag[0]}–${ag[1]}`, size: 26, w: 700, color: '#ffd84a' });
         const w = m.goldenWinner ? (m.goldenWinner === 'A' ? m.ta : m.tb) : (ag[0] > ag[1] ? m.ta : m.tb);
@@ -1191,7 +1825,7 @@
       const bl = Math.floor(lf / 15) % 2 === 0;
       ctx.fillStyle = '#ff3b3b'; if (bl) { ctx.beginPath(); ctx.arc(40, 22, 7, 0, Math.PI * 2); ctx.fill(); }
       text(ctx, 'REPLAY', 56, 23, 22, '#ffffff', 'left', 800);
-      text(ctx, 'SLOW MOTION', G.W - 30, 23, 16, '#bbbbbb', 'right', 700);
+      text(ctx, seg.gotw ? 'GOAL OF THE WEEK' : 'SLOW MOTION', G.W - 30, 23, 16, seg.gotw ? '#ffd84a' : '#bbbbbb', 'right', 700);
       // lower-third caption: scorer + game minute (never beyond 90+added)
       const gl = m.goals[seg.goal];
       const ti = gl.team === 'A' ? m.ta : m.tb, P = show.teams[ti].players[gl.player];
@@ -1219,10 +1853,12 @@
     canvas.width = OUT_W; canvas.height = OUT_H;
     ctx = canvas.getContext('2d', { alpha: false });
     ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+    bgImg = null;
     buildBackground();
     for (const k of Object.keys(styleCache)) delete styleCache[k];
     const L = show.logos || {};
-    return Promise.all(Object.keys(L).map((id) => new Promise((res) => {
+    const bgP = show.background && show.background.src ? new Promise((res) => { const im = new Image(); im.onload = () => { bgImg = im; buildBackground(); res(); }; im.onerror = () => res(); im.src = show.background.src; }) : Promise.resolve();
+    return bgP.then(() => Promise.all(Object.keys(L).map((id) => new Promise((res) => {
       const im = new Image(); im.onload = () => { logoImgs[id] = im; res(); }; im.onerror = () => res(); im.src = L[id];
     }))).then(() => {
       // P7: club without a crest file (assets/logos/MISSING.md) -> fallback decal: its 3-letter code on a disc in the
@@ -1237,9 +1873,11 @@
         g.fillText(String(t.short || t.name.slice(0, 3)).toUpperCase().slice(0, 3), S / 2, S / 2 + S * 0.02, S * 0.78);
         logoImgs[t.id] = cv; logoImgs[t.id].fallback = true;
       }
-      return { total: show.totalFrames, logos: Object.keys(logoImgs).length };
-    });
+      return { total: show.totalFrames, logos: Object.keys(logoImgs).length, background: !!bgImg };
+    }));
   };
+  // P7 §7b test hooks: background layer order and the cover-fit actually used
+  window.bgLayerInfo = () => ({ image: !!bgImg, layers: bgLayers.slice(), fit: bgImg ? bgFitInfo() : null, imgSize: bgImg ? [bgImg.naturalWidth, bgImg.naturalHeight] : null });
   window.fallbackDecalOf = (id) => (logoImgs[id] && logoImgs[id].fallback ? logoImgs[id].toDataURL('image/png') : null);
   window.renderFrame = renderFrame;
 
@@ -1300,7 +1938,7 @@
     text(c, `${sc[0]} – ${sc[1]}`, cx, y + 112, 78, '#0b1a2e', 'center', 900);
     c.fillStyle = 'rgba(255,255,255,0.12)'; rrect(c, L, y + 88, 104, 44, 12); c.fill();
     text(c, clock, L + 52, y + 111, fitText(c, clock, 94, 28), '#ffffff', 'center', 800);
-    const legTxt = m.leg === 'FINAL' ? 'FINAL' : m.leg;
+    const legTxt = m.league ? 'LEAGUE' : m.leg === 'FINAL' ? 'FINAL' : m.leg;
     text(c, legTxt, R - 52, y + 100, 20, '#c9dcff', 'center', 800);
     if (m.leg === 'LEG 2') text(c, `AGG ${m.prev[0] + sc[0]}–${m.prev[1] + sc[1]}`, R - 52, y + 126, 19, '#ffd84a', 'center', 800);
     const st = (m.stage || '').toUpperCase();
@@ -1311,7 +1949,7 @@
   function reelInfo(c, m, comebackNow) {
     const y = 905, x = SAFE.x0, w = SAFE.x1 - SAFE.x0;
     c.fillStyle = 'rgba(8,20,38,0.80)'; rrect(c, x, y, w, 46, 12); c.fill(); box('info', x, y, w, 46);
-    const t = `${(m.roundName || m.stage)} · ${m.leg === 'FINAL' ? 'final' : m.leg.toLowerCase()} · computer simulation`;
+    const t = m.league ? `${m.stage.toLowerCase().replace(/^m/, 'M')} · ${show.league.season} · computer simulation` : `${(m.roundName || m.stage)} · ${m.leg === 'FINAL' ? 'final' : m.leg.toLowerCase()} · computer simulation`;
     text(c, t, x + w / 2, y + 24, fitText(c, t, w - 30, 18, 700), '#c9dcff', 'center', 700);
     if (comebackNow) {
       const bw = 300, bx = x + w / 2 - bw / 2, by = 856;
@@ -1371,7 +2009,7 @@
       reelScoreboard(ctx, m, fr.sc || scoreAt(m, fr.t), CL(fr.t), XT(fr.t));
       if (p.ff) { // fast-forward indicator (top-left of the field, away from the Shorts buttons on the right)
         ctx.fillStyle = 'rgba(8,20,38,0.85)'; rrect(ctx, SAFE.x0, FIELD.y + 10, 96, 36, 12); ctx.fill();
-        text(ctx, '>> x2', SAFE.x0 + 48, FIELD.y + 28.5, 20, '#ffd84a', 'center', 900); box('ff', SAFE.x0, FIELD.y + 10, 96, 36);
+        text(ctx, p.ff > 1 ? `>> x${p.ff}` : '>> x2', SAFE.x0 + 48, FIELD.y + 28.5, 20, '#ffd84a', 'center', 900); box('ff', SAFE.x0, FIELD.y + 10, 96, 36);
       }
       const lg = lastEventBeforeV(m, 'goal', v);
       let capOn = false;
@@ -1422,7 +2060,7 @@
     ctx.fillStyle = 'rgba(10,24,48,0.90)'; ctx.fillRect(FIELD.x, FIELD.y, FIELD.w, FIELD.h);
     const a = smooth(lf / 10), cx = (SAFE.x0 + SAFE.x1) / 2, w = SAFE.x1 - SAFE.x0; ctx.globalAlpha = a;
     const wn = reel.winnerSide === 'A' ? teamName(m.ta) : reel.winnerSide === 'B' ? teamName(m.tb) : null;
-    const head = wn ? (m.leg === 'LEG 1' ? `${wn} win the first leg` : m.leg === 'FINAL' ? `${wn} win` : `${wn} go through`) : 'All square';
+    const head = m.league ? (wn ? `${wn} take the 3 points` : 'Honours even') : wn ? (m.leg === 'LEG 1' ? `${wn} win the first leg` : m.leg === 'FINAL' ? `${wn} win` : `${wn} go through`) : 'All square';
     text(ctx, head, cx, FIELD.y + 80, fitText(ctx, head, w, 40, 900), '#ffd84a', 'center', 900);
     text(ctx, 'Full simulation', cx, FIELD.y + 190, 54, '#ffffff', 'center', 900);
     text(ctx, 'on the channel', cx, FIELD.y + 255, 54, '#ffffff', 'center', 900);

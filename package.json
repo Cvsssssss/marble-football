@@ -4,7 +4,7 @@
   "private": true,
   "type": "commonjs",
   "scripts": {
-    "test": "node tests/run_tests.js && node tests/p2_tests.js && node tests/p3_tests.js && node tests/p4_tests.js && node tests/p5_tests.js && node tests/p6_tests.js && node tests/p7_tests.js",
+    "test": "node tests/run_tests.js && node tests/p2_tests.js && node tests/p3_tests.js && node tests/p4_tests.js && node tests/p5_tests.js && node tests/p6_tests.js && node tests/p7_tests.js && node tests/p7b_tests.js",
     "all": "node build_all.js --competition config/competitions/demo_4teams.json",
     "start": "node launcher.js",
     "test:crossbar": "node tests/crossbar_test.js 5000 both",
@@ -24,7 +24,7 @@
     "diag:p5": "node tools/p5_diag.js",
     "test:p6": "node tests/p6_tests.js",
     "players:check": "node sim/players.js",
-    "test:p7": "node tests/p7_tests.js",
+    "test:p7": "node tests/p7_tests.js && node tests/p7b_tests.js",
     "league": "node league.js",
     "league:calibrate": "node tools/league_calibrate.js",
     "league:dryrun": "node league.js dry-run"

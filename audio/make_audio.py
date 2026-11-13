@@ -331,6 +331,23 @@ if os.path.exists(CUSTOM):  # Max's own royalty-free recording overrides the syn
     fo = min(len(xx), int(0.3 * SR)); xx[-fo:] *= np.linspace(1, 0, fo)
     GOAL = (xx * ST_TARGET / max(_st(xx), 1e-6)).astype(np.float32); CUSTOM_USED = True; SEL = 'custom'
 GOAL_GAIN = 0.55
+# P7 season finale (league only; never used by the cups): firework boom + crackle, short original music sting
+def snd_firework(d=1.6):
+    n = int(d * SR); t = t_(d)
+    boom = np.sin(2 * np.pi * (55 + 30 * np.exp(-t * 9)) * t) * np.exp(-t * 5.5)
+    lr = np.random.default_rng(9090)  # own generator: the shared rng (approved cup sounds) is not advanced
+    X = np.fft.rfft(lr.standard_normal(n)); f = np.fft.rfftfreq(n, 1 / SR)
+    hiss = np.fft.irfft(X / (1 + ((f - 5750) / 3250) ** 4), n); hiss /= (np.max(np.abs(hiss)) + 1e-9)
+    crackle = hiss * (lr.random(n) > 0.985) * np.exp(-np.maximum(0, t - 0.25) * 3) * (t > 0.25)
+    whistle = np.sin(2 * np.pi * (1800 - 900 * np.minimum(t, 0.3) / 0.3) * t) * (t < 0.3) * 0.12
+    return norm(boom + 0.45 * crackle + whistle)
+def snd_ceremony_sting():
+    seq = [(523.25, 0.16), (659.25, 0.16), (783.99, 0.16), (1046.5, 0.5), (987.77, 0.16), (1046.5, 1.6)]
+    out = np.zeros(int(3.6 * SR)); pos = 0
+    for f, d in seq:
+        a = brass(f, d + 0.06); out[pos:pos + len(a)] += a; b = brass(f / 2, d + 0.06) * 0.45; out[pos:pos + len(b)] += b; pos += int(d * SR)
+    return norm(out)
+S['firework'] = snd_firework(); S['ceremony_sting'] = snd_ceremony_sting()
 S['w_reg'] = S['w_half']   # 90' whistle (before the added-time shots): same two-blast pattern as half-time
 
 def pan_x(x): return float(np.clip((x / 1280.0) * 2 - 1, -1, 1)) * 0.6
@@ -372,10 +389,12 @@ for e in show['audio']:
     elif ty == 'fanfare':         place(S['fanfare'], t + 0.2, 0.75, 0.0); goal_times.append(t)
     elif ty == 'cheer':           place(S['cheer'], t, 0.7, 0.0); place(S['applause'], t + 0.2, 0.5, 0.0)
     elif ty == 'sting_intro':     place(S['intro'], t + 0.1, 0.6, 0.0)
+    elif ty == 'firework':        place(S['firework'], t, 0.42, float(np.clip(((e.get('k', 0) * 37) % 10) / 10.0 * 1.2 - 0.6, -0.6, 0.6)))
+    elif ty == 'ceremony_sting':  place(S['ceremony_sting'], t, 0.7, 0.0); goal_times.append(t)
 
 # ambient crowd murmur during matches
 for seg in show['segments']:
-    if seg['type'] in ('match', 'matchPre', 'fulltime'):
+    if seg['type'] in ('match', 'matchPre', 'fulltime', 'lgPre'):
         d = seg['len'] / FPS
         amb = snd_crowd(d, 0.6, 0.6) if d < 60 else snd_crowd(d, 0.6, 0.6)
         place(amb, seg['start'] / FPS, 0.06, 0.0)
@@ -447,7 +466,8 @@ lvl = np.full(N, 0.16, np.float32)
 for seg in show['segments']:
     a = int(seg['start'] / FPS * SR); b = int((seg['start'] + seg['len']) / FPS * SR)
     if seg['type'] in ('intro', 'bracket', 'roundCard', 'hook', 'end'): lvl[a:b] = 0.42  # reels: hook + end card  # P2: round title cards like bracket screens
-    elif seg['type'] == 'winner': lvl[a:b] = 0.30
+    elif seg['type'] in ('lgIntro', 'lgTable', 'lgTableFull', 'lgResults', 'lgScorers', 'lgGotwCard', 'lgNext', 'lgEurope', 'lgBoot', 'lgPodium', 'lgStats'): lvl[a:b] = 0.36  # P7 league screens
+    elif seg['type'] in ('winner', 'lgChampion', 'ceremony'): lvl[a:b] = 0.30
     elif seg['type'] == 'replay': lvl[a:b] = 0.22
 # ducking under goals / whistles / fanfare
 duck = np.ones(N, np.float32)

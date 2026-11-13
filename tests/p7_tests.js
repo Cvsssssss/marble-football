@@ -77,15 +77,21 @@ const tmp = (n) => { const d = fs.mkdtempSync(path.join(os.tmpdir(), 'p7_' + n +
   check('config/players_review.md lists every league player', C.teams.every((t) => t.players.every((p) => review.includes(`| ${t.name} | ${p.name}`))));
   const ML = LC.writeMissingLogos(C);
   const miss = C.teams.filter((t) => !fs.existsSync(path.join(ROOT, 'assets', 'logos', t.id + '.png'))).map((t) => t.id);
-  const mmd = fs.readFileSync(ML.file, 'utf8');
-  check(`assets/logos/MISSING.md lists exactly the clubs without a crest file (${miss.length})`, JSON.stringify(ML.missing) === JSON.stringify(miss) && miss.every((id) => mmd.includes('`' + id + '.png`')) && !C.teams.filter((t) => !miss.includes(t.id)).some((t) => mmd.includes('`' + t.id + '.png`')));
+  const mmd = ML.file ? fs.readFileSync(ML.file, 'utf8') : '';
+  check(`assets/logos/MISSING.md lists exactly the clubs without a crest file (${miss.length}; removed when 0)`, JSON.stringify(ML.missing) === JSON.stringify(miss) && (miss.length ? fs.existsSync(ML.file) : !fs.existsSync(path.join(ROOT, 'assets', 'logos', 'MISSING.md'))) && miss.every((id) => mmd.includes('`' + id + '.png`')) && !C.teams.filter((t) => !miss.includes(t.id)).some((t) => mmd.includes('`' + t.id + '.png`')));
   const man = JSON.parse(fs.readFileSync(path.join(ROOT, 'assets', 'logos', 'manifest.json'), 'utf8')).logos || {};
-  check('no new crest downloaded in P7 (missing clubs have no manifest entry)', miss.every((id) => !man[id]));
+  check('clubs without a crest file have no manifest entry', miss.every((id) => !man[id]));
+  const PL13 = ['man_utd', 'brighton', 'brentford', 'chelsea', 'fulham', 'newcastle', 'everton', 'leeds', 'nottingham_forest', 'tottenham', 'coventry', 'ipswich', 'hull'];
+  check('every downloaded PL crest (13 Nov 2026, Max authorised) has file + source_url + download_url + retrieved in manifest.json', PL13.filter((id) => fs.existsSync(path.join(ROOT, 'assets', 'logos', id + '.png'))).every((id) => man[id] && man[id].file === id + '.png' && /^https:\/\//.test(man[id].source_url) && /^https:\/\//.test(man[id].download_url) && man[id].retrieved === '2026-11-13'));
+  const pngInfo = (f) => { const b = fs.readFileSync(f); return { sig: b.slice(0, 8).toString('hex'), w: b.readUInt32BE(16) }; };
+  check('downloaded crests are PNG, 960 px wide like the existing ones', PL13.filter((id) => fs.existsSync(path.join(ROOT, 'assets', 'logos', id + '.png'))).every((id) => { const i = pngInfo(path.join(ROOT, 'assets', 'logos', id + '.png')); return i.sig === '89504e470d0a1a0a' && i.w === 960; }));
+  const lu = fs.readFileSync(path.join(ROOT, 'assets', 'logos', 'LOGO_USAGE.md'), 'utf8');
+  check('assets/logos/LOGO_USAGE.md records the source URL of every PL crest', PL13.filter((id) => man[id]).every((id) => lu.includes(man[id].source_url)));
 
   // fallback decal (headless page, nothing written): missing club -> decal canvas; club with crest -> its file; ring unchanged
   {
     const { decalShow } = require('../tools/p7_decal_still');
-    const show = await decalShow(['chelsea', 'arsenal', 'fulham', 'hull']);
+    const show = await decalShow(['chelsea', 'arsenal', 'fulham', 'hull'], ['chelsea', 'fulham']);
     const { chromium } = require('playwright');
     const browser = await chromium.launch();
     const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
@@ -95,7 +101,7 @@ const tmp = (n) => { const d = fs.mkdtempSync(path.join(os.tmpdir(), 'p7_' + n +
       styles: kits.map((k) => window.ballStyleInfo(k)) }), [show.matches[0].kits.A, show.matches[0].kits.B]);
     await browser.close();
     const kits = [show.matches[0].kits.A, show.matches[0].kits.B];
-    check('fallback decal for clubs without crest, real crest kept for the others', r.che && r.ful && r.ars === null);
+    check('fallback decal for clubs without crest (simulated missing file), real crest kept for the others', r.che && r.ful && r.ars === null);
     check('decal ball keeps the logo-ball style and the same ring colour', r.styles.every((s, i) => s.logo && s.ring === kits[i].ring), r.styles);
   }
 

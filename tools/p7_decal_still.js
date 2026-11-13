@@ -8,11 +8,13 @@ const ROOT = path.join(__dirname, '..');
 const L = require('../sim/config_loader');
 const T = require('../sim/tournament');
 
-async function decalShow(teams) {
+// noLogo: team ids treated as having no crest file (all 20 clubs have crests since 13 Nov 2026; keeps the fallback testable)
+async function decalShow(teams, noLogo = []) {
   const dir = path.join(ROOT, 'build', 'p7_stills'); fs.mkdirSync(dir, { recursive: true });
   const f = path.join(dir, 'decal_competition.json');
   fs.writeFileSync(f, JSON.stringify({ id: 'p7_decals', name: 'DECAL CHECK', format: 'semis_two_legs_final', teams, pairing: [[0, 3], [1, 2]], map: 'stadium_day', rules: 'base', real_names: true }));
   const conf = L.loadCompetition(f);
+  conf.teams.forEach((t) => { if (noLogo.includes(t.id)) t.logoFile = null; });
   const TT = T.buildTournament(conf, { budget: 40 });
   const show = T.makeShow(conf, TT);
   show.matches.forEach((m) => { delete m.fine; });
@@ -20,7 +22,7 @@ async function decalShow(teams) {
 }
 async function main() {
   const out = path.resolve(process.argv[2] || path.join(ROOT, 'build', 'p7_stills', 'fallback_decals.png'));
-  const show = await decalShow(['chelsea', 'fulham', 'tottenham', 'hull']);
+  const show = await decalShow(['chelsea', 'fulham', 'tottenham', 'hull'], ['chelsea', 'fulham', 'tottenham', 'hull']);
   const { chromium } = require('playwright');
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
