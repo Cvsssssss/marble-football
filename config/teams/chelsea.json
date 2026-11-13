@@ -1,0 +1,42 @@
+{
+ "id": "chelsea",
+ "name": "Chelsea",
+ "short": "CHE",
+ "short_name": "Chelsea",
+ "primary": "#034694",
+ "secondary": "#FFFFFF",
+ "strength": 75,
+ "players": [
+  {
+   "name": "João Pedro",
+   "number": 9,
+   "team": "Chelsea",
+   "nationality": "Brazil",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/8/chelsea/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  },
+  {
+   "name": "P. Neto",
+   "number": 7,
+   "team": "Chelsea",
+   "nationality": "Portugal",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/8/chelsea/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  },
+  {
+   "name": "Estêvão",
+   "number": 41,
+   "team": "Chelsea",
+   "nationality": "Brazil",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/8/chelsea/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  }
+ ],
+ "colours_verified": false
+}

@@ -155,7 +155,7 @@ const README_RO = [
   'VIDEOUL LUNG (long_video_1080p.mp4):',
   '1. Titlu: alege UNA dintre cele 3 variante din long_title.txt și lipește-o în „Titlu”.',
   '2. Descriere: copiază TOT textul din long_description.txt în „Descriere” (are deja capitolele, disclaimerul și hashtag-urile).',
-  '3. Thumbnail: alege unul din thumbnails/.',
+  '3. Thumbnail: îl faci tu și îl încarci (generatorul nu creează thumbnail-uri; fără nume de jucători pe el).',
   '4. Public: „Nu, nu este conceput pentru copii” (Not made for kids).',
   '5. Categoria: Sport (Sports).',
   '6. Conținut modificat / sintetic (întrebarea despre AI): răspunde conform regulii YouTube; videoul este o simulare generată pe calculator (animație), nu imagini reale. Verifică formularea întrebării la momentul publicării.',
@@ -212,13 +212,14 @@ function chaptersCheck(desc, durationS) {
   return errs;
 }
 
-function writePublish(dir, P) {
+function writePublish(dir, P, opts) {
+  const readme = opts && opts.thumbnails ? README_RO.replace(/3\. Thumbnail: [^\n]*/, '3. Thumbnail: alege unul din thumbnails/ (sau fă-l tu).') : README_RO;
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(path.join(dir, 'long_title.txt'), P.longTitles.map((t, i) => `${i + 1}. ${t}`).join('\n') + '\n');
   fs.writeFileSync(path.join(dir, 'long_description.txt'), P.longDescription + '\n');
   fs.writeFileSync(path.join(dir, 'reel_title.txt'), (P.reelTitles.length ? P.reelTitles.map((t, i) => `${i + 1}. ${t}`).join('\n') : '(fără reel în această rulare)') + '\n');
   fs.writeFileSync(path.join(dir, 'reel_description.txt'), (P.reelDescription || '(fără reel în această rulare)') + '\n');
-  fs.writeFileSync(path.join(dir, 'README_publish.txt'), README_RO);
+  fs.writeFileSync(path.join(dir, 'README_publish.txt'), readme);
 }
 
 module.exports = { buildPublish, lintPublish, writePublish, chaptersCheck, recordTitles, readHistory, factsOf, FORBIDDEN, DISCLAIMER, LIMITS };

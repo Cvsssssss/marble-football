@@ -59,6 +59,12 @@ function validateAll(opts) {
     const conf = L.loadCompetition(path.join(dir, f), { skipPlayerCheck: true });
     out[conf.competition.id] = Object.assign({ name: conf.competition.name, teams: conf.teams.length }, validateTeams(conf.teams, opts));
   }
+  // P7: leagues (config/leagues/*.json)
+  const ldir = path.join(ROOT, 'config', 'leagues');
+  if (fs.existsSync(ldir)) for (const f of fs.readdirSync(ldir).filter((x) => x.endsWith('.json'))) {
+    const C = require('./league/config').loadLeague(path.join(ldir, f), { skipPlayerCheck: true });
+    out[C.league.id] = Object.assign({ name: C.league.display_name, teams: C.teams.length }, validateTeams(C.teams, opts));
+  }
   return out;
 }
 

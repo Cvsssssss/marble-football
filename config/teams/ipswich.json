@@ -1,0 +1,42 @@
+{
+ "id": "ipswich",
+ "name": "Ipswich Town",
+ "short": "IPS",
+ "short_name": "Ipswich",
+ "primary": "#3A64A3",
+ "secondary": "#FFFFFF",
+ "strength": 75,
+ "players": [
+  {
+   "name": "J. Clarke",
+   "number": 47,
+   "team": "Ipswich Town",
+   "nationality": "England",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/40/ipswich-town/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  },
+  {
+   "name": "C. Akpom",
+   "number": 29,
+   "team": "Ipswich Town",
+   "nationality": "England",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/40/ipswich-town/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  },
+  {
+   "name": "D. Maeda",
+   "number": 38,
+   "team": "Ipswich Town",
+   "nationality": "Japan",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/40/ipswich-town/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  }
+ ],
+ "colours_verified": false
+}

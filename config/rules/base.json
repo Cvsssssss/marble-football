@@ -14,5 +14,6 @@
   "ball_radius": 18,
   "logos_on_balls": true,
   "strength_edge": 0.15,
-  "show_simulation_label": false
+  "show_simulation_label": false,
+  "generate_thumbnails": false
 }

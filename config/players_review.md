@@ -234,3 +234,68 @@ Coloana „De verificat”: **DA** = sursa nu a confirmat complet (vezi nota).
 | Sparta Prague | J. Braut Brunes (#14) | FW | Norway | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/50033--sparta-praha/squad/) | 2026-11-04 | da | DA — nationality to confirm |
 | Sparta Prague | M. Vojta (#29) | FW | Czechia | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/50033--sparta-praha/squad/) | 2026-11-04 | da |  |
 | Sparta Prague | E. Singhateh (#27) | FW | Gambia | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/50033--sparta-praha/squad/) | 2026-11-04 | da | DA — nationality to confirm |
+
+## PREMIER LEAGUE 2026/27 (premier_league_2026_27) — loturi 2026/27 (premierleague.com / uefa.com)
+
+| Echipă | Nume în video | Post | Naționalitate | Sursă | Consultat | Verificat | De verificat |
+|---|---|---|---|---|---|---|---|
+| Arsenal | B. Saka (#7) | FW | England | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/52280--arsenal/squad/) | 2026-11-04 | da |  |
+| Arsenal | V. Gyökeres (#14) | FW | Sweden | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/52280--arsenal/squad/) | 2026-11-04 | da |  |
+| Arsenal | E. Eze (#10) | W/AM (listed MF) | England | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/52280--arsenal/squad/) | 2026-11-04 | da |  |
+| Manchester City | E. Haaland (#9) | FW | Norway | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/52919--man-city/squad/) | 2026-11-04 | da |  |
+| Manchester City | J. Doku (#11) | W (listed MF) | Belgium | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/52919--man-city/squad/) | 2026-11-04 | da |  |
+| Manchester City | A. Semenyo (#42) | FW | Ghana | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/52919--man-city/squad/) | 2026-11-04 | da |  |
+| Manchester United | B. Mbeumo (#19) | FW | Cameroon | [premierleague.com](https://www.premierleague.com/en/clubs/1/manchester-united/squad) | 2026-11-13 | da |  |
+| Manchester United | M. Cunha (#10) | FW | Brazil | [premierleague.com](https://www.premierleague.com/en/clubs/1/manchester-united/squad) | 2026-11-13 | da |  |
+| Manchester United | B. Šeško (#30) | FW | Slovenia | [premierleague.com](https://www.premierleague.com/en/clubs/1/manchester-united/squad) | 2026-11-13 | da |  |
+| Aston Villa | A. Garnacho (#17) | FW | Argentina | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/52683--aston-villa/squad/) | 2026-11-04 | da |  |
+| Aston Villa | N. Jackson (#11) | FW | Senegal | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/52683--aston-villa/squad/) | 2026-11-04 | da |  |
+| Aston Villa | T. Abraham (#18) | FW | England | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/52683--aston-villa/squad/) | 2026-11-04 | da |  |
+| Liverpool | A. Isak (#9) | FW | Sweden | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/7889--liverpool/squad/) | 2026-11-04 | da |  |
+| Liverpool | H. Ekitiké (#22) | FW | France | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/7889--liverpool/squad/) | 2026-11-04 | da |  |
+| Liverpool | C. Gakpo (#18) | FW | Netherlands | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/7889--liverpool/squad/) | 2026-11-04 | da |  |
+| Bournemouth | Evanilson (#9) | FW | Brazil | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/2601124--bournemouth/squad/) | 2026-11-04 | da |  |
+| Bournemouth | J. Kluivert (#19) | FW | Netherlands | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/2601124--bournemouth/squad/) | 2026-11-04 | da |  |
+| Bournemouth | A. Adli (#21) | FW | Morocco | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/2601124--bournemouth/squad/) | 2026-11-04 | da |  |
+| Sunderland | W. Isidor (#18) | FW | France | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/53360--sunderland/squad/) | 2026-11-04 | da |  |
+| Sunderland | B. Brobbey (#9) | FW | Netherlands | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/53360--sunderland/squad/) | 2026-11-04 | da |  |
+| Sunderland | N. Angulo (#10) | FW | Ecuador | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/53360--sunderland/squad/) | 2026-11-04 | da |  |
+| Brighton & Hove Albion | G. Rutter (#10) | FW | France | [premierleague.com](https://www.premierleague.com/en/clubs/36/brighton-and-hove-albion/squad) | 2026-11-13 | da |  |
+| Brighton & Hove Albion | Y. Minteh (#11) | FW | Gambia | [premierleague.com](https://www.premierleague.com/en/clubs/36/brighton-and-hove-albion/squad) | 2026-11-13 | da |  |
+| Brighton & Hove Albion | S. Tzimas (#9) | FW | Greece | [premierleague.com](https://www.premierleague.com/en/clubs/36/brighton-and-hove-albion/squad) | 2026-11-13 | da |  |
+| Brentford | Igor Thiago (#9) | FW | Brazil | [premierleague.com](https://www.premierleague.com/en/clubs/94/brentford/squad) | 2026-11-13 | da |  |
+| Brentford | D. Ouattara (#11) | FW | Burkina Faso | [premierleague.com](https://www.premierleague.com/en/clubs/94/brentford/squad) | 2026-11-13 | da |  |
+| Brentford | C. Wilson (#13) | FW | England | [premierleague.com](https://www.premierleague.com/en/clubs/94/brentford/squad) | 2026-11-13 | da |  |
+| Chelsea | João Pedro (#9) | FW | Brazil | [premierleague.com](https://www.premierleague.com/en/clubs/8/chelsea/squad) | 2026-11-13 | da |  |
+| Chelsea | P. Neto (#7) | FW | Portugal | [premierleague.com](https://www.premierleague.com/en/clubs/8/chelsea/squad) | 2026-11-13 | da |  |
+| Chelsea | Estêvão (#41) | FW | Brazil | [premierleague.com](https://www.premierleague.com/en/clubs/8/chelsea/squad) | 2026-11-13 | da |  |
+| Fulham | R. Muniz (#9) | FW | Brazil | [premierleague.com](https://www.premierleague.com/en/clubs/54/fulham/squad) | 2026-11-13 | da |  |
+| Fulham | A. Iwobi (#17) | FW | Nigeria | [premierleague.com](https://www.premierleague.com/en/clubs/54/fulham/squad) | 2026-11-13 | da |  |
+| Fulham | Kevin (#11) | FW | Brazil | [premierleague.com](https://www.premierleague.com/en/clubs/54/fulham/squad) | 2026-11-13 | da |  |
+| Newcastle United | Y. Wissa (#9) | FW | DR Congo | [premierleague.com](https://www.premierleague.com/en/clubs/4/newcastle-united/squad) | 2026-11-13 | da |  |
+| Newcastle United | A. Elanga (#19) | FW | Sweden | [premierleague.com](https://www.premierleague.com/en/clubs/4/newcastle-united/squad) | 2026-11-13 | da |  |
+| Newcastle United | W. Osula (#10) | FW | Denmark | [premierleague.com](https://www.premierleague.com/en/clubs/4/newcastle-united/squad) | 2026-11-13 | da |  |
+| Everton | T. Barry (#11) | FW | France | [premierleague.com](https://www.premierleague.com/en/clubs/11/everton/squad) | 2026-11-13 | da |  |
+| Everton | B. Johnson (#22) | FW | Wales | [premierleague.com](https://www.premierleague.com/en/clubs/11/everton/squad) | 2026-11-13 | da |  |
+| Everton | T. Dibling (#20) | FW | England | [premierleague.com](https://www.premierleague.com/en/clubs/11/everton/squad) | 2026-11-13 | da |  |
+| Leeds United | D. Calvert-Lewin (#9) | FW | England | [premierleague.com](https://www.premierleague.com/en/clubs/2/leeds-united/squad) | 2026-11-13 | da |  |
+| Leeds United | N. Okafor (#19) | FW | Switzerland | [premierleague.com](https://www.premierleague.com/en/clubs/2/leeds-united/squad) | 2026-11-13 | da |  |
+| Leeds United | D. James (#7) | FW | Wales | [premierleague.com](https://www.premierleague.com/en/clubs/2/leeds-united/squad) | 2026-11-13 | da |  |
+| Crystal Palace | J. Mateta (#14) | FW | France | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/52916--crystal-palace/squad/) | 2026-11-04 | da |  |
+| Crystal Palace | I. Sarr (#7) | FW | Senegal | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/52916--crystal-palace/squad/) | 2026-11-04 | da |  |
+| Crystal Palace | Y. Pino (#10) | FW | Spain | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/52916--crystal-palace/squad/) | 2026-11-04 | da |  |
+| Nottingham Forest | C. Wood (#9) | FW | New Zealand | [premierleague.com](https://www.premierleague.com/en/clubs/17/nottingham-forest/squad) | 2026-11-13 | da |  |
+| Nottingham Forest | L. Delap (#19) | FW | England | [premierleague.com](https://www.premierleague.com/en/clubs/17/nottingham-forest/squad) | 2026-11-13 | da |  |
+| Nottingham Forest | D. Ndoye (#14) | FW | Switzerland | [premierleague.com](https://www.premierleague.com/en/clubs/17/nottingham-forest/squad) | 2026-11-13 | da |  |
+| Tottenham Hotspur | D. Solanke (#19) | FW | England | [premierleague.com](https://www.premierleague.com/en/clubs/6/tottenham-hotspur/squad) | 2026-11-13 | da |  |
+| Tottenham Hotspur | O. Marmoush (#22) | FW | Egypt | [premierleague.com](https://www.premierleague.com/en/clubs/6/tottenham-hotspur/squad) | 2026-11-13 | da |  |
+| Tottenham Hotspur | Richarlison (#9) | FW | Brazil | [premierleague.com](https://www.premierleague.com/en/clubs/6/tottenham-hotspur/squad) | 2026-11-13 | da |  |
+| Coventry City | H. Wright (#11) | FW | United States | [premierleague.com](https://www.premierleague.com/en/clubs/9/coventry-city/squad) | 2026-11-13 | da |  |
+| Coventry City | E. Simms (#9) | FW | England | [premierleague.com](https://www.premierleague.com/en/clubs/9/coventry-city/squad) | 2026-11-13 | da |  |
+| Coventry City | T. Awoniyi (#14) | FW | Nigeria | [premierleague.com](https://www.premierleague.com/en/clubs/9/coventry-city/squad) | 2026-11-13 | da |  |
+| Ipswich Town | J. Clarke (#47) | FW | England | [premierleague.com](https://www.premierleague.com/en/clubs/40/ipswich-town/squad) | 2026-11-13 | da |  |
+| Ipswich Town | C. Akpom (#29) | FW | England | [premierleague.com](https://www.premierleague.com/en/clubs/40/ipswich-town/squad) | 2026-11-13 | da |  |
+| Ipswich Town | D. Maeda (#38) | FW | Japan | [premierleague.com](https://www.premierleague.com/en/clubs/40/ipswich-town/squad) | 2026-11-13 | da |  |
+| Hull City | O. McBurnie (#9) | FW | Scotland | [premierleague.com](https://www.premierleague.com/en/clubs/88/hull-city/squad) | 2026-11-13 | da |  |
+| Hull City | J. Gelhardt (#11) | FW | England | [premierleague.com](https://www.premierleague.com/en/clubs/88/hull-city/squad) | 2026-11-13 | da |  |
+| Hull City | M. Belloumi (#10) | FW | Algeria | [premierleague.com](https://www.premierleague.com/en/clubs/88/hull-city/squad) | 2026-11-13 | da |  |

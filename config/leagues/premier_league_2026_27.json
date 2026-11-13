@@ -1,0 +1,175 @@
+{
+ "_comment": "P7 Premier League season mode. Plain-text name by Max's decision (13 Nov 2026); no competition logo, trophy copy, kit designs, sponsors or broadcast graphics. Strength is invisible (all balls identical).",
+ "id": "premier_league_2026_27",
+ "display_name": "PREMIER LEAGUE",
+ "season": "2026/27",
+ "season_seed": 202627,
+ "rules": "league",
+ "default_map": "premier_pitchside",
+ "fallback_map": "stadium_day",
+ "real_names": true,
+ "points": {
+  "win": 3,
+  "draw": 1,
+  "loss": 0
+ },
+ "tiebreak": [
+  "points",
+  "goal_difference",
+  "goals_for",
+  "head_to_head_points",
+  "seeded_draw"
+ ],
+ "zones": [
+  {
+   "id": "ucl",
+   "label": "UCL",
+   "from": 1,
+   "to": 5,
+   "colour": "#2F6FE4"
+  },
+  {
+   "id": "uel",
+   "label": "Europa League",
+   "from": 6,
+   "to": 7,
+   "colour": "#F08A24"
+  },
+  {
+   "id": "uecl",
+   "label": "Conference League",
+   "from": 8,
+   "to": 8,
+   "colour": "#2FA65A"
+  },
+  {
+   "id": "rel",
+   "label": "Relegated",
+   "from": 18,
+   "to": 20,
+   "colour": "#D8343B"
+  }
+ ],
+ "strength": {
+  "_comment": "rating = 2025/26 points / 38 (points per game). Promoted clubs get the rating of the weakest club that stayed up (Tottenham, 41 pts). eff(r) compresses the gaps among the top clubs (r > 1.8: 1.8 + 0.3*(r-1.8)). Signed edge = beta*(eff(home)-eff(away)) + home_advantage; the favourite (sign) takes the spout release turn with probability min(edge_max, |edge|). Values chosen with tools/league_calibrate.js --search (see league/premier_league_2026_27/calibration.json).",
+  "beta": 0.7,
+  "home_advantage": 0.16,
+  "edge_max": 0.9,
+  "promoted_rating_from": "tottenham",
+  "top_compress": {
+   "above": 1.8,
+   "factor": 0.3
+  }
+ },
+ "clubs": [
+  {
+   "id": "arsenal",
+   "pos_2025_26": 1,
+   "points_2025_26": 85
+  },
+  {
+   "id": "man_city",
+   "pos_2025_26": 2,
+   "points_2025_26": 78
+  },
+  {
+   "id": "man_utd",
+   "pos_2025_26": 3,
+   "points_2025_26": 71
+  },
+  {
+   "id": "aston_villa",
+   "pos_2025_26": 4,
+   "points_2025_26": 65
+  },
+  {
+   "id": "liverpool",
+   "pos_2025_26": 5,
+   "points_2025_26": 60
+  },
+  {
+   "id": "bournemouth",
+   "pos_2025_26": 6,
+   "points_2025_26": 57
+  },
+  {
+   "id": "sunderland",
+   "pos_2025_26": 7,
+   "points_2025_26": 54
+  },
+  {
+   "id": "brighton",
+   "pos_2025_26": 8,
+   "points_2025_26": 53
+  },
+  {
+   "id": "brentford",
+   "pos_2025_26": 9,
+   "points_2025_26": 53
+  },
+  {
+   "id": "chelsea",
+   "pos_2025_26": 10,
+   "points_2025_26": 52
+  },
+  {
+   "id": "fulham",
+   "pos_2025_26": 11,
+   "points_2025_26": 52
+  },
+  {
+   "id": "newcastle",
+   "pos_2025_26": 12,
+   "points_2025_26": 49
+  },
+  {
+   "id": "everton",
+   "pos_2025_26": 13,
+   "points_2025_26": 49
+  },
+  {
+   "id": "leeds",
+   "pos_2025_26": 14,
+   "points_2025_26": 47
+  },
+  {
+   "id": "crystal_palace",
+   "pos_2025_26": 15,
+   "points_2025_26": 45
+  },
+  {
+   "id": "nottingham_forest",
+   "pos_2025_26": 16,
+   "points_2025_26": 44
+  },
+  {
+   "id": "tottenham",
+   "pos_2025_26": 17,
+   "points_2025_26": 41
+  },
+  {
+   "id": "coventry",
+   "promoted": "Championship 2025/26 champions"
+  },
+  {
+   "id": "ipswich",
+   "promoted": "Championship 2025/26 runners-up"
+  },
+  {
+   "id": "hull",
+   "promoted": "Championship 2025/26 play-off winners"
+  }
+ ],
+ "sources": {
+  "retrieved": "2026-11-13",
+  "final_table_2025_26": "https://www.newsx.com/sports/premier-league-202526-arsenal-champions-after-22-years-west-ham-relegated-bruno-fernandes-breaks-assist-record-check-out-the-final-points-table-224967/",
+  "relegated_2025_26": [
+   "west_ham (39 pts)",
+   "burnley (22 pts)",
+   "wolves (20 pts)"
+  ],
+  "relegation_confirmation": "https://worldsoccertalk.com/news/tottenham-avoid-premier-league-relegation-as-arsenal-win-title-final-2025-26-standings/",
+  "promotion": "https://www.thescore.com/epl/news/3544777/hull-promoted-to-epl-after-mc-burnies-95-th-minute-winner-in-playoff-final",
+  "squads": "https://www.premierleague.com/en/clubs/<id>/<club>/squad (2026/27), per player in config/teams/<id>.json"
+ }
+}

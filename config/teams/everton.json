@@ -1,0 +1,42 @@
+{
+ "id": "everton",
+ "name": "Everton",
+ "short": "EVE",
+ "short_name": "Everton",
+ "primary": "#003399",
+ "secondary": "#FFFFFF",
+ "strength": 75,
+ "players": [
+  {
+   "name": "T. Barry",
+   "number": 11,
+   "team": "Everton",
+   "nationality": "France",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/11/everton/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  },
+  {
+   "name": "B. Johnson",
+   "number": 22,
+   "team": "Everton",
+   "nationality": "Wales",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/11/everton/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  },
+  {
+   "name": "T. Dibling",
+   "number": 20,
+   "team": "Everton",
+   "nationality": "England",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/11/everton/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  }
+ ],
+ "colours_verified": false
+}

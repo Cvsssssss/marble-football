@@ -1,0 +1,42 @@
+{
+ "id": "newcastle",
+ "name": "Newcastle United",
+ "short": "NEW",
+ "short_name": "Newcastle",
+ "primary": "#241F20",
+ "secondary": "#FFFFFF",
+ "strength": 75,
+ "players": [
+  {
+   "name": "Y. Wissa",
+   "number": 9,
+   "team": "Newcastle United",
+   "nationality": "DR Congo",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/4/newcastle-united/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  },
+  {
+   "name": "A. Elanga",
+   "number": 19,
+   "team": "Newcastle United",
+   "nationality": "Sweden",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/4/newcastle-united/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  },
+  {
+   "name": "W. Osula",
+   "number": 10,
+   "team": "Newcastle United",
+   "nationality": "Denmark",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/4/newcastle-united/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  }
+ ],
+ "colours_verified": false
+}

@@ -5,7 +5,7 @@
 //                       [--match-day YYYY-MM-DD --fixture "A vs B"]  (strong real match slot from `npm run next`: publish D-1 evening)
 //                       [--dry-run]  (P5 rehearsal: everything except the long video and the reel videos; run folder *_dryrun,
 //                                    not added to plan/history.json, output/latest unchanged, preflight skips the media checks)
-// Steps: tournament + long video (build_all.js, render cache) -> 1 reel -> 3 thumbnails -> publish/ texts -> run.json -> checklist -> preflight.
+// Steps: tournament + long video (build_all.js, render cache) -> 1 reel -> [3 thumbnails only if rules.generate_thumbnails] -> publish/ texts -> run.json -> checklist -> preflight.
 // Safe to interrupt: re-running the same command resumes from the seed cache, the block render cache and the reel cache.
 const fs = require('fs');
 const path = require('path');
@@ -70,7 +70,7 @@ function updateHistory(entry) {
 function generate(opts) {
   const t0 = Date.now();
   const P = planRun(opts);
-  const N = opts.noReels ? 7 : 8;
+  const N = opts.noReels ? 7 : 8; // the thumbnail step is counted even when skipped (generate_thumbnails: false, P7 default)
   fs.mkdirSync(P.runDir, { recursive: true }); fs.mkdirSync(P.buildDir, { recursive: true });
   console.log(`Run: ${path.relative(ROOT, P.runDir)}`);
   // run-specific competition file (theme, forced pair, output paths); the simulation hash ignores output paths
@@ -103,8 +103,12 @@ function generate(opts) {
     const sel = JSON.parse(fs.readFileSync(path.join(P.runDir, 'reels', 'selection.json'), 'utf8'));
     reelsInfo = sel.reels.map((r) => Object.assign({ dir: `reels/reel_${r.id}`, sel: r }, JSON.parse(fs.readFileSync(path.join(P.runDir, 'reels', `reel_${r.id}`, 'reel_info.json'), 'utf8'))));
   }
-  step(opts.noReels ? 2 : 3, N, 'Thumbnail-uri (3, fără text)', t0);
-  run(['render/thumbs.js', path.join('build', 'show.json'), path.join(P.runDir, 'thumbnails'), path.join(P.runDir, 'reels', 'selection.json')], 'thumbnail-uri');
+  // P7: Max makes thumbnails himself -> off by default (config/rules/<rules>.json: generate_thumbnails: true turns them back on)
+  const thumbsOn = conf.rules.generate_thumbnails === true;
+  if (thumbsOn) {
+    step(opts.noReels ? 2 : 3, N, 'Thumbnail-uri (3, fără text)', t0);
+    run(['render/thumbs.js', path.join('build', 'show.json'), path.join(P.runDir, 'thumbnails'), path.join(P.runDir, 'reels', 'selection.json')], 'thumbnail-uri');
+  } else step(opts.noReels ? 2 : 3, N, 'Thumbnail-uri: sărite (generate_thumbnails = false; le faci tu)', t0);
 
   step(opts.noReels ? 3 : 4, N, 'Texte de publicare (publish/)', t0);
   const PUB = require('./sim/publish');
@@ -115,7 +119,7 @@ function generate(opts) {
   const pubErr = PUB.lintPublish(pub, { playerNames: show.teams.flatMap((t) => t.players.map((p) => p.name)), teamNames: show.teams.map((t) => t.name),
     champion: show.teams[show.champion].name, durationS: show.totalFrames / show.fps });
   if (pubErr.length) throw new RunError('Textele de publicare nu trec verificarea: ' + pubErr.join('; '));
-  PUB.writePublish(path.join(P.runDir, 'publish'), pub);
+  PUB.writePublish(path.join(P.runDir, 'publish'), pub, { thumbnails: thumbsOn });
   if (!opts.dryRun) PUB.recordTitles(pub.longTitles.concat(pub.reelTitles));
 
   step(opts.noReels ? 4 : 5, N, 'run.json', t0);
@@ -136,7 +140,7 @@ function generate(opts) {
     long_video: { file: videoFile, seconds: +(show.totalFrames / show.fps).toFixed(2) },
     matches: idx.matches.map((m) => ({ id: m.id, stage: m.stage, leg: m.leg, team_a: m.team_a, team_b: m.team_b, seed: m.seed, timeline_hash: m.timeline_hash, score: m.score })),
     champion: idx.champion, reels: reelsInfo.map((r) => ({ dir: r.dir, seconds: r.seconds, seed: r.seed, timeline_hash: r.timeline_hash })),
-    dry_run: !!opts.dryRun, show_simulation_label: show.cfg.SHOW_SIM_LABEL === true, bracket_r16: r16, fingerprint: fp, build_minutes: +((Date.now() - t0) / 60000).toFixed(1),
+    dry_run: !!opts.dryRun, thumbnails: thumbsOn, show_simulation_label: show.cfg.SHOW_SIM_LABEL === true, bracket_r16: r16, fingerprint: fp, build_minutes: +((Date.now() - t0) / 60000).toFixed(1),
   };
   fs.writeFileSync(path.join(P.runDir, 'run.json'), JSON.stringify(runJson, null, 1) + '\n');
 

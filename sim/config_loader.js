@@ -65,6 +65,8 @@ const S = {
       logos_on_balls: { type: 'boolean' },                  // P2: team crest printed on the ball (false = colour-only ball)
       strength_edge: { type: 'number', min: 0, max: 0.5 },  // P2: invisible strength lever (release-turn probability)
       show_simulation_label: { type: 'boolean' },            // P5: small SIMULATION pill on screen (default false = no label)
+      generate_thumbnails: { type: 'boolean' },
+      release_interval: { type: 'array', minItems: 2, maxItems: 2, items: { type: 'number', min: 1, max: 8 } }, // P7 league: s between spout releases (default engine [1.6, 2.4])              // P7: Max makes thumbnails himself; true = the old 3 auto thumbnails (default false)
     },
   },
   audio: {
@@ -238,7 +240,7 @@ function loadCompetition(compFile, opts) {
   all.drawSeed = comp.draw_seed !== undefined ? comp.draw_seed
     : parseInt(crypto.createHash('sha256').update(`${comp.id}|${comp.seed_salt || 0}|${mapName}`).digest('hex').slice(0, 8), 16);
   // sim hash: only what changes the simulation (render cache key = simHash + seed)
-  const simPart = { engine: require('./config').ENGINE_VERSION, gate: GATE_VERSION, rules: Object.assign({}, rules, { logos_on_balls: undefined, show_simulation_label: undefined }), pairing: comp.pairing, format: comp.format,
+  const simPart = { engine: require('./config').ENGINE_VERSION, gate: GATE_VERSION, rules: Object.assign({}, rules, { logos_on_balls: undefined, show_simulation_label: undefined, generate_thumbnails: undefined }), pairing: comp.pairing, format: comp.format,
     teams: comp.teams, draw: all.drawSeed, forced: comp.forced_pairs || [], ...(comp.seed_salt ? { salt: comp.seed_salt } : {}), strength: teams.map((t) => t.strength) };
   all.simHash = crypto.createHash('sha256').update(JSON.stringify(simPart)).digest('hex').slice(0, 16);
   all.hash = crypto.createHash('sha256').update(JSON.stringify(all)).digest('hex').slice(0, 16);
@@ -262,6 +264,7 @@ function rulesToCfg(rules) {
     GOALS_MAX: rules.GOALS_MAX !== undefined ? rules.GOALS_MAX : 10,
     BALL_RADIUS: rules.ball_radius !== undefined ? rules.ball_radius : 18,
     STRENGTH_EDGE: rules.strength_edge !== undefined ? rules.strength_edge : 0.15,
+    ...(rules.release_interval ? { RELEASE_INTERVAL: rules.release_interval.slice() } : {}), // P7 league only
   };
 }
 

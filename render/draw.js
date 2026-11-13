@@ -1224,8 +1224,23 @@
     const L = show.logos || {};
     return Promise.all(Object.keys(L).map((id) => new Promise((res) => {
       const im = new Image(); im.onload = () => { logoImgs[id] = im; res(); }; im.onerror = () => res(); im.src = L[id];
-    }))).then(() => ({ total: show.totalFrames, logos: Object.keys(logoImgs).length }));
+    }))).then(() => {
+      // P7: club without a crest file (assets/logos/MISSING.md) -> fallback decal: its 3-letter code on a disc in the
+      // club's primary colour (outline + text in a contrasting kit colour); the ball, its size and its ring are unchanged.
+      if (show.logosOnBalls && show.fallbackDecals !== false) for (const t of show.teams || []) {
+        if (logoImgs[t.id] || t.national) continue;
+        const S = 192, cv = document.createElement('canvas'); cv.width = S; cv.height = S; const g = cv.getContext('2d');
+        const light = lum(t.primary) > 0.8, fg = light ? (lum(t.secondary) > 0.6 ? '#1F2A38' : t.secondary) : (Math.abs(lum(t.secondary) - lum(t.primary)) > 0.35 ? t.secondary : (lum(t.primary) > 0.5 ? '#14202E' : '#FFFFFF'));
+        g.beginPath(); g.arc(S / 2, S / 2, S * 0.47, 0, Math.PI * 2); g.fillStyle = t.primary; g.fill();
+        g.lineWidth = S * 0.05; g.strokeStyle = fg; g.beginPath(); g.arc(S / 2, S / 2, S * 0.43, 0, Math.PI * 2); g.stroke();
+        g.fillStyle = fg; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `900 ${Math.round(S * 0.34)}px "Arial Black", Arial, sans-serif`;
+        g.fillText(String(t.short || t.name.slice(0, 3)).toUpperCase().slice(0, 3), S / 2, S / 2 + S * 0.02, S * 0.78);
+        logoImgs[t.id] = cv; logoImgs[t.id].fallback = true;
+      }
+      return { total: show.totalFrames, logos: Object.keys(logoImgs).length };
+    });
   };
+  window.fallbackDecalOf = (id) => (logoImgs[id] && logoImgs[id].fallback ? logoImgs[id].toDataURL('image/png') : null);
   window.renderFrame = renderFrame;
 
   // ================= P6: vertical reel (1080x1920, design space 720x1280) =================

@@ -39,7 +39,7 @@ function passesRules(r, rc) {
     for (let i = 1; i < F.length; i++) { const dt = F[i].t - F[i - 1].t;
       for (let q = 0; q < still.length; q++) { const b = F[i].b[q], p = F[i - 1].b[q];
         if (b[3] === 3 && p[3] === 3 && Math.hypot(b[0] - p[0], b[1] - p[1]) / Math.max(1e-6, dt) < CFG.STUCK_SPEED) { still[q] += dt; if (still[q] > CFG.STUCK_TIME + 0.15) return 'visibly_stuck'; } else still[q] = 0; } } }
-  if (r.ctx.kind !== 'leg1') { // a deciding match must produce a winner
+  if (r.ctx.kind !== 'leg1' && r.ctx.kind !== 'league') { // a deciding match must produce a winner (P7 league: draws allowed)
     const tot = r.ctx.kind === 'leg2' ? [r.score.A + r.ctx.prevA, r.score.B + r.ctx.prevB] : [r.score.A, r.score.B];
     if (tot[0] === tot[1] && !r.goldenWinner) return 'no_winner';
   }

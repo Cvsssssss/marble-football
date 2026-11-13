@@ -50,7 +50,8 @@ function preflight(runDir) {
   const preview = run.quality !== 'final_1080p';
   const reelsExpected = (run.reels || []).length > 0;
   // 1. files
-  const need = [run.long_video.file, 'chapters.txt', 'PUBLISH_CHECKLIST.md', 'LOGO_USAGE.md', 'thumbnails/thumbnail_1.png', 'thumbnails/thumbnail_2.png', 'thumbnails/thumbnail_3.png']
+  // P7: thumbnails only when the run made them (run.thumbnails; generate_thumbnails is false by default, Max makes his own)
+  const need = [run.long_video.file, 'chapters.txt', 'PUBLISH_CHECKLIST.md', 'LOGO_USAGE.md'].concat(run.thumbnails === true ? ['thumbnails/thumbnail_1.png', 'thumbnails/thumbnail_2.png', 'thumbnails/thumbnail_3.png'] : [])
     .concat((run.reels || []).map((r) => `${r.dir}/reel.mp4`))
     .concat(['publish/long_title.txt', 'publish/long_description.txt', 'publish/reel_title.txt', 'publish/reel_description.txt', 'publish/README_publish.txt']);
   // P5 dry run (rehearsal without videos): media files are not expected and their checks are skipped

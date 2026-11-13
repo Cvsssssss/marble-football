@@ -1,6 +1,6 @@
 # CLAUDE.md — Marble Football Generator (local, no server, no bot, no upload)
 
-Owner: Max (Romanian speaker). Project: a **local generator** of marble-football tournament videos for YouTube. Max starts it with START.bat and gets a finished folder (long video, vertical reels, thumbnails, chapters, checklist), then **publishes by hand and writes his own title and description**. There is NO server, NO Telegram bot, NO database, NO YouTube/Facebook upload code. Master plan: `PLAN.md`. Work is split into 4 phases in `phases/` (P1–P4). Max sits with you in an interactive session and pastes one phase at a time.
+Owner: Max (Romanian speaker). Project: a **local generator** of marble-football tournament videos for YouTube. Max starts it with START.bat and gets a finished folder (long video, vertical reels, chapters, checklist; thumbnails are made by Max himself since 13 Nov 2026, config `generate_thumbnails` default false), then **publishes by hand and writes his own title and description**. There is NO server, NO Telegram bot, NO database, NO YouTube/Facebook upload code. Master plan: `PLAN.md`. Work is split into 4 phases in `phases/` (P1–P4). Max sits with you in an interactive session and pastes one phase at a time.
 
 ## How a phase works
 1. Read this file and ONLY the phase file Max names. Don't read the whole repo; use Grep/Glob and read only what is needed.

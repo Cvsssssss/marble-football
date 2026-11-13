@@ -1,0 +1,42 @@
+{
+ "id": "fulham",
+ "name": "Fulham",
+ "short": "FUL",
+ "short_name": "Fulham",
+ "primary": "#FFFFFF",
+ "secondary": "#000000",
+ "strength": 75,
+ "players": [
+  {
+   "name": "R. Muniz",
+   "number": 9,
+   "team": "Fulham",
+   "nationality": "Brazil",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/54/fulham/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  },
+  {
+   "name": "A. Iwobi",
+   "number": 17,
+   "team": "Fulham",
+   "nationality": "Nigeria",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/54/fulham/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  },
+  {
+   "name": "Kevin",
+   "number": 11,
+   "team": "Fulham",
+   "nationality": "Brazil",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/54/fulham/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  }
+ ],
+ "colours_verified": false
+}

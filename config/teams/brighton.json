@@ -1,0 +1,42 @@
+{
+ "id": "brighton",
+ "name": "Brighton & Hove Albion",
+ "short": "BHA",
+ "short_name": "Brighton",
+ "primary": "#0057B8",
+ "secondary": "#FFFFFF",
+ "strength": 75,
+ "players": [
+  {
+   "name": "G. Rutter",
+   "number": 10,
+   "team": "Brighton & Hove Albion",
+   "nationality": "France",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/36/brighton-and-hove-albion/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  },
+  {
+   "name": "Y. Minteh",
+   "number": 11,
+   "team": "Brighton & Hove Albion",
+   "nationality": "Gambia",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/36/brighton-and-hove-albion/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  },
+  {
+   "name": "S. Tzimas",
+   "number": 9,
+   "team": "Brighton & Hove Albion",
+   "nationality": "Greece",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/36/brighton-and-hove-albion/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  }
+ ],
+ "colours_verified": false
+}

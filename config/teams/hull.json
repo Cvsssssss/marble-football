@@ -1,0 +1,42 @@
+{
+ "id": "hull",
+ "name": "Hull City",
+ "short": "HUL",
+ "short_name": "Hull",
+ "primary": "#F18A01",
+ "secondary": "#000000",
+ "strength": 75,
+ "players": [
+  {
+   "name": "O. McBurnie",
+   "number": 9,
+   "team": "Hull City",
+   "nationality": "Scotland",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/88/hull-city/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  },
+  {
+   "name": "J. Gelhardt",
+   "number": 11,
+   "team": "Hull City",
+   "nationality": "England",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/88/hull-city/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  },
+  {
+   "name": "M. Belloumi",
+   "number": 10,
+   "team": "Hull City",
+   "nationality": "Algeria",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/88/hull-city/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  }
+ ],
+ "colours_verified": false
+}

@@ -101,16 +101,24 @@ const runDir = pick ? path.join(runsDir, pick) : null;
 if (!runDir) check('a generated run folder exists (npm run generate -- ... --preview)', false);
 else {
   const run = JSON.parse(fs.readFileSync(path.join(runDir, 'run.json'), 'utf8'));
-  const need = [run.long_video.file, 'chapters.txt', 'run.json', 'PREFLIGHT.md', 'PUBLISH_CHECKLIST.md', 'LOGO_USAGE.md', 'thumbnails/thumbnail_1.png', 'thumbnails/thumbnail_2.png', 'thumbnails/thumbnail_3.png', 'reels/selection.json']
+  // P7: thumbnails only when generate_thumbnails was on (run.thumbnails); runs made before P7 have no field and do have them
+  const thumbsMade = run.thumbnails === true || (run.thumbnails === undefined && fs.existsSync(path.join(runDir, 'thumbnails', 'thumbnail_1.png')));
+  const need = [run.long_video.file, 'chapters.txt', 'run.json', 'PREFLIGHT.md', 'PUBLISH_CHECKLIST.md', 'LOGO_USAGE.md', 'reels/selection.json'].concat(thumbsMade ? ['thumbnails/thumbnail_1.png', 'thumbnails/thumbnail_2.png', 'thumbnails/thumbnail_3.png'] : [])
     .concat(run.reels.map((r) => `${r.dir}/reel.mp4`)).concat(['publish/long_title.txt', 'publish/long_description.txt', 'publish/reel_title.txt', 'publish/reel_description.txt', 'publish/README_publish.txt']);
   const miss = need.filter((p) => !(run.dry_run && /\.mp4$/.test(p)) && !fs.existsSync(path.join(runDir, p)));
-  check(`run folder structure (${path.basename(runDir)}): video, chapters, 1 reel, 3 thumbnails, publish/ texts, PREFLIGHT, checklist, run.json`, miss.length === 0 && run.reels.length === 1 && /^\d{4}-\d{2}-\d{2}_[a-z0-9_]+_[a-z_]+(_preview|_dryrun)?$/.test(run.run), miss);
+  check(`run folder structure (${path.basename(runDir)}): video, chapters, 1 reel, publish/ texts (thumbnails only if generate_thumbnails), PREFLIGHT, checklist, run.json`, miss.length === 0 && run.reels.length === 1 && /^\d{4}-\d{2}-\d{2}_[a-z0-9_]+_[a-z_]+(_preview|_dryrun)?$/.test(run.run), miss);
   check('run.json has seeds, config hash, timeline hashes, durations', run.configHash && run.matches.length === 29 && run.matches.every((m) => Number.isInteger(m.seed) && m.timeline_hash) && run.long_video.seconds > 0 && run.reels.every((r) => r.seconds > 0));
   const latest = path.join(ROOT, 'output', 'latest');
   check('output/latest points to the last run', fs.existsSync(latest) && (fs.existsSync(path.join(latest, 'run.json')) || fs.existsSync(path.join(latest, 'LATEST.txt'))));
-  const thumbs = [1, 2, 3].map((k) => fs.readFileSync(path.join(runDir, 'thumbnails', `thumbnail_${k}.png`)));
-  const dims = thumbs.map((b) => [b.readUInt32BE(16), b.readUInt32BE(20)]);
-  check('thumbnails: 3 PNG 1280×720', dims.every(([w, h]) => w === 1280 && h === 720), dims);
+  if (thumbsMade) {
+    const thumbs = [1, 2, 3].map((k) => fs.readFileSync(path.join(runDir, 'thumbnails', `thumbnail_${k}.png`)));
+    const dims = thumbs.map((b) => [b.readUInt32BE(16), b.readUInt32BE(20)]);
+    check('thumbnails: 3 PNG 1280×720', dims.every(([w, h]) => w === 1280 && h === 720), dims);
+  } else if (run.thumbnails === false) {
+    // P7: generate_thumbnails false (default): no thumbnail is made and the texts tell Max to make his own
+    const rd = fs.readFileSync(path.join(runDir, 'publish', 'README_publish.txt'), 'utf8');
+    check('thumbnails off by default: rules flag false, checklist + README say Max makes it', require('../config/rules/base.json').generate_thumbnails === false && /îl faci tu/.test(fs.readFileSync(path.join(runDir, 'PUBLISH_CHECKLIST.md'), 'utf8')) && /îl faci tu/.test(rd));
+  }
   const ck = fs.readFileSync(path.join(runDir, 'PUBLISH_CHECKLIST.md'), 'utf8');
   check('PUBLISH_CHECKLIST.md: order, SIMULATION + "not real results" reminders, no player names rule, private first, chapters to paste', /Video lung/.test(ck) && /SIMULATION/.test(ck) && /nu rezultate reale/.test(ck) && /Fără nume de jucători/.test(ck) && /privat/.test(ck) && ck.includes('0:00'));
   const P = require('../preflight');

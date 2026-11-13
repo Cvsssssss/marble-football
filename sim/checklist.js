@@ -27,7 +27,9 @@ function checklistMd(runDir, run) {
     '## 1. Ce încarci și în ce ordine',
     `1. **Video lung**: \`${run.long_video.file}\` — publicare sugerată: **${S.long}** (${S.why}).`,
     ...reels.map((r, i) => `${i + 2}. **Reel**: \`${r.dir}/reel.mp4\` (${r.seconds} s, tot terenul în cadru) — după videoul lung, sugerat **${S.reels[i]}**; pune în descriere linkul către videoul lung.`),
-    `${reels.length + 2}. Thumbnail: alege unul din \`thumbnails/thumbnail_1..3.png\` (fără text; poți adăuga tu text, dar fără nume de jucători).`,
+    run.thumbnails === true
+      ? `${reels.length + 2}. Thumbnail: alege unul din \`thumbnails/thumbnail_1..3.png\` (fără text; poți adăuga tu text, dar fără nume de jucători).`
+      : `${reels.length + 2}. Thumbnail: îl faci tu (generatorul nu mai creează thumbnail-uri; \`generate_thumbnails: false\`). Fără nume de jucători pe el.`,
     '',
     'Reguli de ritm: maxim 1 video lung pe zi; un singur reel per video, ales din optimi/sferturi (cea mai spectaculoasă revenire).',
     '',

@@ -1,0 +1,42 @@
+{
+ "id": "man_utd",
+ "name": "Manchester United",
+ "short": "MUN",
+ "short_name": "Man United",
+ "primary": "#DA291C",
+ "secondary": "#FBE122",
+ "strength": 75,
+ "players": [
+  {
+   "name": "B. Mbeumo",
+   "number": 19,
+   "team": "Manchester United",
+   "nationality": "Cameroon",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/1/manchester-united/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  },
+  {
+   "name": "M. Cunha",
+   "number": 10,
+   "team": "Manchester United",
+   "nationality": "Brazil",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/1/manchester-united/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  },
+  {
+   "name": "B. Šeško",
+   "number": 30,
+   "team": "Manchester United",
+   "nationality": "Slovenia",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/1/manchester-united/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  }
+ ],
+ "colours_verified": false
+}

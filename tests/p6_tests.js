@@ -80,7 +80,7 @@ const throws = (f) => { try { f(); return null; } catch (e) { return e.message; 
     const bar = JSON.parse(fs.readFileSync(path.join(ROOT, 'config', 'teams', 'barcelona.json'), 'utf8')).players.map((p) => p.name);
     check("Max's hints: Real Madrid Mbappé + Vinícius + Diomande; Barcelona Yamal + Raphinha + a third attacker", rm.join() === 'K. Mbappé,Vinícius Jr.,Y. Diomande' && bar[0] === 'L. Yamal' && bar[1] === 'Raphinha', { rm, bar });
     const review = fs.readFileSync(path.join(ROOT, 'config', 'players_review.md'), 'utf8');
-    const allPlayers = Object.keys(all).flatMap((id) => L.loadCompetition(COMP(id), { skipPlayerCheck: true }).teams.flatMap((x) => x.players.map((p) => p.name)));
+    const allPlayers = Object.keys(all).filter((id) => fs.existsSync(COMP(id))).flatMap((id) => L.loadCompetition(COMP(id), { skipPlayerCheck: true }).teams.flatMap((x) => x.players.map((p) => p.name)));
     check('config/players_review.md lists every player and has the "De verificat" column', allPlayers.every((n) => review.includes(n)) && /De verificat/.test(review), { players: allPlayers.length });
     const stale = ['K. Viveros', 'G. Simeone', 'I. Perišić', 'A. Budimir', 'A. Yarmolenko', 'D. Maldini', 'T. Weah', 'V. Júnior'];
     const gr = require('child_process').spawnSync('git', ['grep', '-l', '-F', ...stale.flatMap((s) => ['-e', s]), '--', '.', ':!reports', ':!progress', ':!phases', ':!tests/p6_tests.js', ':!tools/p6_players.js'], { cwd: ROOT, encoding: 'utf8' });

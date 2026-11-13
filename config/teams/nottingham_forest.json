@@ -1,0 +1,42 @@
+{
+ "id": "nottingham_forest",
+ "name": "Nottingham Forest",
+ "short": "NFO",
+ "short_name": "Nott'm Forest",
+ "primary": "#E53233",
+ "secondary": "#FFFFFF",
+ "strength": 75,
+ "players": [
+  {
+   "name": "C. Wood",
+   "number": 9,
+   "team": "Nottingham Forest",
+   "nationality": "New Zealand",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/17/nottingham-forest/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  },
+  {
+   "name": "L. Delap",
+   "number": 19,
+   "team": "Nottingham Forest",
+   "nationality": "England",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/17/nottingham-forest/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  },
+  {
+   "name": "D. Ndoye",
+   "number": 14,
+   "team": "Nottingham Forest",
+   "nationality": "Switzerland",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/17/nottingham-forest/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  }
+ ],
+ "colours_verified": false
+}

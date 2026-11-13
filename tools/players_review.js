@@ -25,5 +25,17 @@ for (const f of fs.readdirSync(dir).filter((x) => x.endsWith('.json'))) {
   }
   lines.push('');
 }
+// P7: leagues (config/leagues/*.json)
+const ldir = path.join(ROOT, 'config', 'leagues');
+if (fs.existsSync(ldir)) for (const f of fs.readdirSync(ldir).filter((x) => x.endsWith('.json'))) {
+  const C = require('../sim/league/config').loadLeague(path.join(ldir, f), { skipPlayerCheck: true });
+  lines.push(`## ${C.league.display_name} ${C.league.season} (${C.league.id}) — loturi 2026/27 (premierleague.com / uefa.com)`, '', '| Echipă | Nume în video | Post | Naționalitate | Sursă | Consultat | Verificat | De verificat |', '|---|---|---|---|---|---|---|---|');
+  for (const t of C.teams) for (const p of t.players) {
+    const need = p.verified === false || /to confirm/.test(p.note || '');
+    let host = ''; try { host = new URL(p.source_url).hostname.replace(/^www\./, ''); } catch (e) { host = 'sursă'; }
+    lines.push(`| ${t.name} | ${p.name}${p.number ? ' (#' + p.number + ')' : ''} | ${p.position || ''} | ${p.nationality || ''} | [${host}](${p.source_url}) | ${p.retrieved} | ${p.verified ? 'da' : 'nu'} | ${need ? 'DA — ' + (p.note || '') : ''} |`);
+  }
+  lines.push('');
+}
 fs.writeFileSync(path.join(ROOT, 'config', 'players_review.md'), lines.join('\n'));
 console.log('config/players_review.md written');

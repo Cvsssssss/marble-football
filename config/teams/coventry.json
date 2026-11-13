@@ -1,0 +1,42 @@
+{
+ "id": "coventry",
+ "name": "Coventry City",
+ "short": "COV",
+ "short_name": "Coventry",
+ "primary": "#59CBE8",
+ "secondary": "#FFFFFF",
+ "strength": 75,
+ "players": [
+  {
+   "name": "H. Wright",
+   "number": 11,
+   "team": "Coventry City",
+   "nationality": "United States",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/9/coventry-city/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  },
+  {
+   "name": "E. Simms",
+   "number": 9,
+   "team": "Coventry City",
+   "nationality": "England",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/9/coventry-city/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  },
+  {
+   "name": "T. Awoniyi",
+   "number": 14,
+   "team": "Coventry City",
+   "nationality": "Nigeria",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/9/coventry-city/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  }
+ ],
+ "colours_verified": false
+}

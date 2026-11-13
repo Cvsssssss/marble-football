@@ -1,0 +1,42 @@
+{
+ "id": "brentford",
+ "name": "Brentford",
+ "short": "BRE",
+ "short_name": "Brentford",
+ "primary": "#E30613",
+ "secondary": "#FFFFFF",
+ "strength": 75,
+ "players": [
+  {
+   "name": "Igor Thiago",
+   "number": 9,
+   "team": "Brentford",
+   "nationality": "Brazil",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/94/brentford/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  },
+  {
+   "name": "D. Ouattara",
+   "number": 11,
+   "team": "Brentford",
+   "nationality": "Burkina Faso",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/94/brentford/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  },
+  {
+   "name": "C. Wilson",
+   "number": 13,
+   "team": "Brentford",
+   "nationality": "England",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/94/brentford/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  }
+ ],
+ "colours_verified": false
+}

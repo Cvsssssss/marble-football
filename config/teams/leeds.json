@@ -1,0 +1,42 @@
+{
+ "id": "leeds",
+ "name": "Leeds United",
+ "short": "LEE",
+ "short_name": "Leeds",
+ "primary": "#FFFFFF",
+ "secondary": "#1D428A",
+ "strength": 75,
+ "players": [
+  {
+   "name": "D. Calvert-Lewin",
+   "number": 9,
+   "team": "Leeds United",
+   "nationality": "England",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/2/leeds-united/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  },
+  {
+   "name": "N. Okafor",
+   "number": 19,
+   "team": "Leeds United",
+   "nationality": "Switzerland",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/2/leeds-united/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  },
+  {
+   "name": "D. James",
+   "number": 7,
+   "team": "Leeds United",
+   "nationality": "Wales",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/2/leeds-united/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  }
+ ],
+ "colours_verified": false
+}

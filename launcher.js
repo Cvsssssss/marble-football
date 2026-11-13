@@ -107,6 +107,38 @@ function option6() {
   console.log(ok ? '\nTotul este în regulă.' : '\nAu apărut erori (vezi mai sus).');
 }
 
+// P7: Premier League season (one matchweek per video). No choosing of matches or teams: the fixtures are fixed.
+async function optionLeague() {
+  const leagueOut = (args) => spawnSync(node, ['league.js', ...args], { cwd: ROOT, encoding: 'utf8' });
+  let map = null;
+  for (;;) {
+    const st = leagueOut(['status']);
+    console.log('\n==================== PREMIER LEAGUE ====================');
+    console.log(st.status === 0 ? st.stdout.trim() : `*** ${st.stderr.trim()}`);
+    const maps = JSON.parse(leagueOut(['maps']).stdout || '{"choices":[],"default":null}');
+    const useMap = map || maps.default;
+    const builder = fs.existsSync(path.join(ROOT, 'build_matchweek.js'));
+    console.log(`  1. Generează următoarea etapă (${builder ? 'video lung + 1 reel + texte de publicare' : 'rezultate + clasament; videoul vine în P7 §5'})  · hartă: ${useMap}`);
+    console.log('  2. Regenerează DOAR ultima etapă generată (cele dinainte sunt blocate)');
+    console.log('  3. Arată clasamentul complet');
+    console.log('  4. Alege harta pentru generare');
+    console.log('  0. Înapoi');
+    const a = await ask('Opțiunea: ');
+    if (a === '0' || a === '') return;
+    if (a === '1' || a === '2') {
+      if (!builder) {
+        const ok = await ask('Videoul etapei nu există încă (P7 §5). Salvez doar rezultatele? Etapa precedentă se blochează. [d = da, Enter = nu]: ');
+        if (!/^d/i.test(ok)) continue;
+      }
+      // regenerate keeps last week's map unless Max chose one (option 4)
+      const mapArgs = a === '2' ? (map ? ['--map', map] : []) : ['--map', useMap];
+      fail(runNode(['league.js', 'play'].concat(mapArgs, a === '2' ? ['--regenerate'] : [])), a === '2' ? 'Regenerarea etapei' : 'Generarea etapei');
+    } else if (a === '3') runNode(['league.js', 'table']);
+    else if (a === '4') map = (await choose('Harta pentru etapă (implicit: alta decât săptămâna trecută):', maps.choices.map((m) => ({ label: m, value: m })), Math.max(0, maps.choices.indexOf(maps.default)))).value;
+    else console.log('Opțiune necunoscută.');
+  }
+}
+
 async function main() {
   for (;;) {
     console.log('\n==================== MARBLE FOOTBALL ====================');
@@ -116,11 +148,12 @@ async function main() {
     console.log('  4. Generează videoul recomandat');
     console.log('  5. Deschide folderul cu rezultate');
     console.log('  6. Verifică configurarea și planul');
+    console.log('  7. PREMIER LEAGUE — sezonul 2026/27, câte o etapă pe video');
     console.log('  0. Ieșire');
     const a = await ask('Opțiunea: ');
     try {
       if (a === '1') await option1(); else if (a === '2') await option2(); else if (a === '3') option3(); else if (a === '4') await option4();
-      else if (a === '5') option5(); else if (a === '6') option6(); else if (a === '0') break; else console.log('Opțiune necunoscută.');
+      else if (a === '5') option5(); else if (a === '6') option6(); else if (a === '7') await optionLeague(); else if (a === '0') break; else console.log('Opțiune necunoscută.');
     } catch (e) { console.log(`\n*** Eroare: ${e.message}`); }
   }
   rl.close();

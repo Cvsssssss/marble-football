@@ -1,0 +1,42 @@
+{
+ "id": "tottenham",
+ "name": "Tottenham Hotspur",
+ "short": "TOT",
+ "short_name": "Tottenham",
+ "primary": "#FFFFFF",
+ "secondary": "#132257",
+ "strength": 75,
+ "players": [
+  {
+   "name": "D. Solanke",
+   "number": 19,
+   "team": "Tottenham Hotspur",
+   "nationality": "England",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/6/tottenham-hotspur/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  },
+  {
+   "name": "O. Marmoush",
+   "number": 22,
+   "team": "Tottenham Hotspur",
+   "nationality": "Egypt",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/6/tottenham-hotspur/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  },
+  {
+   "name": "Richarlison",
+   "number": 9,
+   "team": "Tottenham Hotspur",
+   "nationality": "Brazil",
+   "position": "FW",
+   "source_url": "https://www.premierleague.com/en/clubs/6/tottenham-hotspur/squad",
+   "retrieved": "2026-11-13",
+   "verified": true
+  }
+ ],
+ "colours_verified": false
+}
