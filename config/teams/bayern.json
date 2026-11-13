@@ -10,6 +10,8 @@
   {
    "name": "H. Kane",
    "number": 9,
+   "team": "Bayern Munich",
+   "nationality": "England",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefachampionsleague/clubs/50037--bayern-munchen/squad/",
    "retrieved": "2026-11-04",
@@ -18,6 +20,8 @@
   {
    "name": "M. Olise",
    "number": 17,
+   "team": "Bayern Munich",
+   "nationality": "France",
    "position": "W (listed MF)",
    "source_url": "https://www.uefa.com/uefachampionsleague/clubs/50037--bayern-munchen/squad/",
    "retrieved": "2026-11-04",
@@ -26,6 +30,8 @@
   {
    "name": "L. Díaz",
    "number": 14,
+   "team": "Bayern Munich",
+   "nationality": "Colombia",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefachampionsleague/clubs/50037--bayern-munchen/squad/",
    "retrieved": "2026-11-04",

@@ -11,14 +11,19 @@
   {
    "name": "J. Braut Brunes",
    "number": 14,
+   "team": "Sparta Prague",
+   "nationality": "Norway",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/50033--sparta-praha/squad/",
    "retrieved": "2026-11-04",
-   "verified": true
+   "verified": true,
+   "note": "nationality to confirm"
   },
   {
    "name": "M. Vojta",
    "number": 29,
+   "team": "Sparta Prague",
+   "nationality": "Czechia",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/50033--sparta-praha/squad/",
    "retrieved": "2026-11-04",
@@ -27,10 +32,13 @@
   {
    "name": "E. Singhateh",
    "number": 27,
+   "team": "Sparta Prague",
+   "nationality": "Gambia",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/50033--sparta-praha/squad/",
    "retrieved": "2026-11-04",
-   "verified": true
+   "verified": true,
+   "note": "nationality to confirm"
   }
  ],
  "fictional_players": [

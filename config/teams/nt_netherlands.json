@@ -10,27 +10,30 @@
  "strength": 80,
  "players": [
   {
-   "name": "J. Zirkzee",
-   "number": 9,
+   "name": "C. Gakpo",
+   "team": "Netherlands",
+   "nationality": "Netherlands",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Netherlands_national_football_team",
-   "retrieved": "2026-11-04",
+   "source_url": "https://news.bet365.nl/nl-nl/article/xavi-maakt-selectie-oranje-bekend-voor-komende-interlandperiode/2026110611442297493",
+   "retrieved": "2026-11-13",
    "verified": true
   },
   {
    "name": "C. Summerville",
-   "number": 7,
+   "team": "Netherlands",
+   "nationality": "Netherlands",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Netherlands_national_football_team",
-   "retrieved": "2026-11-04",
+   "source_url": "https://news.bet365.nl/nl-nl/article/xavi-maakt-selectie-oranje-bekend-voor-komende-interlandperiode/2026110611442297493",
+   "retrieved": "2026-11-13",
    "verified": true
   },
   {
    "name": "N. Lang",
-   "number": 10,
+   "team": "Netherlands",
+   "nationality": "Netherlands",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Netherlands_national_football_team",
-   "retrieved": "2026-11-04",
+   "source_url": "https://news.bet365.nl/nl-nl/article/xavi-maakt-selectie-oranje-bekend-voor-komende-interlandperiode/2026110611442297493",
+   "retrieved": "2026-11-13",
    "verified": true
   }
  ],

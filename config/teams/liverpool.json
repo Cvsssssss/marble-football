@@ -11,6 +11,8 @@
   {
    "name": "A. Isak",
    "number": 9,
+   "team": "Liverpool",
+   "nationality": "Sweden",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefachampionsleague/clubs/7889--liverpool/squad/",
    "retrieved": "2026-11-04",
@@ -19,6 +21,8 @@
   {
    "name": "H. Ekitiké",
    "number": 22,
+   "team": "Liverpool",
+   "nationality": "France",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefachampionsleague/clubs/7889--liverpool/squad/",
    "retrieved": "2026-11-04",
@@ -27,6 +31,8 @@
   {
    "name": "C. Gakpo",
    "number": 18,
+   "team": "Liverpool",
+   "nationality": "Netherlands",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefachampionsleague/clubs/7889--liverpool/squad/",
    "retrieved": "2026-11-04",

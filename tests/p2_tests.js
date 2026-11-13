@@ -51,7 +51,7 @@ const conf = L.loadCompetition(COMP);
   check('competition: MARBLE CHAMPIONS, knockout16, 16 teams, standings snapshot with source URL + date, GAME_MIN_PER_SEC 2.4',
     c.name === 'MARBLE CHAMPIONS' && c.format === 'knockout16' && conf.teams.length === 16 && /^https:\/\//.test(c.standings.source_url) && /^\d{4}-\d{2}-\d{2}$/.test(c.standings.retrieved)
     && c.standings.table.length === 16 && c.standings.table.every((r, i) => r.team === c.teams[i] && r.pos === i + 1) && conf.rules.GAME_MIN_PER_SEC === 2.4);
-  const fmt = conf.teams.every((t) => t.players.length === 3 && t.players.every((p) => /^([A-Z]\. \S.*|[A-Z][a-zà-ÿ]+)$/u.test(p.name) && /^https?:\/\//.test(p.source_url) && typeof p.verified === 'boolean'));
+  const fmt = conf.teams.every((t) => t.players.length === 3 && t.players.every((p) => /^([A-Z]\. \S.*|[A-Z][a-zà-ÿ]+( Jr\.)?)$/u.test(p.name) && /^https?:\/\//.test(p.source_url) && typeof p.verified === 'boolean'));
   const review = fs.readFileSync(path.join(ROOT, 'config', 'players_review.md'), 'utf8');
   check('players: 3 attackers per team with source/retrieved/verified, format "I. Surname", all listed in config/players_review.md', fmt && conf.teams.every((t) => t.players.every((p) => review.includes(p.name))),
     conf.teams.filter((t) => !t.players.every((p) => review.includes(p.name))).map((t) => t.id));

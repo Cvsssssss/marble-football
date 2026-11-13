@@ -11,26 +11,29 @@
  "players": [
   {
    "name": "R. Lukaku",
-   "number": 9,
+   "team": "Belgium",
+   "nationality": "Belgium",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Belgium_national_football_team",
-   "retrieved": "2026-11-04",
+   "source_url": "https://sporza.be/nl/2026/11/05/livestream-welke-rode-duivels-roept-mark-van-bommel-op-voor-komend-nations-league-tweeluik~1793900077484/",
+   "retrieved": "2026-11-13",
    "verified": true
   },
   {
    "name": "L. Trossard",
-   "number": 10,
+   "team": "Belgium",
+   "nationality": "Belgium",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Belgium_national_football_team",
-   "retrieved": "2026-11-04",
+   "source_url": "https://sporza.be/nl/2026/11/05/livestream-welke-rode-duivels-roept-mark-van-bommel-op-voor-komend-nations-league-tweeluik~1793900077484/",
+   "retrieved": "2026-11-13",
    "verified": true
   },
   {
    "name": "C. De Ketelaere",
-   "number": 17,
+   "team": "Belgium",
+   "nationality": "Belgium",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Belgium_national_football_team",
-   "retrieved": "2026-11-04",
+   "source_url": "https://sporza.be/nl/2026/11/05/livestream-welke-rode-duivels-roept-mark-van-bommel-op-voor-komend-nations-league-tweeluik~1793900077484/",
+   "retrieved": "2026-11-13",
    "verified": true
   }
  ],

@@ -11,6 +11,8 @@
   {
    "name": "A. Garnacho",
    "number": 17,
+   "team": "Aston Villa",
+   "nationality": "Argentina",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefachampionsleague/clubs/52683--aston-villa/squad/",
    "retrieved": "2026-11-04",
@@ -19,6 +21,8 @@
   {
    "name": "N. Jackson",
    "number": 11,
+   "team": "Aston Villa",
+   "nationality": "Senegal",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefachampionsleague/clubs/52683--aston-villa/squad/",
    "retrieved": "2026-11-04",
@@ -27,6 +31,8 @@
   {
    "name": "T. Abraham",
    "number": 18,
+   "team": "Aston Villa",
+   "nationality": "England",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefachampionsleague/clubs/52683--aston-villa/squad/",
    "retrieved": "2026-11-04",

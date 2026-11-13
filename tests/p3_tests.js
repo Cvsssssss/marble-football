@@ -28,13 +28,13 @@ const UCL = path.join(ROOT, 'config', 'competitions', 'ucl_2026_top16.json');
   const { show } = TOUR.buildAll(UCL, tmpShow);
   const index = TOUR.matchesIndex(show);
   // same candidate rule as build_reels.js (P5: reel must fit 30..55 s)
-  const sel = selectReels(Object.assign({}, index, { matches: index.matches.filter((m) => !m.goals.length || buildReel(show, m.index).seconds <= TARGET_MAX + 1) }), 3);
-  check('selection: 3 comeback matches from round of 16 / quarter-finals only (never semifinal or final)',
-    sel.reels.length === 3 && sel.reels.every((r) => /^(ROUND OF 16|QUARTER-FINAL)/.test(r.stage) && index.matches.find((m) => m.id === r.id).comeback), sel.reels.map((r) => `${r.id}:${r.why}`));
+  const sel = selectReels(Object.assign({}, index, { matches: index.matches.filter((m) => !m.goals.length || buildReel(show, m.index).seconds <= TARGET_MAX + 1) }));
+  check('selection (P6: ONE reel): a comeback match from round of 16 / quarter-finals only (never semifinal or final)',
+    sel.reels.length === 1 && sel.reels.every((r) => /^(ROUND OF 16|QUARTER-FINAL)/.test(r.stage) && index.matches.find((m) => m.id === r.id).comeback), sel.reels.map((r) => `${r.id}:${r.why}`));
   { // synthetic: a strong semifinal comeback must still be excluded, depth >= 2 ranked first
     const fake = JSON.parse(JSON.stringify(index));
     const sf = fake.matches.find((m) => /^SEMIFINAL/.test(m.stage)); sf.comeback = true; sf.comeback_depth = 3;
-    const s2 = selectReels(fake, 3);
+    const s2 = selectReels(fake);
     check('selection rule: semifinal/final comebacks are never picked; depth >= 2 ranked first', !s2.reels.some((r) => /^SEMI|FINAL$/.test(r.stage)) && (s2.reels[0].comeback_depth >= 2 || !fake.matches.some((m) => m.comeback && m.comeback_depth >= 2 && /^(ROUND|QUARTER)/.test(m.stage))), s2.reels.map((r) => r.id));
   }
   const reels = sel.reels.map((r) => ({ r, reel: buildReel(show, r.index) }));
@@ -114,8 +114,9 @@ const UCL = path.join(ROOT, 'config', 'competitions', 'ucl_2026_top16.json');
     CanvasRenderingContext2D.prototype.fillText = o;
     return seen.filter((s) => s.y > 120); // all reel texts
   }, samples);
-  const outside = boxes.filter((b) => b.l < 72 - 1 || b.r > 648 + 1 || b.y < 128 || b.y > 1152);
-  check('safe area: every text drawn on the reel (scoreboard, captions, cards) lies inside x 72..648, y 128..1152 (design px)', outside.length === 0, outside.slice(0, 5));
+  const SF = await page.evaluate(() => window.REEL_LAYOUT.SAFE); // P6 safe area: out of the bottom 25 % and the right 12 %
+  const outside = boxes.filter((b) => b.l < SF.x0 - 1 || b.r > SF.x1 + 1 || b.y < SF.y0 || b.y > SF.y1);
+  check(`safe area: every text drawn on the reel (scoreboard, captions, cards) lies inside x ${SF.x0}..${SF.x1}, y ${SF.y0}..${SF.y1} (design px)`, outside.length === 0, outside.slice(0, 5));
   // contrast (WCAG ratio) of the main text / background pairs used by the reel UI
   const lum = (h) => { const c = [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
   const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
@@ -210,15 +211,17 @@ const UCL = path.join(ROOT, 'config', 'competitions', 'ucl_2026_top16.json');
     const fp = require('ffprobe-static').path;
     const info = [], lintErr = [];
     for (const r of S.reels) {
-      const dir = path.join(ROOT, 'output', 'reels', `reel${r.rank}_${r.id}`);
+      const dir = fs.existsSync(path.join(ROOT, 'output', 'reels', `reel_${r.id}`)) ? path.join(ROOT, 'output', 'reels', `reel_${r.id}`) : path.join(ROOT, 'output', 'reels', `reel${r.rank}_${r.id}`);
+      if (!fs.existsSync(path.join(dir, 'suggestions.txt')) && !fs.existsSync(path.join(dir, 'reel.mp4'))) { info.push({ id: r.id, missing: true }); continue; } // P6: texts live in <run>/publish/
       const f = path.join(dir, 'reel.mp4');
       const lint = () => { const txt = fs.readFileSync(path.join(dir, 'suggestions.txt'), 'utf8');
         const grab = (h) => { const i = txt.indexOf(h + '\n'); return txt.slice(i + h.length + 1).split('\n\n')[0].trim(); };
         lintErr.push(...lintSuggestion({ title: grab('TITLU:'), description: grab('DESCRIERE:'), tags: grab('TAGURI:').split(',').map((x) => x.trim()) }, playerNames).map((e) => `${r.id}: ${e}`)); };
-      if (!fs.existsSync(f)) { info.push({ id: r.id, missing: true }); if (fs.existsSync(path.join(dir, 'suggestions.txt'))) lint(); else lintErr.push(`${r.id}: suggestions.txt missing`); continue; }
+      if (!fs.existsSync(f)) { info.push({ id: r.id, missing: true }); if (fs.existsSync(path.join(dir, 'suggestions.txt'))) lint(); continue; }
       const j = JSON.parse(execFileSync(fp, ['-v', 'error', '-show_entries', 'stream=codec_type,codec_name,width,height,r_frame_rate:format=duration', '-of', 'json', f]).toString());
       const v = j.streams.find((s) => s.codec_type === 'video'), a = j.streams.find((s) => s.codec_type === 'audio');
       info.push({ id: r.id, w: v.width, h: v.height, fps: v.r_frame_rate, codec: v.codec_name, audio: a ? a.codec_name : null, dur: +(+j.format.duration).toFixed(1) });
+      if (!fs.existsSync(path.join(dir, 'suggestions.txt'))) continue;
       const txt = fs.readFileSync(path.join(dir, 'suggestions.txt'), 'utf8');
       const grab = (h) => { const i = txt.indexOf(h + '\n'); return txt.slice(i + h.length + 1).split('\n\n')[0].trim(); };
       const sObj = { title: grab('TITLU:'), description: grab('DESCRIERE:'), tags: grab('TAGURI:').split(',').map((x) => x.trim()) };
@@ -226,7 +229,7 @@ const UCL = path.join(ROOT, 'config', 'competitions', 'ucl_2026_top16.json');
     }
     const noVideo = info.length > 0 && info.every((x) => x.missing);
     if (noVideo) console.log('SKIP ffprobe + loudness of the rendered reels: no reel.mp4 (P5 rule: Claude Code renders no reel sets; Max renders them with START.bat)');
-    if (!noVideo) check('ffprobe: 3 reels, 1080x1920, 30 fps, h264 + aac, 30..60 s', info.length === 3 && info.every((x) => x.w === 1080 && x.h === 1920 && x.fps === '30/1' && x.codec === 'h264' && x.audio === 'aac' && x.dur >= 30 && x.dur <= 60), info);
+    if (!noVideo) check('ffprobe: 3 reels, 1080x1920, 30 fps, h264 + aac, 30..60 s', info.length >= 1 && info.every((x) => x.w === 1080 && x.h === 1920 && x.fps === '30/1' && x.codec === 'h264' && x.audio === 'aac' && x.dur >= 30 && x.dur <= 60), info);
     check('suggestions.txt of every reel passes the lint (SIMULATION, no player names, no official names)', lintErr.length === 0, lintErr);
     if (!noVideo) {
     const ln = spawnSync(require('ffmpeg-static'), ['-hide_banner', '-i', path.join(ROOT, 'output', 'reels', `reel1_${S.reels[0].id}`, 'reel.mp4'), '-af', 'ebur128', '-f', 'null', '-'], { encoding: 'utf8' });

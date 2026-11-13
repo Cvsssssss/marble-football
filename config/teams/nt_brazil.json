@@ -11,30 +11,30 @@
  "players": [
   {
    "name": "Vinícius Jr.",
-   "number": 7,
+   "team": "Brazil",
+   "nationality": "Brazil",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Brazil_national_football_team",
-   "retrieved": "2026-11-04",
-   "verified": true,
-   "number_note": "unnumbered in source (recent call-up / no squad number); number set by us"
+   "source_url": "https://trivela.com.br/brasil/selecao-brasileira-convocacao-ancelotti-expande-leque/",
+   "retrieved": "2026-11-13",
+   "verified": true
   },
   {
    "name": "Raphinha",
-   "number": 11,
+   "team": "Brazil",
+   "nationality": "Brazil",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Brazil_national_football_team",
-   "retrieved": "2026-11-04",
-   "verified": true,
-   "number_note": "unnumbered in source (recent call-up / no squad number); number set by us"
+   "source_url": "https://trivela.com.br/brasil/selecao-brasileira-convocacao-ancelotti-expande-leque/",
+   "retrieved": "2026-11-13",
+   "verified": true
   },
   {
    "name": "Estêvão",
-   "number": 20,
+   "team": "Brazil",
+   "nationality": "Brazil",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Brazil_national_football_team",
-   "retrieved": "2026-11-04",
-   "verified": true,
-   "number_note": "unnumbered in source (recent call-up / no squad number); number set by us"
+   "source_url": "https://trivela.com.br/brasil/selecao-brasileira-convocacao-ancelotti-expande-leque/",
+   "retrieved": "2026-11-13",
+   "verified": true
   }
  ],
  "fictional_players": [

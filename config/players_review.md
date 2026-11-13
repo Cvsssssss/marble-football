@@ -1,253 +1,236 @@
-# Jucători reali — de verificat de Max
+# Jucători reali — tabel de verificat de Max
 
-Numele apar **doar în video** (gol, reluare, Man of the Match, ecranul final, podium). Nu apar niciodată în numele fișierelor, în thumbnail-uri sau în titlul, descrierea ori tag-urile sugerate.
-Fiecare echipă are 3 atacanți (atacanți sau extreme) din lotul **actual**. Sursa este lotul oficial din Liga Campionilor 2026/27 publicat pe UEFA.com, consultat pe **2026-11-04**.
-Ca să schimbi un nume: editează `config/teams/<id>.json` → `players[i].name` (format `I. Nume`). Ca să folosești nume fictive: pune `"real_names": false` în `config/competitions/demo_4teams.json` (atunci se folosesc `fictional_players`).
-Mingea i a echipei aparține jucătorului i (bilele 1–2 → jucătorul 1, bilele 3–4 → jucătorul 2, bilele 5–6 → jucătorul 3).
+Numele apar **doar în video** (gol, reluare, Man of the Match, ecranul final, podium). Niciodată în numele fișierelor, thumbnail-uri, titluri, descrieri sau tag-uri.
+Fiecare echipă are 3 atacanți/extreme din lotul **actual** (cluburi: lotul UEFA 2026/27; naționale: ultima convocare găsită, de obicei noiembrie 2026). Audit P6: **2026-11-13**.
+Corectare: editează `config/teams/<id>.json` → `players[i]` (`name` format `I. Nume`, `team`, `nationality`, `source_url`, `retrieved`, `verified`). Apoi rulează `node tools/players_review.js` ca să refaci acest tabel.
+Validatorul (`node sim/players.js`, rulat și la pornire) cere: 3 jucători pe echipă, `team` = echipa, la naționale `nationality` = țara, niciun jucător în două echipe ale aceleiași competiții, `retrieved` de cel mult 120 de zile.
+Coloana „De verificat”: **DA** = sursa nu a confirmat complet (vezi nota).
 
-| Echipă | # | Nume în video | Post (UEFA) | Sursă | Verificat |
-|---|---|---|---|---|---|
-| Manchester City | 9 | E. Haaland | atacant | [UEFA – Man City squad](https://www.uefa.com/uefachampionsleague/clubs/52919--man-city/squad/) | da |
-| Manchester City | 11 | J. Doku | extremă (listat ca mijlocaș) | idem | da |
-| Manchester City | 42 | A. Semenyo | atacant | idem | da |
-| Real Madrid | 10 | K. Mbappé | atacant | [UEFA – Real Madrid squad](https://www.uefa.com/uefachampionsleague/clubs/50051--real-madrid/squad/) | da |
-| Real Madrid | 7 | V. Júnior | atacant | idem | da |
-| Real Madrid | 11 | Rodrygo | atacant | idem | da |
-| Bayern Munich | 9 | H. Kane | atacant | [UEFA – Bayern squad](https://www.uefa.com/uefachampionsleague/clubs/50037--bayern-munchen/squad/) | da |
-| Bayern Munich | 17 | M. Olise | extremă (listat ca mijlocaș) | idem | da |
-| Bayern Munich | 14 | L. Díaz | atacant | idem | da |
-| Arsenal | 7 | B. Saka | atacant | [UEFA – Arsenal squad](https://www.uefa.com/uefachampionsleague/clubs/52280--arsenal/squad/) | da |
-| Arsenal | 14 | V. Gyökeres | atacant | idem | da |
-| Arsenal | 10 | E. Eze | extremă / mijlocaș ofensiv (listat ca mijlocaș) | idem | da |
+## MARBLE CUP (demo_4teams)
 
-Note:
-- **Rodrygo** este cunoscut după un singur nume, așa că nu are inițială. **Vinícius Júnior** este scris `V. Júnior` ca să respecte formatul; poți scrie `Vini Jr.` dacă preferi.
-- Alte variante din aceleași liste UEFA: City – I. Ndiaye, P. Foden, R. Cherki; Real – Endrick, B. Díaz; Bayern – S. Gnabry, J. Musiala; Arsenal – N. Madueke, K. Havertz.
-- „Verificat” = numele, numărul și apartenența la club confirmate pe pagina de lot UEFA la data consultării. Transferurile ulterioare nu sunt urmărite automat.
+| Echipă | Nume în video | Post | Naționalitate | Sursă | Consultat | Verificat | De verificat |
+|---|---|---|---|---|---|---|---|
+| Manchester City | E. Haaland (#9) | FW | Norway | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/52919--man-city/squad/) | 2026-11-04 | da |  |
+| Manchester City | J. Doku (#11) | W (listed MF) | Belgium | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/52919--man-city/squad/) | 2026-11-04 | da |  |
+| Manchester City | A. Semenyo (#42) | FW | Ghana | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/52919--man-city/squad/) | 2026-11-04 | da |  |
+| Real Madrid | K. Mbappé (#10) | FW | France | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/50051--real-madrid/squad/) | 2026-11-04 | da |  |
+| Real Madrid | Vinícius Jr. (#7) | FW | Brazil | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/50051--real-madrid/squad/) | 2026-11-04 | da |  |
+| Real Madrid | Y. Diomande (#25) | FW | Ivory Coast | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/50051--real-madrid/squad/) | 2026-11-04 | da |  |
+| Bayern Munich | H. Kane (#9) | FW | England | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/50037--bayern-munchen/squad/) | 2026-11-04 | da |  |
+| Bayern Munich | M. Olise (#17) | W (listed MF) | France | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/50037--bayern-munchen/squad/) | 2026-11-04 | da |  |
+| Bayern Munich | L. Díaz (#14) | FW | Colombia | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/50037--bayern-munchen/squad/) | 2026-11-04 | da |  |
+| Arsenal | B. Saka (#7) | FW | England | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/52280--arsenal/squad/) | 2026-11-04 | da |  |
+| Arsenal | V. Gyökeres (#14) | FW | Sweden | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/52280--arsenal/squad/) | 2026-11-04 | da |  |
+| Arsenal | E. Eze (#10) | W/AM (listed MF) | England | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/52280--arsenal/squad/) | 2026-11-04 | da |  |
 
-## MARBLE CHAMPIONS (ucl_2026_top16) — top 16 din faza ligii, consultat 2026-11-04
+## MARBLE EURO NATIONS (nations_euro_16)
 
-Sursă jucători: lotul oficial Liga Campionilor 2026/27 de pe UEFA.com (lista „Forwards”), consultat pe **2026-11-04**. Am ales cei mai cunoscuți 3 atacanți/extreme. Nume fictive: pune `"real_names": false` în `config/competitions/ucl_2026_top16.json`.
+| Echipă | Nume în video | Post | Naționalitate | Sursă | Consultat | Verificat | De verificat |
+|---|---|---|---|---|---|---|---|
+| Spain | L. Yamal | FW | Spain | [comuniate.com](https://www.comuniate.com/en/noticias/38889/luis-de-la-fuente-names-squad-for-group-stage-finale) | 2026-11-13 | da |  |
+| Spain | M. Oyarzabal | FW | Spain | [comuniate.com](https://www.comuniate.com/en/noticias/38889/luis-de-la-fuente-names-squad-for-group-stage-finale) | 2026-11-13 | da |  |
+| Spain | Y. Pino | FW | Spain | [comuniate.com](https://www.comuniate.com/en/noticias/38889/luis-de-la-fuente-names-squad-for-group-stage-finale) | 2026-11-13 | da |  |
+| France | K. Mbappé | FW | France | [khelnow.com](https://khelnow.com/football/france-november-uefa-nations-league-squad-202611) | 2026-11-13 | da |  |
+| France | M. Olise | FW | France | [khelnow.com](https://khelnow.com/football/france-november-uefa-nations-league-squad-202611) | 2026-11-13 | da |  |
+| France | D. Doué | FW | France | [khelnow.com](https://khelnow.com/football/france-november-uefa-nations-league-squad-202611) | 2026-11-13 | da |  |
+| England | H. Kane | FW | England | [sportsmole.co.uk](https://www.sportsmole.co.uk/football/england/uefa-nations-league/news/palmer-white-king-decisions-england-squad-for-november-confirmed_608569.html) | 2026-11-13 | da |  |
+| England | A. Gordon | FW | England | [sportsmole.co.uk](https://www.sportsmole.co.uk/football/england/uefa-nations-league/news/palmer-white-king-decisions-england-squad-for-november-confirmed_608569.html) | 2026-11-13 | da |  |
+| England | E. Eze | FW | England | [sportsmole.co.uk](https://www.sportsmole.co.uk/football/england/uefa-nations-league/news/palmer-white-king-decisions-england-squad-for-november-confirmed_608569.html) | 2026-11-13 | da |  |
+| Portugal | R. Leão | FW | Portugal | [khelnow.com](https://khelnow.com/football/portugal-november-uefa-nations-league-squad-202611) | 2026-11-13 | da |  |
+| Portugal | G. Ramos | FW | Portugal | [khelnow.com](https://khelnow.com/football/portugal-november-uefa-nations-league-squad-202611) | 2026-11-13 | da |  |
+| Portugal | J. Félix | FW | Portugal | [khelnow.com](https://khelnow.com/football/portugal-november-uefa-nations-league-squad-202611) | 2026-11-13 | da |  |
+| Belgium | R. Lukaku | FW | Belgium | [sporza.be](https://sporza.be/nl/2026/11/05/livestream-welke-rode-duivels-roept-mark-van-bommel-op-voor-komend-nations-league-tweeluik~1793900077484/) | 2026-11-13 | da |  |
+| Belgium | L. Trossard | FW | Belgium | [sporza.be](https://sporza.be/nl/2026/11/05/livestream-welke-rode-duivels-roept-mark-van-bommel-op-voor-komend-nations-league-tweeluik~1793900077484/) | 2026-11-13 | da |  |
+| Belgium | C. De Ketelaere | FW | Belgium | [sporza.be](https://sporza.be/nl/2026/11/05/livestream-welke-rode-duivels-roept-mark-van-bommel-op-voor-komend-nations-league-tweeluik~1793900077484/) | 2026-11-13 | da |  |
+| Netherlands | C. Gakpo | FW | Netherlands | [news.bet365.nl](https://news.bet365.nl/nl-nl/article/xavi-maakt-selectie-oranje-bekend-voor-komende-interlandperiode/2026110611442297493) | 2026-11-13 | da |  |
+| Netherlands | C. Summerville | FW | Netherlands | [news.bet365.nl](https://news.bet365.nl/nl-nl/article/xavi-maakt-selectie-oranje-bekend-voor-komende-interlandperiode/2026110611442297493) | 2026-11-13 | da |  |
+| Netherlands | N. Lang | FW | Netherlands | [news.bet365.nl](https://news.bet365.nl/nl-nl/article/xavi-maakt-selectie-oranje-bekend-voor-komende-interlandperiode/2026110611442297493) | 2026-11-13 | da |  |
+| Switzerland | B. Embolo | FW | Switzerland | [plattformj.ch](https://www.plattformj.ch/artikel/248250/) | 2026-11-13 | da |  |
+| Switzerland | Z. Amdouni | FW | Switzerland | [plattformj.ch](https://www.plattformj.ch/artikel/248250/) | 2026-11-13 | da |  |
+| Switzerland | R. Vargas | FW | Switzerland | [plattformj.ch](https://www.plattformj.ch/artikel/248250/) | 2026-11-13 | da |  |
+| Germany | K. Havertz | FW | Germany | [90min.de](https://www.90min.de/klopp-nominiert-zum-zweiten-mal-diese-24-spieler-stehen-im-dfb-kader) | 2026-11-13 | da |  |
+| Germany | N. Füllkrug | FW | Germany | [dfb.de](https://www.dfb.de/news/mit-fuellkrug-und-mohya-klopp-nominiert-kader-fuer-serbien-und-niederlande) | 2026-11-13 | da |  |
+| Germany | Y. Ebnoutalib | FW | Germany | [90min.de](https://www.90min.de/klopp-nominiert-zum-zweiten-mal-diese-24-spieler-stehen-im-dfb-kader) | 2026-11-13 | da |  |
+| Croatia | A. Kramarić | FW | Croatia | [hns.team](https://hns.team/en/news/31688/bilic-the-best-players-play-for-the-national-teamthat-is-the-only-criterion/) | 2026-11-13 | da |  |
+| Croatia | F. Ivanović | FW | Croatia | [hns.team](https://hns.team/en/news/31688/bilic-the-best-players-play-for-the-national-teamthat-is-the-only-criterion/) | 2026-11-13 | da |  |
+| Croatia | L. Majer | FW | Croatia | [hns.team](https://hns.team/en/news/31688/bilic-the-best-players-play-for-the-national-teamthat-is-the-only-criterion/) | 2026-11-13 | nu | DA — listed among forwards by HNS; usually an attacking midfielder |
+| Italy | P. Esposito | FW | Italy | [sport.sky.it](https://sport.sky.it/calcio/nazionale/convocati-italia-mancini-nazionale-nations-league-novembre-2026) | 2026-11-13 | da |  |
+| Italy | G. Scamacca | FW | Italy | [sport.sky.it](https://sport.sky.it/calcio/nazionale/convocati-italia-mancini-nazionale-nations-league-novembre-2026) | 2026-11-13 | da |  |
+| Italy | N. Cambiaghi | FW | Italy | [sport.sky.it](https://sport.sky.it/calcio/nazionale/convocati-italia-mancini-nazionale-nations-league-novembre-2026) | 2026-11-13 | da |  |
+| Norway | E. Haaland | FW | Norway | [flashscore.com](https://www.flashscore.com/news/soccer-uefa-nations-league-norway-boosted-by-the-return-of-atletico-madrid-striker-for-vital-clash-against-denmark/d64ecbat/) | 2026-11-13 | da |  |
+| Norway | A. Sørloth | FW | Norway | [flashscore.com](https://www.flashscore.com/news/soccer-uefa-nations-league-norway-boosted-by-the-return-of-atletico-madrid-striker-for-vital-clash-against-denmark/d64ecbat/) | 2026-11-13 | da |  |
+| Norway | A. Nusa | FW | Norway | [fourfourtwo.com](https://www.fourfourtwo.com/team/norway-world-cup-2026-squad) | 2026-11-13 | nu | DA — World Cup 2026 squad; Nov 2026 list not confirmed |
+| Denmark | R. Højlund | FW | Denmark | [fourfourtwo.com](https://www.fourfourtwo.com/team/denmark-world-cup-2026-squad) | 2026-11-13 | nu | DA — Nov 2026 squad not found |
+| Denmark | G. Isaksen | FW | Denmark | [fourfourtwo.com](https://www.fourfourtwo.com/team/denmark-world-cup-2026-squad) | 2026-11-13 | nu | DA — Nov 2026 squad not found |
+| Denmark | J. Wind | FW | Denmark | [fourfourtwo.com](https://www.fourfourtwo.com/team/denmark-world-cup-2026-squad) | 2026-11-13 | nu | DA — Nov 2026 squad not found |
+| Austria | M. Grüll | FW | Austria | [salzburg24.at](https://www.salzburg24.at/sport/fussball/showdown-um-nations-league-aufstieg-ralf-rangnick-nominiert-vier-salzburger-fuer-oefb-team-art-343276) | 2026-11-13 | da |  |
+| Austria | C. Baumgartner | FW | Austria | [salzburg24.at](https://www.salzburg24.at/sport/fussball/showdown-um-nations-league-aufstieg-ralf-rangnick-nominiert-vier-salzburger-fuer-oefb-team-art-343276) | 2026-11-13 | da |  |
+| Austria | R. Florucz | FW | Austria | [weekend.at](https://www.weekend.at/sport/yusuf-demir-oefb-comeback) | 2026-11-13 | nu | DA — late call-up, date not confirmed |
+| Türkiye | Y. Akgün | FW | Türkiye | [gazeteoksijen.com](https://gazeteoksijen.com/spor/a-milli-takimin-aday-kadrosu-aciklandi-295235) | 2026-11-13 | da |  |
+| Türkiye | B. Yılmaz | FW | Türkiye | [gazeteoksijen.com](https://gazeteoksijen.com/spor/a-milli-takimin-aday-kadrosu-aciklandi-295235) | 2026-11-13 | da |  |
+| Türkiye | D. Gül | FW | Türkiye | [gazeteoksijen.com](https://gazeteoksijen.com/spor/a-milli-takimin-aday-kadrosu-aciklandi-295235) | 2026-11-13 | da |  |
+| Sweden | V. Gyökeres | FW | Sweden | [news.bet365.com](https://news.bet365.com/sv-sv/article/sveriges-trupp-till-de-avgorande-nations-league-matcherna-i-november/2026110410474912091) | 2026-11-13 | da |  |
+| Sweden | A. Isak | FW | Sweden | [news.bet365.com](https://news.bet365.com/sv-sv/article/sveriges-trupp-till-de-avgorande-nations-league-matcherna-i-november/2026110410474912091) | 2026-11-13 | da |  |
+| Sweden | A. Elanga | FW | Sweden | [news.bet365.com](https://news.bet365.com/sv-sv/article/sveriges-trupp-till-de-avgorande-nations-league-matcherna-i-november/2026110410474912091) | 2026-11-13 | da |  |
+| Ukraine | A. Dovbyk | FW | Ukraine | [dynamo.kiev.ua](https://dynamo.kiev.ua/en/news/703869-serhiy-rebrov-announced-the-ukrainian-national-teams-lineup-for-the-november-world-cup-2026-qualifiers-against-france-and-icela) | 2026-11-13 | nu | DA — latest list found is Nov 2025 |
+| Ukraine | V. Vanat | FW | Ukraine | [dynamo.kiev.ua](https://dynamo.kiev.ua/en/news/703869-serhiy-rebrov-announced-the-ukrainian-national-teams-lineup-for-the-november-world-cup-2026-qualifiers-against-france-and-icela) | 2026-11-13 | nu | DA — latest list found is Nov 2025 |
+| Ukraine | R. Yaremchuk | FW | Ukraine | [dynamo.kiev.ua](https://dynamo.kiev.ua/en/news/703869-serhiy-rebrov-announced-the-ukrainian-national-teams-lineup-for-the-november-world-cup-2026-qualifiers-against-france-and-icela) | 2026-11-13 | nu | DA — latest list found is Nov 2025 |
 
-| Poz. | Echipă | # | Nume în video | Sursă | Verificat |
-|---|---|---|---|---|---|
-| 1 | Paris Saint-Germain | 10 | O. Dembélé | [UEFA – Paris Saint-Germain squad](https://www.uefa.com/uefachampionsleague/clubs/52747--paris/squad/) | da |
-| 1 | Paris Saint-Germain | 7 | K. Kvaratskhelia | idem | da |
-| 1 | Paris Saint-Germain | 14 | D. Doué | idem | da |
-| 2 | Barcelona | 10 | L. Yamal | [UEFA – Barcelona squad](https://www.uefa.com/uefachampionsleague/clubs/50080--barcelona/squad/) | da |
-| 2 | Barcelona | 11 | Raphinha | idem | da |
-| 2 | Barcelona | 17 | A. Gordon | idem | da |
-| 3 | Aston Villa | 17 | A. Garnacho | [UEFA – Aston Villa squad](https://www.uefa.com/uefachampionsleague/clubs/52683--aston-villa/squad/) | da |
-| 3 | Aston Villa | 11 | N. Jackson | idem | da |
-| 3 | Aston Villa | 18 | T. Abraham | idem | da |
-| 4 | Liverpool | 9 | A. Isak | [UEFA – Liverpool squad](https://www.uefa.com/uefachampionsleague/clubs/7889--liverpool/squad/) | da |
-| 4 | Liverpool | 22 | H. Ekitiké | idem | da |
-| 4 | Liverpool | 18 | C. Gakpo | idem | da |
-| 5 | Real Madrid | 10 | K. Mbappé | [UEFA – Real Madrid squad](https://www.uefa.com/uefachampionsleague/clubs/50051--real-madrid/squad/) | da |
-| 5 | Real Madrid | 7 | V. Júnior | idem | da |
-| 5 | Real Madrid | 11 | Rodrygo | idem | da |
-| 6 | Sporting CP | 97 | L. Suárez | [UEFA – Sporting CP squad](https://www.uefa.com/uefachampionsleague/clubs/50149--sporting-cp/squad/) | da |
-| 6 | Sporting CP | 10 | G. Catamo | idem | da |
-| 6 | Sporting CP | 7 | F. Ioannidis | idem | da |
-| 7 | Real Betis | 7 | Antony | [UEFA – Real Betis squad](https://www.uefa.com/uefachampionsleague/clubs/52265--real-betis/squad/) | da |
-| 7 | Real Betis | 9 | C. Hernández | idem | da |
-| 7 | Real Betis | 10 | Abde | idem | da |
-| 8 | Bayern Munich | 9 | H. Kane | [UEFA – Bayern Munich squad](https://www.uefa.com/uefachampionsleague/clubs/50037--bayern-munchen/squad/) | da |
-| 8 | Bayern Munich | 17 | M. Olise | idem | da |
-| 8 | Bayern Munich | 14 | L. Díaz | idem | da |
-| 9 | Arsenal | 7 | B. Saka | [UEFA – Arsenal squad](https://www.uefa.com/uefachampionsleague/clubs/52280--arsenal/squad/) | da |
-| 9 | Arsenal | 14 | V. Gyökeres | idem | da |
-| 9 | Arsenal | 10 | E. Eze | idem | da |
-| 10 | Stuttgart | 26 | D. Undav | [UEFA – Stuttgart squad](https://www.uefa.com/uefachampionsleague/clubs/50107--stuttgart/squad/) | da |
-| 10 | Stuttgart | 18 | J. Leweling | idem | da |
-| 10 | Stuttgart | 8 | T. Tomás | idem | da |
-| 11 | Como | 90 | M. Kean | [UEFA – Como squad](https://www.uefa.com/uefachampionsleague/clubs/79946--como/squad/) | da |
-| 11 | Como | 11 | A. Diao | idem | da |
-| 11 | Como | 9 | T. Douvikas | idem | da |
-| 12 | Manchester City | 9 | E. Haaland | [UEFA – Manchester City squad](https://www.uefa.com/uefachampionsleague/clubs/52919--man-city/squad/) | da |
-| 12 | Manchester City | 11 | J. Doku | idem | da |
-| 12 | Manchester City | 42 | A. Semenyo | idem | da |
-| 13 | Club Brugge | 9 | C. Forbs | [UEFA – Club Brugge squad](https://www.uefa.com/uefachampionsleague/clubs/50043--club-brugge/squad/) | da |
-| 13 | Club Brugge | 7 | N. Tresoldi | idem | da |
-| 13 | Club Brugge | 17 | R. Vermant | idem | da |
-| 14 | Inter | 10 | L. Martínez | [UEFA – Inter squad](https://www.uefa.com/uefachampionsleague/clubs/50138--inter/squad/) | da |
-| 14 | Inter | 9 | M. Thuram | idem | da |
-| 14 | Inter | 94 | P. Esposito | idem | da |
-| 15 | LASK | 11 | S. Kalajdzic | [UEFA – LASK squad](https://www.uefa.com/uefachampionsleague/clubs/63405--lask/squad/) | da |
-| 15 | LASK | 8 | M. Usor | idem | da |
-| 15 | LASK | 7 | S. Adeniran | idem | da |
-| 16 | Dortmund | 9 | S. Guirassy | [UEFA – Dortmund squad](https://www.uefa.com/uefachampionsleague/clubs/52758--b-dortmund/squad/) | da |
-| 16 | Dortmund | 14 | M. Beier | idem | da |
-| 16 | Dortmund | 21 | F. Silva | idem | da |
+## MARBLE WORLD NATIONS (nations_world_16)
 
-Note:
-- **Raphinha**, **Antony** și **Abde** (Ezzalzouli) sunt cunoscuți după un singur nume. **C. Hernández** = Cucho Hernández. **S. Kalajdzic** e scris ca pe UEFA (fără diacritice).
-- Culori nesigure (marcate `colours_verified: false` în fișierul echipei): Como (albastru #1E4FA0 ales plauzibil).
-- Alternative din aceleași liste UEFA: PSG – M. Godts; Barcelona – D. Olmo, K. Adeyemi; Liverpool – B. Barcola, R. Ngumoha; Aston Villa – E. Buendía, I. Mbaye; Inter – L. Henrique; Dortmund – K. Karetsas; Stuttgart – J. Malanga; Brugge – J. Virgili.
-- Echipele Manchester City, Real Madrid, Bayern și Arsenal folosesc jucătorii din tabelul de mai sus (P1b).
+| Echipă | Nume în video | Post | Naționalitate | Sursă | Consultat | Verificat | De verificat |
+|---|---|---|---|---|---|---|---|
+| Spain | L. Yamal | FW | Spain | [comuniate.com](https://www.comuniate.com/en/noticias/38889/luis-de-la-fuente-names-squad-for-group-stage-finale) | 2026-11-13 | da |  |
+| Spain | M. Oyarzabal | FW | Spain | [comuniate.com](https://www.comuniate.com/en/noticias/38889/luis-de-la-fuente-names-squad-for-group-stage-finale) | 2026-11-13 | da |  |
+| Spain | Y. Pino | FW | Spain | [comuniate.com](https://www.comuniate.com/en/noticias/38889/luis-de-la-fuente-names-squad-for-group-stage-finale) | 2026-11-13 | da |  |
+| Argentina | J. Álvarez | FW | Argentina | [442.perfil.com](https://442.perfil.com/noticias/seleccion-argentina/lionel-scaloni-confirmo-los-convocados-de-la-seleccion-argentina-para-la-fecha-fifa.phtml) | 2026-11-13 | da |  |
+| Argentina | T. Almada | FW | Argentina | [442.perfil.com](https://442.perfil.com/noticias/seleccion-argentina/lionel-scaloni-confirmo-los-convocados-de-la-seleccion-argentina-para-la-fecha-fifa.phtml) | 2026-11-13 | da |  |
+| Argentina | S. Castro | FW | Argentina | [442.perfil.com](https://442.perfil.com/noticias/seleccion-argentina/lionel-scaloni-confirmo-los-convocados-de-la-seleccion-argentina-para-la-fecha-fifa.phtml) | 2026-11-13 | da |  |
+| France | K. Mbappé | FW | France | [khelnow.com](https://khelnow.com/football/france-november-uefa-nations-league-squad-202611) | 2026-11-13 | da |  |
+| France | M. Olise | FW | France | [khelnow.com](https://khelnow.com/football/france-november-uefa-nations-league-squad-202611) | 2026-11-13 | da |  |
+| France | D. Doué | FW | France | [khelnow.com](https://khelnow.com/football/france-november-uefa-nations-league-squad-202611) | 2026-11-13 | da |  |
+| England | H. Kane | FW | England | [sportsmole.co.uk](https://www.sportsmole.co.uk/football/england/uefa-nations-league/news/palmer-white-king-decisions-england-squad-for-november-confirmed_608569.html) | 2026-11-13 | da |  |
+| England | A. Gordon | FW | England | [sportsmole.co.uk](https://www.sportsmole.co.uk/football/england/uefa-nations-league/news/palmer-white-king-decisions-england-squad-for-november-confirmed_608569.html) | 2026-11-13 | da |  |
+| England | E. Eze | FW | England | [sportsmole.co.uk](https://www.sportsmole.co.uk/football/england/uefa-nations-league/news/palmer-white-king-decisions-england-squad-for-november-confirmed_608569.html) | 2026-11-13 | da |  |
+| Portugal | R. Leão | FW | Portugal | [khelnow.com](https://khelnow.com/football/portugal-november-uefa-nations-league-squad-202611) | 2026-11-13 | da |  |
+| Portugal | G. Ramos | FW | Portugal | [khelnow.com](https://khelnow.com/football/portugal-november-uefa-nations-league-squad-202611) | 2026-11-13 | da |  |
+| Portugal | J. Félix | FW | Portugal | [khelnow.com](https://khelnow.com/football/portugal-november-uefa-nations-league-squad-202611) | 2026-11-13 | da |  |
+| Brazil | Vinícius Jr. | FW | Brazil | [trivela.com.br](https://trivela.com.br/brasil/selecao-brasileira-convocacao-ancelotti-expande-leque/) | 2026-11-13 | da |  |
+| Brazil | Raphinha | FW | Brazil | [trivela.com.br](https://trivela.com.br/brasil/selecao-brasileira-convocacao-ancelotti-expande-leque/) | 2026-11-13 | da |  |
+| Brazil | Estêvão | FW | Brazil | [trivela.com.br](https://trivela.com.br/brasil/selecao-brasileira-convocacao-ancelotti-expande-leque/) | 2026-11-13 | da |  |
+| Morocco | B. Díaz | FW | Morocco | [ysscores.com](https://www.ysscores.com/en/news/14087541/wahbi-announces-morocco-squad-for-niger-clashes-amid-notable-absences) | 2026-11-13 | da |  |
+| Morocco | Y. En-Nesyri | FW | Morocco | [ysscores.com](https://www.ysscores.com/en/news/14087541/wahbi-announces-morocco-squad-for-niger-clashes-amid-notable-absences) | 2026-11-13 | da |  |
+| Morocco | A. El Kaabi | FW | Morocco | [ysscores.com](https://www.ysscores.com/en/news/14087541/wahbi-announces-morocco-squad-for-niger-clashes-amid-notable-absences) | 2026-11-13 | nu | DA — Sep 2026 squad; Nov 2026 full list not found |
+| Belgium | R. Lukaku | FW | Belgium | [sporza.be](https://sporza.be/nl/2026/11/05/livestream-welke-rode-duivels-roept-mark-van-bommel-op-voor-komend-nations-league-tweeluik~1793900077484/) | 2026-11-13 | da |  |
+| Belgium | L. Trossard | FW | Belgium | [sporza.be](https://sporza.be/nl/2026/11/05/livestream-welke-rode-duivels-roept-mark-van-bommel-op-voor-komend-nations-league-tweeluik~1793900077484/) | 2026-11-13 | da |  |
+| Belgium | C. De Ketelaere | FW | Belgium | [sporza.be](https://sporza.be/nl/2026/11/05/livestream-welke-rode-duivels-roept-mark-van-bommel-op-voor-komend-nations-league-tweeluik~1793900077484/) | 2026-11-13 | da |  |
+| Netherlands | C. Gakpo | FW | Netherlands | [news.bet365.nl](https://news.bet365.nl/nl-nl/article/xavi-maakt-selectie-oranje-bekend-voor-komende-interlandperiode/2026110611442297493) | 2026-11-13 | da |  |
+| Netherlands | C. Summerville | FW | Netherlands | [news.bet365.nl](https://news.bet365.nl/nl-nl/article/xavi-maakt-selectie-oranje-bekend-voor-komende-interlandperiode/2026110611442297493) | 2026-11-13 | da |  |
+| Netherlands | N. Lang | FW | Netherlands | [news.bet365.nl](https://news.bet365.nl/nl-nl/article/xavi-maakt-selectie-oranje-bekend-voor-komende-interlandperiode/2026110611442297493) | 2026-11-13 | da |  |
+| Mexico | S. Giménez | FW | Mexico | [excelsior.com.mx](https://www.excelsior.com.mx/deportes/henry-martin-borrado-seleccion-mexicana-pese-buenos-numeros) | 2026-11-13 | da |  |
+| Mexico | A. González | FW | Mexico | [excelsior.com.mx](https://www.excelsior.com.mx/deportes/henry-martin-borrado-seleccion-mexicana-pese-buenos-numeros) | 2026-11-13 | da |  |
+| Mexico | J. Quiñones | FW | Mexico | [latribuna.hn](https://www.latribuna.hn/2026/11/06/quinones-vuelve-a-un-mexico-urgido-de-goles/) | 2026-11-13 | da |  |
+| Colombia | J. Arias | FW | Colombia | [clarosports.com](https://www.clarosports.com/colombia/seleccion-colombiana/oficial-la-convocatoria-de-nestor-lorenzo-para-los-partidos-amistosos-ante-chile/) | 2026-11-13 | da |  |
+| Colombia | Ó. Perea | FW | Colombia | [clarosports.com](https://www.clarosports.com/colombia/seleccion-colombiana/oficial-la-convocatoria-de-nestor-lorenzo-para-los-partidos-amistosos-ante-chile/) | 2026-11-13 | da |  |
+| Colombia | D. Mosquera | FW | Colombia | [clarosports.com](https://www.clarosports.com/colombia/seleccion-colombiana/oficial-la-convocatoria-de-nestor-lorenzo-para-los-partidos-amistosos-ante-chile/) | 2026-11-13 | da |  |
+| Switzerland | B. Embolo | FW | Switzerland | [plattformj.ch](https://www.plattformj.ch/artikel/248250/) | 2026-11-13 | da |  |
+| Switzerland | Z. Amdouni | FW | Switzerland | [plattformj.ch](https://www.plattformj.ch/artikel/248250/) | 2026-11-13 | da |  |
+| Switzerland | R. Vargas | FW | Switzerland | [plattformj.ch](https://www.plattformj.ch/artikel/248250/) | 2026-11-13 | da |  |
+| Germany | K. Havertz | FW | Germany | [90min.de](https://www.90min.de/klopp-nominiert-zum-zweiten-mal-diese-24-spieler-stehen-im-dfb-kader) | 2026-11-13 | da |  |
+| Germany | N. Füllkrug | FW | Germany | [dfb.de](https://www.dfb.de/news/mit-fuellkrug-und-mohya-klopp-nominiert-kader-fuer-serbien-und-niederlande) | 2026-11-13 | da |  |
+| Germany | Y. Ebnoutalib | FW | Germany | [90min.de](https://www.90min.de/klopp-nominiert-zum-zweiten-mal-diese-24-spieler-stehen-im-dfb-kader) | 2026-11-13 | da |  |
+| Croatia | A. Kramarić | FW | Croatia | [hns.team](https://hns.team/en/news/31688/bilic-the-best-players-play-for-the-national-teamthat-is-the-only-criterion/) | 2026-11-13 | da |  |
+| Croatia | F. Ivanović | FW | Croatia | [hns.team](https://hns.team/en/news/31688/bilic-the-best-players-play-for-the-national-teamthat-is-the-only-criterion/) | 2026-11-13 | da |  |
+| Croatia | L. Majer | FW | Croatia | [hns.team](https://hns.team/en/news/31688/bilic-the-best-players-play-for-the-national-teamthat-is-the-only-criterion/) | 2026-11-13 | nu | DA — listed among forwards by HNS; usually an attacking midfielder |
+| Italy | P. Esposito | FW | Italy | [sport.sky.it](https://sport.sky.it/calcio/nazionale/convocati-italia-mancini-nazionale-nations-league-novembre-2026) | 2026-11-13 | da |  |
+| Italy | G. Scamacca | FW | Italy | [sport.sky.it](https://sport.sky.it/calcio/nazionale/convocati-italia-mancini-nazionale-nations-league-novembre-2026) | 2026-11-13 | da |  |
+| Italy | N. Cambiaghi | FW | Italy | [sport.sky.it](https://sport.sky.it/calcio/nazionale/convocati-italia-mancini-nazionale-nations-league-novembre-2026) | 2026-11-13 | da |  |
+| United States | C. Pulisic | FW | United States | [si.com](https://www.si.com/soccer/usmnt-november-2026-roster-confirmed-full-list-players-stars-schedule) | 2026-11-13 | da |  |
+| United States | F. Balogun | FW | United States | [si.com](https://www.si.com/soccer/usmnt-november-2026-roster-confirmed-full-list-players-stars-schedule) | 2026-11-13 | da |  |
+| United States | C. Sullivan | FW | United States | [si.com](https://www.si.com/soccer/usmnt-november-2026-roster-confirmed-full-list-players-stars-schedule) | 2026-11-13 | da |  |
 
-## MARBLE CONTINENTAL (P3) — top 16 din faza ligii Europa League 2026–27
+## MARBLE CHAMPIONS (ucl_2026_top16)
 
-| Poz. | Echipa | Nr. | Jucător | Sursă | Verificat |
-|---|---|---|---|---|---|
-| 1 | Benfica | 14 | V. Pavlidis | [UEFA – Benfica squad](https://www.uefa.com/uefaeuropaleague/clubs/50147--benfica/squad/) | da |
-| 1 | Benfica | 11 | D. Lukébakio | idem | da |
-| 1 | Benfica | 22 | J. Durán | idem | da |
-| 2 | Bayer Leverkusen | 14 | P. Schick | [UEFA – Bayer Leverkusen squad](https://www.uefa.com/uefaeuropaleague/clubs/50109--leverkusen/squad/) | da |
-| 2 | Bayer Leverkusen | 19 | M. Diaby | idem | da |
-| 2 | Bayer Leverkusen | 35 | C. Kofane | idem | da |
-| 3 | Bournemouth | 9 | Evanilson | [UEFA – Bournemouth squad](https://www.uefa.com/uefaeuropaleague/clubs/2601124--bournemouth/squad/) | da |
-| 3 | Bournemouth | 19 | J. Kluivert | idem | da |
-| 3 | Bournemouth | 21 | A. Adli | idem | da |
-| 4 | Ferencváros | 19 | F. Kovačević | [UEFA – Ferencváros squad](https://www.uefa.com/uefaeuropaleague/clubs/52298--ferencvaros/squad/) | da |
-| 4 | Ferencváros | 11 | B. Yusuf | idem | da |
-| 4 | Ferencváros | 75 | L. Joseph | idem | da |
-| 5 | Olympiacos | 11 | R. Yaremchuk | [UEFA – Olympiacos squad](https://www.uefa.com/uefaeuropaleague/clubs/2610--olympiacos/squad/) | da |
-| 5 | Olympiacos | 17 | L. Bailey | idem | da |
-| 5 | Olympiacos | 10 | G. Martins | idem | da |
-| 6 | Union Saint-Gilloise | 13 | K. Rodriguez | [UEFA – Union Saint-Gilloise squad](https://www.uefa.com/uefaeuropaleague/clubs/64125--union-sg/squad/) | da |
-| 6 | Union Saint-Gilloise | 9 | M. Biondic | idem | da |
-| 6 | Union Saint-Gilloise | 30 | R. Florucz | idem | da |
-| 7 | Juventus | 10 | K. Yıldız | [UEFA – Juventus squad](https://www.uefa.com/uefaeuropaleague/clubs/50139--juventus/squad/) | da |
-| 7 | Juventus | 9 | R. Kolo Muani | idem | da |
-| 7 | Juventus | 7 | F. Conceição | idem | da |
-| 8 | Beşiktaş | 28 | D. Vlahović | [UEFA – Beşiktaş squad](https://www.uefa.com/uefaeuropaleague/clubs/50157--besiktas/squad/) | da |
-| 8 | Beşiktaş | 17 | E. Poku | idem | da |
-| 8 | Beşiktaş | 90 | S. Kılıçsoy | idem | da |
-| 9 | Sunderland | 18 | W. Isidor | [UEFA – Sunderland squad](https://www.uefa.com/uefaeuropaleague/clubs/53360--sunderland/squad/) | da |
-| 9 | Sunderland | 9 | B. Brobbey | idem | da |
-| 9 | Sunderland | 10 | N. Angulo | idem | da |
-| 10 | AZ Alkmaar | 9 | M. Meerdink | [UEFA – AZ Alkmaar squad](https://www.uefa.com/uefaeuropaleague/clubs/52327--az-alkmaar/squad/) | da |
-| 10 | AZ Alkmaar | 14 | C. Stengs | idem | da |
-| 10 | AZ Alkmaar | 7 | W. Patati | idem | da |
-| 11 | Omonia | 17 | F. Tănase | [UEFA – Omonia squad](https://www.uefa.com/uefaeuropaleague/clubs/50077--omonia/squad/) | da |
-| 11 | Omonia | 9 | A. Kakoullis | idem | da |
-| 11 | Omonia | 22 | M. Tankovic | idem | da |
-| 12 | Lyon | 17 | L. Openda | [UEFA – Lyon squad](https://www.uefa.com/uefaeuropaleague/clubs/5312--lyon/squad/) | da |
-| 12 | Lyon | 7 | E. Nuamah | idem | da |
-| 12 | Lyon | 11 | K. Nakamura | idem | da |
-| 13 | Rennes | 9 | E. Lepaul | [UEFA – Rennes squad](https://www.uefa.com/uefaeuropaleague/clubs/55031--rennes/squad/) | da |
-| 13 | Rennes | 22 | B. Dia | idem | da |
-| 13 | Rennes | 11 | M. Al-Taamari | idem | da |
-| 14 | Real Sociedad | 14 | T. Kubo | [UEFA – Real Sociedad squad](https://www.uefa.com/uefaeuropaleague/clubs/50123--real-sociedad/squad/) | da |
-| 14 | Real Sociedad | 9 | O. Óskarsson | idem | da |
-| 14 | Real Sociedad | 11 | G. Guedes | idem | da |
-| 15 | Crystal Palace | 14 | J. Mateta | [UEFA – Crystal Palace squad](https://www.uefa.com/uefaeuropaleague/clubs/52916--crystal-palace/squad/) | da |
-| 15 | Crystal Palace | 7 | I. Sarr | idem | da |
-| 15 | Crystal Palace | 10 | Y. Pino | idem | da |
-| 16 | Sparta Prague | 14 | J. Braut Brunes | [UEFA – Sparta Prague squad](https://www.uefa.com/uefaeuropaleague/clubs/50033--sparta-praha/squad/) | da |
-| 16 | Sparta Prague | 29 | M. Vojta | idem | da |
-| 16 | Sparta Prague | 27 | E. Singhateh | idem | da |
+| Echipă | Nume în video | Post | Naționalitate | Sursă | Consultat | Verificat | De verificat |
+|---|---|---|---|---|---|---|---|
+| Paris Saint-Germain | O. Dembélé (#10) | FW | France | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/52747--paris/squad/) | 2026-11-04 | da |  |
+| Paris Saint-Germain | K. Kvaratskhelia (#7) | FW | Georgia | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/52747--paris/squad/) | 2026-11-04 | da |  |
+| Paris Saint-Germain | D. Doué (#14) | FW | France | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/52747--paris/squad/) | 2026-11-04 | da |  |
+| Barcelona | L. Yamal (#10) | FW | Spain | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/50080--barcelona/squad/) | 2026-11-04 | da |  |
+| Barcelona | Raphinha (#11) | FW | Brazil | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/50080--barcelona/squad/) | 2026-11-04 | da |  |
+| Barcelona | A. Gordon (#17) | FW | England | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/50080--barcelona/squad/) | 2026-11-04 | da |  |
+| Aston Villa | A. Garnacho (#17) | FW | Argentina | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/52683--aston-villa/squad/) | 2026-11-04 | da |  |
+| Aston Villa | N. Jackson (#11) | FW | Senegal | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/52683--aston-villa/squad/) | 2026-11-04 | da |  |
+| Aston Villa | T. Abraham (#18) | FW | England | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/52683--aston-villa/squad/) | 2026-11-04 | da |  |
+| Liverpool | A. Isak (#9) | FW | Sweden | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/7889--liverpool/squad/) | 2026-11-04 | da |  |
+| Liverpool | H. Ekitiké (#22) | FW | France | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/7889--liverpool/squad/) | 2026-11-04 | da |  |
+| Liverpool | C. Gakpo (#18) | FW | Netherlands | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/7889--liverpool/squad/) | 2026-11-04 | da |  |
+| Real Madrid | K. Mbappé (#10) | FW | France | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/50051--real-madrid/squad/) | 2026-11-04 | da |  |
+| Real Madrid | Vinícius Jr. (#7) | FW | Brazil | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/50051--real-madrid/squad/) | 2026-11-04 | da |  |
+| Real Madrid | Y. Diomande (#25) | FW | Ivory Coast | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/50051--real-madrid/squad/) | 2026-11-04 | da |  |
+| Sporting CP | L. Suárez (#97) | FW | Colombia | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/50149--sporting-cp/squad/) | 2026-11-04 | da |  |
+| Sporting CP | G. Catamo (#10) | FW | Mozambique | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/50149--sporting-cp/squad/) | 2026-11-04 | da |  |
+| Sporting CP | F. Ioannidis (#7) | FW | Greece | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/50149--sporting-cp/squad/) | 2026-11-04 | da |  |
+| Real Betis | Antony (#7) | FW | Brazil | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/52265--real-betis/squad/) | 2026-11-04 | da |  |
+| Real Betis | C. Hernández (#9) | FW | Colombia | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/52265--real-betis/squad/) | 2026-11-04 | da |  |
+| Real Betis | Abde (#10) | FW | Morocco | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/52265--real-betis/squad/) | 2026-11-04 | da |  |
+| Bayern Munich | H. Kane (#9) | FW | England | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/50037--bayern-munchen/squad/) | 2026-11-04 | da |  |
+| Bayern Munich | M. Olise (#17) | W (listed MF) | France | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/50037--bayern-munchen/squad/) | 2026-11-04 | da |  |
+| Bayern Munich | L. Díaz (#14) | FW | Colombia | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/50037--bayern-munchen/squad/) | 2026-11-04 | da |  |
+| Arsenal | B. Saka (#7) | FW | England | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/52280--arsenal/squad/) | 2026-11-04 | da |  |
+| Arsenal | V. Gyökeres (#14) | FW | Sweden | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/52280--arsenal/squad/) | 2026-11-04 | da |  |
+| Arsenal | E. Eze (#10) | W/AM (listed MF) | England | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/52280--arsenal/squad/) | 2026-11-04 | da |  |
+| Stuttgart | D. Undav (#26) | FW | Germany | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/50107--stuttgart/squad/) | 2026-11-04 | da |  |
+| Stuttgart | J. Leweling (#18) | FW | Germany | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/50107--stuttgart/squad/) | 2026-11-04 | da |  |
+| Stuttgart | T. Tomás (#8) | FW | Portugal | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/50107--stuttgart/squad/) | 2026-11-04 | da |  |
+| Como | M. Kean (#90) | FW | Italy | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/79946--como/squad/) | 2026-11-04 | da |  |
+| Como | A. Diao (#11) | FW | Senegal | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/79946--como/squad/) | 2026-11-04 | da |  |
+| Como | T. Douvikas (#9) | FW | Greece | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/79946--como/squad/) | 2026-11-04 | da |  |
+| Manchester City | E. Haaland (#9) | FW | Norway | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/52919--man-city/squad/) | 2026-11-04 | da |  |
+| Manchester City | J. Doku (#11) | W (listed MF) | Belgium | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/52919--man-city/squad/) | 2026-11-04 | da |  |
+| Manchester City | A. Semenyo (#42) | FW | Ghana | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/52919--man-city/squad/) | 2026-11-04 | da |  |
+| Club Brugge | C. Forbs (#9) | FW | Portugal | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/50043--club-brugge/squad/) | 2026-11-04 | da |  |
+| Club Brugge | N. Tresoldi (#7) | FW | Germany | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/50043--club-brugge/squad/) | 2026-11-04 | da |  |
+| Club Brugge | R. Vermant (#17) | FW | Belgium | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/50043--club-brugge/squad/) | 2026-11-04 | da |  |
+| Inter | L. Martínez (#10) | FW | Argentina | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/50138--inter/squad/) | 2026-11-04 | da |  |
+| Inter | M. Thuram (#9) | FW | France | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/50138--inter/squad/) | 2026-11-04 | da |  |
+| Inter | P. Esposito (#94) | FW | Italy | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/50138--inter/squad/) | 2026-11-04 | da |  |
+| LASK | S. Kalajdzic (#11) | FW | Austria | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/63405--lask/squad/) | 2026-11-04 | da |  |
+| LASK | M. Usor (#8) | FW | Nigeria | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/63405--lask/squad/) | 2026-11-04 | da | DA — nationality to confirm |
+| LASK | S. Adeniran (#7) | FW | England | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/63405--lask/squad/) | 2026-11-04 | da | DA — nationality to confirm |
+| Dortmund | S. Guirassy (#9) | FW | Guinea | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/52758--b-dortmund/squad/) | 2026-11-04 | da |  |
+| Dortmund | M. Beier (#14) | FW | Germany | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/52758--b-dortmund/squad/) | 2026-11-04 | da |  |
+| Dortmund | F. Silva (#21) | FW | Portugal | [uefa.com](https://www.uefa.com/uefachampionsleague/clubs/52758--b-dortmund/squad/) | 2026-11-04 | da |  |
 
-## MARBLE WORLD NATIONS (P3) — top 16 clasament FIFA (7 oct. 2026)
+## MARBLE CONTINENTAL (uel_top16)
 
-| Poz. | Echipa | Nr. | Jucător | Sursă | Verificat |
-|---|---|---|---|---|---|
-| 1 | Spain | 19 | L. Yamal | [Wikipedia – Spain](https://en.wikipedia.org/wiki/Spain_national_football_team) | da |
-| 1 | Spain | 21 | M. Oyarzabal | idem | da |
-| 1 | Spain | 11 | Y. Pino | idem | da |
-| 2 | Argentina | 9* | J. Álvarez | [Wikipedia – Argentina](https://en.wikipedia.org/wiki/Argentina_national_football_team) | da |
-| 2 | Argentina | 16* | T. Almada | idem | da |
-| 2 | Argentina | 20* | G. Simeone | idem | da |
-| 3 | France | 7 | O. Dembélé | [Wikipedia – France](https://en.wikipedia.org/wiki/France_national_football_team) | da |
-| 3 | France | 11 | M. Olise | idem | da |
-| 3 | France | 20 | D. Doué | idem | da |
-| 4 | England | 9 | H. Kane | [Wikipedia – England](https://en.wikipedia.org/wiki/England_national_football_team) | da |
-| 4 | England | 7 | B. Saka | idem | da |
-| 4 | England | 11 | A. Gordon | idem | da |
-| 5 | Portugal | 7 | R. Leão | [Wikipedia – Portugal](https://en.wikipedia.org/wiki/Portugal_national_football_team) | da |
-| 5 | Portugal | 9 | G. Ramos | idem | da |
-| 5 | Portugal | 11 | J. Félix | idem | da |
-| 6 | Brazil | 7* | Vinícius Jr. | [Wikipedia – Brazil](https://en.wikipedia.org/wiki/Brazil_national_football_team) | da |
-| 6 | Brazil | 11* | Raphinha | idem | da |
-| 6 | Brazil | 20* | Estêvão | idem | da |
-| 7 | Morocco | 10 | B. Díaz | [Wikipedia – Morocco](https://en.wikipedia.org/wiki/Morocco_national_football_team) | da |
-| 7 | Morocco | 9 | S. Rahimi | idem | da |
-| 7 | Morocco | 17 | A. Ezzalzouli | idem | da |
-| 8 | Belgium | 9 | R. Lukaku | [Wikipedia – Belgium](https://en.wikipedia.org/wiki/Belgium_national_football_team) | da |
-| 8 | Belgium | 10 | L. Trossard | idem | da |
-| 8 | Belgium | 17 | C. De Ketelaere | idem | da |
-| 9 | Netherlands | 9 | J. Zirkzee | [Wikipedia – Netherlands](https://en.wikipedia.org/wiki/Netherlands_national_football_team) | da |
-| 9 | Netherlands | 7 | C. Summerville | idem | da |
-| 9 | Netherlands | 10 | N. Lang | idem | da |
-| 10 | Mexico | 11 | S. Giménez | [Wikipedia – Mexico](https://en.wikipedia.org/wiki/Mexico_national_football_team) | da |
-| 10 | Mexico | 9 | G. Berterame | idem | da |
-| 10 | Mexico | 25 | R. Alvarado | idem | da |
-| 11 | Colombia | 9 | L. Suárez | [Wikipedia – Colombia](https://en.wikipedia.org/wiki/Colombia_national_football_team) | da |
-| 11 | Colombia | 20 | K. Viveros | idem | da |
-| 11 | Colombia | 7 | Ó. Perea | idem | da |
-| 12 | Switzerland | 11 | D. Ndoye | [Wikipedia – Switzerland](https://en.wikipedia.org/wiki/Switzerland_national_football_team) | da |
-| 12 | Switzerland | 10 | Z. Amdouni | idem | da |
-| 12 | Switzerland | 7 | J. Monteiro | idem | da |
-| 13 | Germany | 11 | N. Woltemade | [Wikipedia – Germany](https://en.wikipedia.org/wiki/Germany_national_football_team) | da |
-| 13 | Germany | 10 | J. Burkardt | idem | da |
-| 13 | Germany | 9 | D. Scherhant | idem | da |
-| 14 | Croatia | 9* | A. Kramarić | [Wikipedia – Croatia](https://en.wikipedia.org/wiki/Croatia_national_football_team) | da |
-| 14 | Croatia | 4* | I. Perišić | idem | da |
-| 14 | Croatia | 17* | A. Budimir | idem | da |
-| 15 | Italy | 9 | P. Esposito | [Wikipedia – Italy](https://en.wikipedia.org/wiki/Italy_national_football_team) | da |
-| 15 | Italy | 11 | G. Scamacca | idem | da |
-| 15 | Italy | 17 | D. Maldini | idem | da |
-| 16 | United States | 10* | C. Pulisic | [Wikipedia – United States](https://en.wikipedia.org/wiki/United_States_men's_national_soccer_team) | da |
-| 16 | United States | 20* | F. Balogun | idem | da |
-| 16 | United States | 21* | T. Weah | idem | da |
-
-## MARBLE EURO NATIONS (P3) — top 16 echipe europene din clasamentul FIFA
-
-| Poz. | Echipa | Nr. | Jucător | Sursă | Verificat |
-|---|---|---|---|---|---|
-| 1 | Spain | 19 | L. Yamal | [Wikipedia – Spain](https://en.wikipedia.org/wiki/Spain_national_football_team) (vezi mai sus) | da |
-| 1 | Spain | 21 | M. Oyarzabal | idem | da |
-| 1 | Spain | 11 | Y. Pino | idem | da |
-| 2 | France | 7 | O. Dembélé | [Wikipedia – France](https://en.wikipedia.org/wiki/France_national_football_team) (vezi mai sus) | da |
-| 2 | France | 11 | M. Olise | idem | da |
-| 2 | France | 20 | D. Doué | idem | da |
-| 3 | England | 9 | H. Kane | [Wikipedia – England](https://en.wikipedia.org/wiki/England_national_football_team) (vezi mai sus) | da |
-| 3 | England | 7 | B. Saka | idem | da |
-| 3 | England | 11 | A. Gordon | idem | da |
-| 4 | Portugal | 7 | R. Leão | [Wikipedia – Portugal](https://en.wikipedia.org/wiki/Portugal_national_football_team) (vezi mai sus) | da |
-| 4 | Portugal | 9 | G. Ramos | idem | da |
-| 4 | Portugal | 11 | J. Félix | idem | da |
-| 5 | Belgium | 9 | R. Lukaku | [Wikipedia – Belgium](https://en.wikipedia.org/wiki/Belgium_national_football_team) (vezi mai sus) | da |
-| 5 | Belgium | 10 | L. Trossard | idem | da |
-| 5 | Belgium | 17 | C. De Ketelaere | idem | da |
-| 6 | Netherlands | 9 | J. Zirkzee | [Wikipedia – Netherlands](https://en.wikipedia.org/wiki/Netherlands_national_football_team) (vezi mai sus) | da |
-| 6 | Netherlands | 7 | C. Summerville | idem | da |
-| 6 | Netherlands | 10 | N. Lang | idem | da |
-| 7 | Switzerland | 11 | D. Ndoye | [Wikipedia – Switzerland](https://en.wikipedia.org/wiki/Switzerland_national_football_team) (vezi mai sus) | da |
-| 7 | Switzerland | 10 | Z. Amdouni | idem | da |
-| 7 | Switzerland | 7 | J. Monteiro | idem | da |
-| 8 | Germany | 11 | N. Woltemade | [Wikipedia – Germany](https://en.wikipedia.org/wiki/Germany_national_football_team) (vezi mai sus) | da |
-| 8 | Germany | 10 | J. Burkardt | idem | da |
-| 8 | Germany | 9 | D. Scherhant | idem | da |
-| 9 | Croatia | 9* | A. Kramarić | [Wikipedia – Croatia](https://en.wikipedia.org/wiki/Croatia_national_football_team) (vezi mai sus) | da |
-| 9 | Croatia | 4* | I. Perišić | idem | da |
-| 9 | Croatia | 17* | A. Budimir | idem | da |
-| 10 | Italy | 9 | P. Esposito | [Wikipedia – Italy](https://en.wikipedia.org/wiki/Italy_national_football_team) (vezi mai sus) | da |
-| 10 | Italy | 11 | G. Scamacca | idem | da |
-| 10 | Italy | 17 | D. Maldini | idem | da |
-| 11 | Norway | 9 | E. Haaland | [Wikipedia – Norway](https://en.wikipedia.org/wiki/Norway_national_football_team) | da |
-| 11 | Norway | 11 | J. Strand Larsen | idem | da |
-| 11 | Norway | 20 | A. Nusa | idem | da |
-| 12 | Denmark | 9 | R. Højlund | [Wikipedia – Denmark](https://en.wikipedia.org/wiki/Denmark_national_football_team) | da |
-| 12 | Denmark | 8 | G. Isaksen | idem | da |
-| 12 | Denmark | 11 | A. Skov Olsen | idem | da |
-| 13 | Austria | 9 | S. Kalajdžić | [Wikipedia – Austria](https://en.wikipedia.org/wiki/Austria_national_football_team) | da |
-| 13 | Austria | 11 | M. Gregoritsch | idem | da |
-| 13 | Austria | 19 | M. Grüll | idem | da |
-| 14 | Türkiye | 7 | K. Aktürkoğlu | [Wikipedia – Türkiye](https://en.wikipedia.org/wiki/Turkey_national_football_team) | da |
-| 14 | Türkiye | 10 | İ. Kahveci | idem | da |
-| 14 | Türkiye | 19 | Y. Akgün | idem | da |
-| 15 | Sweden | 17 | V. Gyökeres | [Wikipedia – Sweden](https://en.wikipedia.org/wiki/Sweden_men's_national_football_team) | da |
-| 15 | Sweden | 9 | P. Abraham | idem | da |
-| 15 | Sweden | 18* | A. Isak | idem | da |
-| 16 | Ukraine | 9 | R. Yaremchuk | [Wikipedia – Ukraine](https://en.wikipedia.org/wiki/Ukraine_national_football_team) | da |
-| 16 | Ukraine | 7 | A. Yarmolenko | idem | da |
-| 16 | Ukraine | 11 | V. Vanat | idem | da |
-
-Note P3:
-- Numerele marcate cu * nu apar în sursă (convocare recentă / fără număr); le-am pus noi.
-- Echipele naționale: sursa este secțiunea „Current squad” (sau „Recent call-ups”) din articolul Wikipedia al echipei, 4 nov. 2026. Unii jucători foarte cunoscuți lipsesc pentru că nu sunt în lotul curent (ex. Mbappé, Messi).
-- Euro: Rusia (locul 35 FIFA) nu e inclusă, fiind suspendată din competițiile UEFA; Ucraina (36) ia locul 16.
-- Culori nesigure: Lyon (#FFFFFF / #14387F), Sparta Praga (#A50034).
-- **Vinícius Jr.**, **Raphinha**, **Estêvão**, **Evanilson** sunt cunoscuți după un singur nume. **J. Mateta** = Jean-Philippe Mateta.
+| Echipă | Nume în video | Post | Naționalitate | Sursă | Consultat | Verificat | De verificat |
+|---|---|---|---|---|---|---|---|
+| Benfica | V. Pavlidis (#14) | FW | Greece | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/50147--benfica/squad/) | 2026-11-04 | da |  |
+| Benfica | D. Lukébakio (#11) | FW | Belgium | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/50147--benfica/squad/) | 2026-11-04 | da |  |
+| Benfica | J. Durán (#22) | FW | Colombia | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/50147--benfica/squad/) | 2026-11-04 | da |  |
+| Bayer Leverkusen | P. Schick (#14) | FW | Czechia | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/50109--leverkusen/squad/) | 2026-11-04 | da |  |
+| Bayer Leverkusen | M. Diaby (#19) | FW | France | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/50109--leverkusen/squad/) | 2026-11-04 | da | DA — nationality to confirm |
+| Bayer Leverkusen | C. Kofane (#35) | FW | Cameroon | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/50109--leverkusen/squad/) | 2026-11-04 | da |  |
+| Bournemouth | Evanilson (#9) | FW | Brazil | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/2601124--bournemouth/squad/) | 2026-11-04 | da |  |
+| Bournemouth | J. Kluivert (#19) | FW | Netherlands | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/2601124--bournemouth/squad/) | 2026-11-04 | da |  |
+| Bournemouth | A. Adli (#21) | FW | Morocco | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/2601124--bournemouth/squad/) | 2026-11-04 | da |  |
+| Ferencváros | F. Kovačević (#19) | FW | Croatia | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/52298--ferencvaros/squad/) | 2026-11-04 | da | DA — nationality to confirm |
+| Ferencváros | B. Yusuf (#11) | FW | Nigeria | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/52298--ferencvaros/squad/) | 2026-11-04 | da | DA — nationality to confirm |
+| Ferencváros | L. Joseph (#75) | FW | France | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/52298--ferencvaros/squad/) | 2026-11-04 | da | DA — nationality to confirm |
+| Olympiacos | R. Yaremchuk (#11) | FW | Ukraine | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/2610--olympiacos/squad/) | 2026-11-04 | da |  |
+| Olympiacos | L. Bailey (#17) | FW | Jamaica | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/2610--olympiacos/squad/) | 2026-11-04 | da |  |
+| Olympiacos | G. Martins (#10) | FW | Portugal | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/2610--olympiacos/squad/) | 2026-11-04 | da |  |
+| Union Saint-Gilloise | K. Rodriguez (#13) | FW | Ecuador | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/64125--union-sg/squad/) | 2026-11-04 | da | DA — nationality to confirm |
+| Union Saint-Gilloise | M. Biondic (#9) | FW | Croatia | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/64125--union-sg/squad/) | 2026-11-04 | da | DA — nationality to confirm |
+| Union Saint-Gilloise | R. Florucz (#30) | FW | Austria | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/64125--union-sg/squad/) | 2026-11-04 | da |  |
+| Juventus | K. Yıldız (#10) | FW | Türkiye | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/50139--juventus/squad/) | 2026-11-04 | da |  |
+| Juventus | R. Kolo Muani (#9) | FW | France | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/50139--juventus/squad/) | 2026-11-04 | da |  |
+| Juventus | F. Conceição (#7) | FW | Portugal | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/50139--juventus/squad/) | 2026-11-04 | da |  |
+| Beşiktaş | D. Vlahović (#28) | FW | Serbia | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/50157--besiktas/squad/) | 2026-11-04 | da |  |
+| Beşiktaş | E. Poku (#17) | FW | Netherlands | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/50157--besiktas/squad/) | 2026-11-04 | da | DA — nationality to confirm |
+| Beşiktaş | S. Kılıçsoy (#90) | FW | Türkiye | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/50157--besiktas/squad/) | 2026-11-04 | da |  |
+| Sunderland | W. Isidor (#18) | FW | France | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/53360--sunderland/squad/) | 2026-11-04 | da |  |
+| Sunderland | B. Brobbey (#9) | FW | Netherlands | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/53360--sunderland/squad/) | 2026-11-04 | da |  |
+| Sunderland | N. Angulo (#10) | FW | Ecuador | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/53360--sunderland/squad/) | 2026-11-04 | da |  |
+| AZ Alkmaar | M. Meerdink (#9) | FW | Netherlands | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/52327--az-alkmaar/squad/) | 2026-11-04 | da |  |
+| AZ Alkmaar | C. Stengs (#14) | FW | Netherlands | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/52327--az-alkmaar/squad/) | 2026-11-04 | da |  |
+| AZ Alkmaar | W. Patati (#7) | FW | Netherlands | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/52327--az-alkmaar/squad/) | 2026-11-04 | da | DA — nationality to confirm |
+| Omonia | F. Tănase (#17) | FW | Romania | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/50077--omonia/squad/) | 2026-11-04 | da |  |
+| Omonia | A. Kakoullis (#9) | FW | Cyprus | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/50077--omonia/squad/) | 2026-11-04 | da |  |
+| Omonia | M. Tankovic (#22) | FW | Sweden | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/50077--omonia/squad/) | 2026-11-04 | da |  |
+| Lyon | L. Openda (#17) | FW | Belgium | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/5312--lyon/squad/) | 2026-11-04 | da |  |
+| Lyon | E. Nuamah (#7) | FW | Ghana | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/5312--lyon/squad/) | 2026-11-04 | da |  |
+| Lyon | K. Nakamura (#11) | FW | Japan | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/5312--lyon/squad/) | 2026-11-04 | da |  |
+| Rennes | E. Lepaul (#9) | FW | France | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/55031--rennes/squad/) | 2026-11-04 | da |  |
+| Rennes | B. Dia (#22) | FW | Senegal | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/55031--rennes/squad/) | 2026-11-04 | da |  |
+| Rennes | M. Al-Taamari (#11) | FW | Jordan | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/55031--rennes/squad/) | 2026-11-04 | da |  |
+| Real Sociedad | T. Kubo (#14) | FW | Japan | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/50123--real-sociedad/squad/) | 2026-11-04 | da |  |
+| Real Sociedad | O. Óskarsson (#9) | FW | Iceland | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/50123--real-sociedad/squad/) | 2026-11-04 | da |  |
+| Real Sociedad | G. Guedes (#11) | FW | Portugal | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/50123--real-sociedad/squad/) | 2026-11-04 | da |  |
+| Crystal Palace | J. Mateta (#14) | FW | France | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/52916--crystal-palace/squad/) | 2026-11-04 | da |  |
+| Crystal Palace | I. Sarr (#7) | FW | Senegal | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/52916--crystal-palace/squad/) | 2026-11-04 | da |  |
+| Crystal Palace | Y. Pino (#10) | FW | Spain | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/52916--crystal-palace/squad/) | 2026-11-04 | da |  |
+| Sparta Prague | J. Braut Brunes (#14) | FW | Norway | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/50033--sparta-praha/squad/) | 2026-11-04 | da | DA — nationality to confirm |
+| Sparta Prague | M. Vojta (#29) | FW | Czechia | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/50033--sparta-praha/squad/) | 2026-11-04 | da |  |
+| Sparta Prague | E. Singhateh (#27) | FW | Gambia | [uefa.com](https://www.uefa.com/uefaeuropaleague/clubs/50033--sparta-praha/squad/) | 2026-11-04 | da | DA — nationality to confirm |

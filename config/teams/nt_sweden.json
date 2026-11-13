@@ -11,28 +11,30 @@
  "players": [
   {
    "name": "V. Gyökeres",
-   "number": 17,
+   "team": "Sweden",
+   "nationality": "Sweden",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Sweden_men's_national_football_team",
-   "retrieved": "2026-11-04",
-   "verified": true
-  },
-  {
-   "name": "P. Abraham",
-   "number": 9,
-   "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Sweden_men's_national_football_team",
-   "retrieved": "2026-11-04",
+   "source_url": "https://news.bet365.com/sv-sv/article/sveriges-trupp-till-de-avgorande-nations-league-matcherna-i-november/2026110410474912091",
+   "retrieved": "2026-11-13",
    "verified": true
   },
   {
    "name": "A. Isak",
-   "number": 18,
+   "team": "Sweden",
+   "nationality": "Sweden",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Sweden_men's_national_football_team",
-   "retrieved": "2026-11-04",
-   "verified": true,
-   "number_note": "unnumbered in source (recent call-up / no squad number); number set by us"
+   "source_url": "https://news.bet365.com/sv-sv/article/sveriges-trupp-till-de-avgorande-nations-league-matcherna-i-november/2026110410474912091",
+   "retrieved": "2026-11-13",
+   "verified": true
+  },
+  {
+   "name": "A. Elanga",
+   "team": "Sweden",
+   "nationality": "Sweden",
+   "position": "FW",
+   "source_url": "https://news.bet365.com/sv-sv/article/sveriges-trupp-till-de-avgorande-nations-league-matcherna-i-november/2026110410474912091",
+   "retrieved": "2026-11-13",
+   "verified": true
   }
  ],
  "fictional_players": [

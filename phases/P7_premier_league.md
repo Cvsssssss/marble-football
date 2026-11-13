@@ -1,0 +1,66 @@
+# P7 — PREMIER LEAGUE season mode (38 matchweeks, one video per matchweek)
+
+Depends on: P1–P6 (done). Requires from Max: nothing (optional: his message may say he authorises downloading missing club crests). Max is NOT watching: follow CLAUDE.md — **no video renders of any kind**, no questions about taste, at most ~8 still PNG frames. Report: `reports/P7_REPORT.md` (first 5 lines in Romanian). Notes: `progress/P7.md`. Commit `P7: premier league season mode`.
+
+This is a new competition format next to the four existing ones (they stay unchanged in the menu).
+
+## 0. Decisions and interpretations (write them in the report)
+- Display name **PREMIER LEAGUE** (plain text, config `display_name`). Official-name text is allowed here by Max's decision (see CLAUDE.md); **no competition logo, no copy of the real trophy design, no kit designs, no sponsors, no broadcast graphics**. Title/description always say "Simulation".
+- **Format:** 20 clubs, double round robin: every pair meets **twice, once at each club's ground** = 38 matchweeks × 10 matches. (Max's example mentioned 4 meetings per pair; that would give 76 matchweeks, so the real-league format with 2 meetings is used. Say it in the report.)
+- One video = one matchweek (10 matches). Matches are single matches (no legs), 90 minutes + added-time shots as in P1b/P5, **draws allowed, no golden ball**.
+- Points 3/1/0. Tie-break order: goal difference, goals scored, head-to-head points, then a deterministic seeded draw (never visible as "random"). Final champion = first of the table; if two teams are level on points, goal difference decides.
+- Qualification zones shown on the table (config, plain text labels): **places 1–5 "UCL", 6–7 "Europa League", 8 "Conference League", 18–20 "Relegated"**.
+- Trophy: original design only (our own gold trophy, different from earlier ones if you like). Do not try to imitate the real one.
+
+## 1. Data (web search; today is mid-November 2026)
+- The **exact 20 clubs of the 2026/27 season** (verify promoted/relegated clubs with official/BBC sources), with short names, 3-letter codes, two colours each, source and date.
+- **2025/26 final table** (points) as the base for strength; promoted clubs get the strength of the weakest existing clubs. Strength is an invisible parameter only (all balls the same size, CLAUDE.md).
+- **3 current attackers per club** (same schema and validator as P6: team, nationality, position, source_url, retrieved, verified), written to `config/players_review.md`. Format `E. Haaland`. Names only inside the video (goal banner, replay, Man of the Match, top scorers).
+- Crests as ball decals: use files already in `assets/logos/` and any Max placed there (file name = team id). For missing clubs use the fallback decal (3-letter code on the club's primary colour, same ring) and list them in `assets/logos/MISSING.md`. Download crests from the web **only if Max's message in this session explicitly authorises it**; then record sources in `assets/logos/manifest.json` and `LOGO_USAGE.md`.
+
+## 2. Fixture generator (organised once, up front)
+- `league/premier_league_2026_27/fixtures.json`: 38 weeks × 10 matches, generated once from the season seed (circle method, then optimised by random restarts). Constraints, all tested: each club plays every other club exactly twice, once home and once away; each club has exactly 19 home and 19 away matches; no club has more than 2 consecutive home or away matches; the second half of the season mirrors the first (venues swapped) with a different order; the big clubs are spread evenly (for every club, the average strength of opponents in each block of 10 weeks stays within a narrow band; Arsenal-style "plays City ten times early" patterns must not happen); deterministic.
+- Matches inside a matchweek are shown from lower to higher profile (sum of strengths), so the biggest match comes last.
+
+## 3. Strength model and realism (calibrate with the real engine, no rendering)
+- Headless simulation only. Fit, from at least 2,000 simulated matches across strength gaps, the probability of home win/draw/away win and the goals distribution as a function of the strength gap. Add a small invisible **home advantage** parameter calibrated to a home-win share of 40–50%.
+- Targets for single matches (report measured values): average goals 2.5–3.2, draws 18–28%, 0–0 not more than 8% (the old "1–10 goals" gate becomes 0–9 for league matches; no seed is ever chosen for its outcome, only technical gates: no stuck balls, determinism).
+- Season-level check with a Monte-Carlo of at least 5,000 seasons using the fitted probabilities (document assumptions; these targets are my guess, tell Max if they cannot be met): in ≥ 90% of seasons the champion has 68–95 points, the last club 15–40, the gap between 1st and 20th after matchweek 15 is 14–30 points, the pre-season top-rated club wins the title in 20–45% of seasons, and the top club can still lose matches (it must lose at least 2 matches in ≥ 90% of seasons). Outcomes must look natural: no week where all clubs have nearly the same points, no unbeatable favourite, upsets possible even in the last matchweek.
+
+## 4. Season state and workflow
+- `league/premier_league_2026_27/state.json` + `results/week_NN.json` (scores, scorers, events, timeline hash, seeds from season seed + week + match index, standings after the week).
+- START.bat → Premier League: shows "Next: Matchweek N of 38" and the table summary; actions: **generate matchweek N** (long video + ONE reel + thumbnails + publish texts), **regenerate the last generated matchweek** (only the latest one; earlier weeks are locked because standings carry on), show the table in the console, choose the **map** (default: the new premier map and its backgrounds, any other map allowed; avoid repeating last week's by default). **No choosing of matches or teams.** Week N+1 continues from the saved table (not from zero).
+- Dry-run/test mode with stub data for the whole 38-week flow (no renders).
+
+## 5. The matchweek video (≈ 20–28 min, 10 matches)
+Reuse everything approved (match scene, goal moment, replay with caption, Man of the Match, added-time shots, crests on balls). Add, with a clean professional look:
+- Matchweek intro card (fixtures grid, "Matchweek N · 2026/27", crests/colours), per-match pre-card with both clubs' current positions and last-5 form dots.
+- After every match: result flash, then an **animated table update** (rows slide to their new places, points count up, green/red arrows, short pulse when a club enters or leaves a zone, zone colours: top 5 blue, 6–7 orange, 8 green, bottom 3 red). Keep each update short (≈ 4–6 s) so the video stays under 28 min.
+- End of video: full table with zones, all 10 results, top scorers (top 5, with team), "Goal of the Week" replay (best goal by a documented score), next matchweek teaser.
+- Chapters file, 1 reel (selection: best comeback of the week; else latest winning goal; else the highest-scoring match; deterministic, full-pitch layout from P6), thumbnails, and `publish/` texts from P6 adapted for the league: title pattern `Premier League Matchweek N | Marble Football Simulation 2026/27`, description with the week's results list labelled as simulated and the top of the table as text, hashtags such as `#PremierLeague #EPL #MarbleFootball #FootballSimulation` (first three most important), never player names.
+- Table layout test: 20 rows readable at 1080p (row height ≥ 36 px, font ≥ 22 px) and inside the frame.
+
+## 6. Season finale (matchweek 38 video only)
+After the last match and the final table: champion reveal, then a **trophy ceremony of 25–35 s with 3 camera angles** drawn in 2D with strong production value: (1) wide stadium view, stands full of procedural crowd, fireworks and confetti in the champion's colours; (2) close low-angle shot of the original trophy being lifted, gold light and flash; (3) top-down/orbit shot with confetti and waving flags in the club's colours. Synthesised crowd, fireworks and a short original music sting (no third-party audio). Then: European places and relegated clubs, Golden Boot (top scorer), podium, season stats. Test the ceremony timeline (durations, three distinct angles, assets exist); 3 still frames max.
+
+## 7. New map and backgrounds for the Premier League
+Max has no design in mind; you decide (generic English-style stadium atmosphere, **no real stadium, no club or sponsor branding, advertising boards with fictional text**):
+- A new map `premier_pitchside` (name free) with a better goal (thicker frame, net with depth and a gentle sway on a goal), polished terrain and stands; may move/resize the goal and the windmill by up to ±10% and improve the camera angle, but it must pass **all existing physics tests** (bar, goal, pump timing, windmill) and be calibrated like the others.
+- **Art direction chosen by Max (13 Nov 2026):** a big modern stadium bowl: curved stands full of procedural crowd, a lit roof with truss structure and rows of floodlights, boards angled in a V towards a large centre screen, the real pitch visible through the gap between the two platforms (stripes, centre markings, far goal), stone-block platforms with grass tops, red-and-white windmill, deeper goal net with perspective. Boards and the centre screen show the plain text "PREMIER LEAGUE" in our own font and colours (e.g. teal/navy), **never the official logo or its colours/emblem**; any other board text uses fictional brands. Scoreboard shows team names/crests on balls, not the competition logo.
+- **Image backgrounds supported:** if files `assets/backgrounds/premier_day.png`, `premier_overcast.png`, `premier_evening.png`, `premier_night.png` exist (Max generates them with an image tool; empty foreground, no logos, no text, blank boards and a blank centre screen), use them as the scene background layer (cover-fit 16:9) and draw platforms, windmill, spout, goal, keeper, ball, scoreboard and effects on top. Overlay the plain text "PREMIER LEAGUE" only on a configurable centre-screen rectangle (`center_screen_rect` in the map config, default centred in the upper-middle) and do not try to detect board geometry; boards stay as in the image. If an image is missing, fall back to the procedural stadium. Add tests that missing files fall back cleanly and that the layer order and 16:9 cover-fit are right. Never add, trace or recreate any competition logo; Max's own files are his responsibility.
+- 3–4 background variants of this same stadium (overcast afternoon, floodlit evening, bright sunny day, drizzly night), selectable. Existing maps stay available for every competition.
+- Max reviews the look later by himself; produce 3 still frames (two backgrounds + goal close-up) for your own check.
+
+## Tests (write and run all)
+Fixtures (all constraints above, determinism); standings and tie-breaks (scripted scenarios incl. head-to-head and seeded draw); zones; state persistence and "regenerate only last week"; calibration numbers and Monte-Carlo targets (print them); league match gates (no golden ball, draws allowed, added-time shots); player validator for the 20 clubs; goal scorer belongs to scoring team; publish text checks; table layout; ceremony timeline; reel selection and layout; START menu flow with stubs; all earlier phases' tests still green.
+
+## Finish
+Docs in Romanian (how to run the league, what each menu item does, how to regenerate, where texts are). Report with the measured numbers, decisions, unverified items (visual quality of table animations, ceremony and new map in motion, data correctness beyond sources). `npm test` green, commit. Final message to Max: 3–5 lines in Romanian.
+
+## 7b. Max's chosen background image (13 Nov 2026) — overrides the art direction above where they differ
+Max supplies `assets/backgrounds/premier_day.png` (ultra-wide, about 1925x817, aspect ~2.36; sunny day, curved 3-tier stands full of crowd with purple flags, truss roof, floodlights, striped pitch with centre circle in the lower ~18%; no logos, no text, no boards to write on). Use it as the scene background layer exactly as it is:
+- Cover-fit into the 16:9 scene: scale to the scene height and crop the sides symmetrically (never stretch, never letterbox). Keep the bottom (pitch) aligned to the scene's bottom edge so the grass stays visible.
+- Draw on top, unchanged from the other maps: terrain/platforms (stone blocks with grass top, placed so their grass line sits where the pitch begins), spout, windmill (red-white), goal with deeper net, keeper, balls, scoreboard, effects. Nothing from the old procedural stadium is drawn when this image exists.
+- This image has **no centre screen**: do NOT overlay "PREMIER LEAGUE" on it (`center_screen_rect: null` for this background). The competition name appears only in UI cards/scoreboard strip as plain text. Other variants (`premier_overcast/evening/night.png`) may exist later; each has its own optional `center_screen_rect`.
+- If the file is missing: procedural fallback. Test cover-fit math for 2.36 -> 16:9 (crop left/right only), layer order, and that the ground line of the map is inside the pitch area of the image. One still frame to check, no video.
+- Do not modify, trace or add any logo to the image. Colours of overlays should work with its blue/purple palette.

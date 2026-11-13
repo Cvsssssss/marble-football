@@ -127,7 +127,7 @@ function recommend(state, nowMs) {
     const accent = '#E0457B';
     const map = pickMap(hist, c.comp.id, accent, comps);
     return { action: 'strong_match', competition: c.comp.id, competition_file: c.comp.file, map, accent, forced_pair: { a: c.a, b: c.b, round: rules.forced_round },
-      match_day: D, fixture: `${c.a} vs ${c.b}`, generate_by: generateBy, publish_long: publishLong, publish_reels: placeReels(hist, publishLong, 3, rules),
+      match_day: D, fixture: `${c.a} vs ${c.b}`, generate_by: generateBy, publish_long: publishLong, publish_reels: placeReels(hist, publishLong, 1, rules),
       why: [`Meci real tare: ${c.fx.home} – ${c.fx.away} (${c.fx.competition}, ${D} ${c.fx.time}) — ${c.reason}.`, 'Videoul lung se publică în D−1 seara (Copenhaga), reel-urile în D−1 și D.', `Perechea e forțată în ${rules.forced_round === 'QF' ? 'sferturi' : 'optimi'}.`].concat(why) };
   }
   // 2. weekly: nothing published in the last 7 days -> next valid entry of content_plan.json
@@ -145,7 +145,7 @@ function recommend(state, nowMs) {
   const publishLong = localToUtc(pubDay, rules.weekly_publish_local_time);
   const comp = comps[entry.competition];
   return { action: 'weekly', plan_id: entry.id, competition: entry.competition, competition_file: comp.file, map: entry.map, accent: entry.accent, forced_pair: null,
-    publish_long: publishLong, publish_reels: placeReels(hist, publishLong, 3, rules),
+    publish_long: publishLong, publish_reels: placeReels(hist, publishLong, 1, rules),
     why: why.concat([`Niciun meci real tare de pregătit și niciun video lung în ultimele 7 zile → următoarea intrare din plan: ${entry.id} (${comp.name}, ${entry.map}).`]) };
 }
 

@@ -11,27 +11,31 @@
  "players": [
   {
    "name": "E. Haaland",
-   "number": 9,
+   "team": "Norway",
+   "nationality": "Norway",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Norway_national_football_team",
-   "retrieved": "2026-11-04",
+   "source_url": "https://www.flashscore.com/news/soccer-uefa-nations-league-norway-boosted-by-the-return-of-atletico-madrid-striker-for-vital-clash-against-denmark/d64ecbat/",
+   "retrieved": "2026-11-13",
    "verified": true
   },
   {
-   "name": "J. Strand Larsen",
-   "number": 11,
+   "name": "A. Sørloth",
+   "team": "Norway",
+   "nationality": "Norway",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Norway_national_football_team",
-   "retrieved": "2026-11-04",
+   "source_url": "https://www.flashscore.com/news/soccer-uefa-nations-league-norway-boosted-by-the-return-of-atletico-madrid-striker-for-vital-clash-against-denmark/d64ecbat/",
+   "retrieved": "2026-11-13",
    "verified": true
   },
   {
    "name": "A. Nusa",
-   "number": 20,
+   "team": "Norway",
+   "nationality": "Norway",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Norway_national_football_team",
-   "retrieved": "2026-11-04",
-   "verified": true
+   "source_url": "https://www.fourfourtwo.com/team/norway-world-cup-2026-squad",
+   "retrieved": "2026-11-13",
+   "verified": false,
+   "note": "World Cup 2026 squad; Nov 2026 list not confirmed"
   }
  ],
  "fictional_players": [

@@ -5,7 +5,7 @@
 //                       [--match-day YYYY-MM-DD --fixture "A vs B"]  (strong real match slot from `npm run next`: publish D-1 evening)
 //                       [--dry-run]  (P5 rehearsal: everything except the long video and the reel videos; run folder *_dryrun,
 //                                    not added to plan/history.json, output/latest unchanged, preflight skips the media checks)
-// Steps: tournament + long video (build_all.js, render cache) -> 3 reels -> 3 thumbnails -> run.json -> checklist -> preflight.
+// Steps: tournament + long video (build_all.js, render cache) -> 1 reel -> 3 thumbnails -> publish/ texts -> run.json -> checklist -> preflight.
 // Safe to interrupt: re-running the same command resumes from the seed cache, the block render cache and the reel cache.
 const fs = require('fs');
 const path = require('path');
@@ -70,7 +70,7 @@ function updateHistory(entry) {
 function generate(opts) {
   const t0 = Date.now();
   const P = planRun(opts);
-  const N = opts.noReels ? 6 : 7;
+  const N = opts.noReels ? 7 : 8;
   fs.mkdirSync(P.runDir, { recursive: true }); fs.mkdirSync(P.buildDir, { recursive: true });
   console.log(`Run: ${path.relative(ROOT, P.runDir)}`);
   // run-specific competition file (theme, forced pair, output paths); the simulation hash ignores output paths
@@ -98,15 +98,27 @@ function generate(opts) {
 
   let reelsInfo = [];
   if (!opts.noReels) {
-    step(2, N, 'Reel-uri verticale (3)', t0);
+    step(2, N, 'Reel vertical (1, tot terenul în cadru)', t0);
     run(['build_reels.js', '--competition', compRun, '--out-dir', path.join(P.runDir, 'reels')].concat(opts.preview ? ['--fast'] : []).concat(opts.dryRun ? ['--no-render'] : []), 'reel-uri');
     const sel = JSON.parse(fs.readFileSync(path.join(P.runDir, 'reels', 'selection.json'), 'utf8'));
-    reelsInfo = sel.reels.map((r) => Object.assign({ dir: `reels/reel${r.rank}_${r.id}` }, JSON.parse(fs.readFileSync(path.join(P.runDir, 'reels', `reel${r.rank}_${r.id}`, 'reel_info.json'), 'utf8'))));
+    reelsInfo = sel.reels.map((r) => Object.assign({ dir: `reels/reel_${r.id}`, sel: r }, JSON.parse(fs.readFileSync(path.join(P.runDir, 'reels', `reel_${r.id}`, 'reel_info.json'), 'utf8'))));
   }
   step(opts.noReels ? 2 : 3, N, 'Thumbnail-uri (3, fără text)', t0);
   run(['render/thumbs.js', path.join('build', 'show.json'), path.join(P.runDir, 'thumbnails'), path.join(P.runDir, 'reels', 'selection.json')], 'thumbnail-uri');
 
-  step(opts.noReels ? 3 : 4, N, 'run.json', t0);
+  step(opts.noReels ? 3 : 4, N, 'Texte de publicare (publish/)', t0);
+  const PUB = require('./sim/publish');
+  const mapCfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'config', 'maps', P.map + '.json'), 'utf8'));
+  const hist = PUB.readHistory();
+  const pub = PUB.buildPublish(show, fs.readFileSync(path.join(P.runDir, 'chapters.txt'), 'utf8'), reelsInfo[0] ? reelsInfo[0].sel : null,
+    { seed: P.runName + '|' + conf.simHash, mapName: mapCfg.name, recentTitles: hist.recent_titles || [] });
+  const pubErr = PUB.lintPublish(pub, { playerNames: show.teams.flatMap((t) => t.players.map((p) => p.name)), teamNames: show.teams.map((t) => t.name),
+    champion: show.teams[show.champion].name, durationS: show.totalFrames / show.fps });
+  if (pubErr.length) throw new RunError('Textele de publicare nu trec verificarea: ' + pubErr.join('; '));
+  PUB.writePublish(path.join(P.runDir, 'publish'), pub);
+  if (!opts.dryRun) PUB.recordTitles(pub.longTitles.concat(pub.reelTitles));
+
+  step(opts.noReels ? 4 : 5, N, 'run.json', t0);
   const PV = require('./plan/validate');
   const planF = path.join(ROOT, 'plan', 'content_plan.json');
   const planE = fs.existsSync(planF) ? JSON.parse(fs.readFileSync(planF, 'utf8')).videos.find((v) => v.competition === P.comp.id && v.map === P.map) : null;
@@ -128,12 +140,12 @@ function generate(opts) {
   };
   fs.writeFileSync(path.join(P.runDir, 'run.json'), JSON.stringify(runJson, null, 1) + '\n');
 
-  step(opts.noReels ? 4 : 5, N, 'PUBLISH_CHECKLIST.md', t0);
+  step(opts.noReels ? 5 : 6, N, 'PUBLISH_CHECKLIST.md', t0);
   require('./sim/checklist').writeChecklist(P.runDir, runJson);
   if (!opts.dryRun) updateHistory({ run: P.runName, generated_at: runJson.created, competition: P.comp.id, map: P.map, accent, quality: runJson.quality, status: 'generated', forced_pair: P.forced[0] || null, fingerprint: fp });
   if (!opts.dryRun) linkLatest(P.runDir);
 
-  step(opts.noReels ? 5 : 6, N, 'Preflight (verificări automate)', t0);
+  step(opts.noReels ? 6 : 7, N, 'Preflight (verificări automate)', t0);
   const pf = require('./preflight').preflight(P.runDir);
   step(N, N, 'Gata', t0);
   console.log(`\nRezultat: ${P.runDir}\nPreflight: ${pf.ok ? 'VERDE (toate verificările au trecut)' : 'ROȘU (' + pf.red + ' probleme) — vezi PREFLIGHT.md'}\nTimp total: ${((Date.now() - t0) / 60000).toFixed(1)} min`);

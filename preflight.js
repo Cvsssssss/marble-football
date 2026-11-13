@@ -51,7 +51,8 @@ function preflight(runDir) {
   const reelsExpected = (run.reels || []).length > 0;
   // 1. files
   const need = [run.long_video.file, 'chapters.txt', 'PUBLISH_CHECKLIST.md', 'LOGO_USAGE.md', 'thumbnails/thumbnail_1.png', 'thumbnails/thumbnail_2.png', 'thumbnails/thumbnail_3.png']
-    .concat((run.reels || []).flatMap((r) => [`${r.dir}/reel.mp4`, `${r.dir}/suggestions.txt`]));
+    .concat((run.reels || []).map((r) => `${r.dir}/reel.mp4`))
+    .concat(['publish/long_title.txt', 'publish/long_description.txt', 'publish/reel_title.txt', 'publish/reel_description.txt', 'publish/README_publish.txt']);
   // P5 dry run (rehearsal without videos): media files are not expected and their checks are skipped
   const missing = need.filter((p) => !(run.dry_run && /\.mp4$/.test(p)) && !fs.existsSync(rf(p)));
   if (run.dry_run) add('repetiție fără video (dry run): verificările video/audio sunt sărite', true, '');
@@ -89,7 +90,7 @@ function preflight(runDir) {
           if (Math.abs(b[i] - b[r0]) + Math.abs(b[i + 1] - b[r0 + 1]) + Math.abs(b[i + 2] - b[r0 + 2]) > 45) bad++;
         }
       }
-      const g = grabGray(f, t, { x: 470, y: 1668, w: 140, h: 42 }); if (labelPresent(g, 140, 42)) simSeen++;
+      const g = grabGray(f, t, { x: 60, y: 1153, w: 160, h: 40 }); if (labelPresent(g, 160, 40)) simSeen++; // P6 reel label: bottom-left of the scene band
     }
     add(`${r.dir}: zona sigură (scor și texte în centrul de 80 %)`, bad / tot < 0.002, `Elemente desenate la marginea ecranului (${bad} pixeli), unde interfața telefonului le acoperă.`, { bad, tot });
     if (labelOn) add(`${r.dir}: eticheta SIMULATION vizibilă`, simSeen === ts.length, `Eticheta SIMULATION lipsește în ${ts.length - simSeen} din ${ts.length} cadre.`);
@@ -99,7 +100,9 @@ function preflight(runDir) {
   const man = JSON.parse(fs.readFileSync(path.join(ROOT, 'assets', 'logos', 'manifest.json'), 'utf8')).logos;
   const listed = new Set(Object.values(man).map((m) => m.file));
   const imgs = textFiles(path.join(ROOT, 'assets')).filter((p) => /\.(png|jpe?g|svg|gif|webp)$/i.test(p));
-  const unlisted = imgs.filter((p) => !(path.dirname(p) === path.join(ROOT, 'assets', 'logos') && listed.has(path.basename(p))));
+  // P6: assets/backgrounds/ holds Max's own scene backgrounds (his files, P7 7b), not crests: not part of the crest manifest
+  const bgDir = path.join(ROOT, 'assets', 'backgrounds');
+  const unlisted = imgs.filter((p) => !(path.dirname(p) === path.join(ROOT, 'assets', 'logos') && listed.has(path.basename(p))) && path.dirname(p) !== bgDir);
   add('nicio imagine în afara manifestului de resurse (assets/logos/manifest.json)', unlisted.length === 0, `Imagini fără sursă în manifest: ${unlisted.map((p) => path.relative(ROOT, p)).join(', ')}. Șterge-le sau adaugă sursa în manifest.`);
   // 4. no player names in any file name or text file of the run
   const comp = JSON.parse(fs.readFileSync(path.join(ROOT, run.competition.file), 'utf8'));
@@ -141,16 +144,15 @@ function preflight(runDir) {
     else ok = r16.includes(key);
     add(`perechea forțată ${fp.a} vs ${fp.b} (${fp.round}) e în tablou`, ok, `Perechea forțată nu apare în tablou cum s-a cerut (${fp.round === 'QF' ? 'în optimi alăturate, ca să se poată întâlni în sferturi' : 'ca meci din optimi'}).`);
   }
-  // 8. reel suggestions lint
-  if (reelsExpected) {
-    const { lintSuggestion } = require('./build_reels');
-    const errs = [];
-    for (const r of run.reels) {
-      const f = rf(`${r.dir}/suggestions.txt`); if (!fs.existsSync(f)) continue;
-      const txt = fs.readFileSync(f, 'utf8'); const grab = (h) => { const i = txt.indexOf(h + '\n'); return txt.slice(i + h.length + 1).split('\n\n')[0].trim(); };
-      errs.push(...lintSuggestion({ title: grab('TITLU:'), description: grab('DESCRIERE:'), tags: grab('TAGURI:').split(',').map((x) => x.trim()) }, names).map((e) => `${r.dir}: ${e.replace(/player name: .*/, 'nume de jucător')}`));
-    }
-    add('sugestiile reel-urilor respectă regulile (SIMULATION, fără nume, fără nume oficiale)', errs.length === 0, `Probleme: ${errs.join('; ')}`);
+  // 8. P6 publish texts lint (titles <= 100 with "Simulation", description <= 5000, hashtags, chapters, disclaimer, no names)
+  add('un singur reel pe rulare', (run.reels || []).length <= 1, `Rularea are ${(run.reels || []).length} reel-uri (trebuie unul).`);
+  if (fs.existsSync(rf('publish/long_title.txt'))) {
+    const PUB = require('./sim/publish');
+    const opts = (f) => fs.readFileSync(rf('publish/' + f), 'utf8').split(/\r?\n/).filter((l) => /^\d\. /.test(l)).map((l) => l.slice(3));
+    const P = { longTitles: opts('long_title.txt'), reelTitles: opts('reel_title.txt'), longDescription: fs.readFileSync(rf('publish/long_description.txt'), 'utf8').trim(),
+      reelDescription: (run.reels || []).length ? fs.readFileSync(rf('publish/reel_description.txt'), 'utf8').trim() : '' };
+    const errs = PUB.lintPublish(P, { playerNames: names, durationS: run.long_video.seconds, champion: run.champion });
+    add('textele din publish/ respectă regulile (Simulation, ≤ 100 caractere, capitole, disclaimer, fără nume de jucători / oficiale)', errs.length === 0, `Probleme: ${errs.map((e) => e.replace(/player name: .*/, 'nume de jucător')).join('; ')}`);
   }
   return finish(runDir, C, run);
 }

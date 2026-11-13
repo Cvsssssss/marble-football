@@ -423,7 +423,7 @@ console.log('== awards');
   const md = path.join(ROOT, 'config', 'players_review.md');
   const okFile = fs.existsSync(md) && comp.teams.every((t) => t.players.every((p) => fs.readFileSync(md, 'utf8').includes(p.name)));
   const okSrc = comp.teams.every((t) => t.players.length === 3 && t.players.every((p) => /^https?:\/\//.test(p.source_url || '') && /^\d{4}-\d{2}-\d{2}$/.test(p.retrieved || '') && typeof p.verified === 'boolean'));
-  const fmt = comp.teams.every((t) => t.players.every((p) => /^([A-Z]\. \S.*|[A-Z][a-zà-ÿ]+)$/u.test(p.name)));
+  const fmt = comp.teams.every((t) => t.players.every((p) => /^([A-Z]\. \S.*|[A-Z][a-zà-ÿ]+( Jr\.)?)$/u.test(p.name)));
   check('players: real_names on, 3 players per team with source_url / retrieved / verified, listed in config/players_review.md, format "I. Surname"', comp.competition.real_names === true && okFile && okSrc && fmt, comp.teams.map((t) => t.players.map((p) => p.name).join(', ')));
   const conf2 = L.loadCompetition(undefined, {});
   check('players: fictional_players kept for real_names=false', conf2.teams.every((t) => Array.isArray(t.fictional_players) && t.fictional_players.length === 3));

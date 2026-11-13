@@ -11,26 +11,29 @@
  "players": [
   {
    "name": "L. Yamal",
-   "number": 19,
+   "team": "Spain",
+   "nationality": "Spain",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Spain_national_football_team",
-   "retrieved": "2026-11-04",
+   "source_url": "https://www.comuniate.com/en/noticias/38889/luis-de-la-fuente-names-squad-for-group-stage-finale",
+   "retrieved": "2026-11-13",
    "verified": true
   },
   {
    "name": "M. Oyarzabal",
-   "number": 21,
+   "team": "Spain",
+   "nationality": "Spain",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Spain_national_football_team",
-   "retrieved": "2026-11-04",
+   "source_url": "https://www.comuniate.com/en/noticias/38889/luis-de-la-fuente-names-squad-for-group-stage-finale",
+   "retrieved": "2026-11-13",
    "verified": true
   },
   {
    "name": "Y. Pino",
-   "number": 11,
+   "team": "Spain",
+   "nationality": "Spain",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Spain_national_football_team",
-   "retrieved": "2026-11-04",
+   "source_url": "https://www.comuniate.com/en/noticias/38889/luis-de-la-fuente-names-squad-for-group-stage-finale",
+   "retrieved": "2026-11-13",
    "verified": true
   }
  ],

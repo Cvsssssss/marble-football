@@ -10,28 +10,32 @@
  "strength": 80,
  "players": [
   {
-   "name": "S. Kalajdžić",
-   "number": 9,
-   "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Austria_national_football_team",
-   "retrieved": "2026-11-04",
-   "verified": true
-  },
-  {
-   "name": "M. Gregoritsch",
-   "number": 11,
-   "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Austria_national_football_team",
-   "retrieved": "2026-11-04",
-   "verified": true
-  },
-  {
    "name": "M. Grüll",
-   "number": 19,
+   "team": "Austria",
+   "nationality": "Austria",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Austria_national_football_team",
-   "retrieved": "2026-11-04",
+   "source_url": "https://www.salzburg24.at/sport/fussball/showdown-um-nations-league-aufstieg-ralf-rangnick-nominiert-vier-salzburger-fuer-oefb-team-art-343276",
+   "retrieved": "2026-11-13",
    "verified": true
+  },
+  {
+   "name": "C. Baumgartner",
+   "team": "Austria",
+   "nationality": "Austria",
+   "position": "FW",
+   "source_url": "https://www.salzburg24.at/sport/fussball/showdown-um-nations-league-aufstieg-ralf-rangnick-nominiert-vier-salzburger-fuer-oefb-team-art-343276",
+   "retrieved": "2026-11-13",
+   "verified": true
+  },
+  {
+   "name": "R. Florucz",
+   "team": "Austria",
+   "nationality": "Austria",
+   "position": "FW",
+   "source_url": "https://www.weekend.at/sport/yusuf-demir-oefb-comeback",
+   "retrieved": "2026-11-13",
+   "verified": false,
+   "note": "late call-up, date not confirmed"
   }
  ],
  "fictional_players": [

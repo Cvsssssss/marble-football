@@ -10,27 +10,30 @@
  "strength": 80,
  "players": [
   {
-   "name": "K. Aktürkoğlu",
-   "number": 7,
-   "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Turkey_national_football_team",
-   "retrieved": "2026-11-04",
-   "verified": true
-  },
-  {
-   "name": "İ. Kahveci",
-   "number": 10,
-   "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Turkey_national_football_team",
-   "retrieved": "2026-11-04",
-   "verified": true
-  },
-  {
    "name": "Y. Akgün",
-   "number": 19,
+   "team": "Türkiye",
+   "nationality": "Türkiye",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Turkey_national_football_team",
-   "retrieved": "2026-11-04",
+   "source_url": "https://gazeteoksijen.com/spor/a-milli-takimin-aday-kadrosu-aciklandi-295235",
+   "retrieved": "2026-11-13",
+   "verified": true
+  },
+  {
+   "name": "B. Yılmaz",
+   "team": "Türkiye",
+   "nationality": "Türkiye",
+   "position": "FW",
+   "source_url": "https://gazeteoksijen.com/spor/a-milli-takimin-aday-kadrosu-aciklandi-295235",
+   "retrieved": "2026-11-13",
+   "verified": true
+  },
+  {
+   "name": "D. Gül",
+   "team": "Türkiye",
+   "nationality": "Türkiye",
+   "position": "FW",
+   "source_url": "https://gazeteoksijen.com/spor/a-milli-takimin-aday-kadrosu-aciklandi-295235",
+   "retrieved": "2026-11-13",
    "verified": true
   }
  ],

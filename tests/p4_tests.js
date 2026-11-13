@@ -94,15 +94,17 @@ const runsDir = path.join(ROOT, 'output', 'runs');
 const runs = fs.existsSync(runsDir) ? fs.readdirSync(runsDir).filter((r) => fs.existsSync(path.join(runsDir, r, 'run.json'))) : [];
 // P5: runs whose videos still exist first (Max's own runs), else the newest dry run (`generate.js --dry-run`, no videos)
 const hasVideo = (r) => { try { const j = JSON.parse(fs.readFileSync(path.join(runsDir, r, 'run.json'), 'utf8')); return fs.existsSync(path.join(runsDir, r, j.long_video.file)); } catch (e) { return false; } };
-const pick = runs.find((r) => hasVideo(r) && r.endsWith('_preview')) || runs.find(hasVideo) || runs.filter((r) => r.endsWith('_dryrun')).sort().pop();
+// P6: only runs made by the current pipeline (one reel + publish/ texts); older 3-reel runs are legacy
+const current = (r) => fs.existsSync(path.join(runsDir, r, 'publish', 'long_title.txt'));
+const pick = runs.filter(current).find((r) => hasVideo(r) && r.endsWith('_preview')) || runs.filter(current).find(hasVideo) || runs.filter((r) => current(r) && r.endsWith('_dryrun')).sort().pop();
 const runDir = pick ? path.join(runsDir, pick) : null;
 if (!runDir) check('a generated run folder exists (npm run generate -- ... --preview)', false);
 else {
   const run = JSON.parse(fs.readFileSync(path.join(runDir, 'run.json'), 'utf8'));
   const need = [run.long_video.file, 'chapters.txt', 'run.json', 'PREFLIGHT.md', 'PUBLISH_CHECKLIST.md', 'LOGO_USAGE.md', 'thumbnails/thumbnail_1.png', 'thumbnails/thumbnail_2.png', 'thumbnails/thumbnail_3.png', 'reels/selection.json']
-    .concat(run.reels.flatMap((r) => [`${r.dir}/reel.mp4`, `${r.dir}/suggestions.txt`]));
+    .concat(run.reels.map((r) => `${r.dir}/reel.mp4`)).concat(['publish/long_title.txt', 'publish/long_description.txt', 'publish/reel_title.txt', 'publish/reel_description.txt', 'publish/README_publish.txt']);
   const miss = need.filter((p) => !(run.dry_run && /\.mp4$/.test(p)) && !fs.existsSync(path.join(runDir, p)));
-  check(`run folder structure (${path.basename(runDir)}): video, chapters, 3 reels, 3 thumbnails, PREFLIGHT, checklist, run.json`, miss.length === 0 && run.reels.length === 3 && /^\d{4}-\d{2}-\d{2}_[a-z0-9_]+_[a-z_]+(_preview|_dryrun)?$/.test(run.run), miss);
+  check(`run folder structure (${path.basename(runDir)}): video, chapters, 1 reel, 3 thumbnails, publish/ texts, PREFLIGHT, checklist, run.json`, miss.length === 0 && run.reels.length === 1 && /^\d{4}-\d{2}-\d{2}_[a-z0-9_]+_[a-z_]+(_preview|_dryrun)?$/.test(run.run), miss);
   check('run.json has seeds, config hash, timeline hashes, durations', run.configHash && run.matches.length === 29 && run.matches.every((m) => Number.isInteger(m.seed) && m.timeline_hash) && run.long_video.seconds > 0 && run.reels.every((r) => r.seconds > 0));
   const latest = path.join(ROOT, 'output', 'latest');
   check('output/latest points to the last run', fs.existsSync(latest) && (fs.existsSync(path.join(latest, 'run.json')) || fs.existsSync(path.join(latest, 'LATEST.txt'))));

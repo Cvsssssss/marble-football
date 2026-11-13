@@ -11,6 +11,8 @@
   {
    "name": "Antony",
    "number": 7,
+   "team": "Real Betis",
+   "nationality": "Brazil",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefachampionsleague/clubs/52265--real-betis/squad/",
    "retrieved": "2026-11-04",
@@ -19,6 +21,8 @@
   {
    "name": "C. Hernández",
    "number": 9,
+   "team": "Real Betis",
+   "nationality": "Colombia",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefachampionsleague/clubs/52265--real-betis/squad/",
    "retrieved": "2026-11-04",
@@ -27,6 +31,8 @@
   {
    "name": "Abde",
    "number": 10,
+   "team": "Real Betis",
+   "nationality": "Morocco",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefachampionsleague/clubs/52265--real-betis/squad/",
    "retrieved": "2026-11-04",

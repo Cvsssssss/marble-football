@@ -11,6 +11,8 @@
   {
    "name": "L. Openda",
    "number": 17,
+   "team": "Lyon",
+   "nationality": "Belgium",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/5312--lyon/squad/",
    "retrieved": "2026-11-04",
@@ -19,6 +21,8 @@
   {
    "name": "E. Nuamah",
    "number": 7,
+   "team": "Lyon",
+   "nationality": "Ghana",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/5312--lyon/squad/",
    "retrieved": "2026-11-04",
@@ -27,6 +31,8 @@
   {
    "name": "K. Nakamura",
    "number": 11,
+   "team": "Lyon",
+   "nationality": "Japan",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/5312--lyon/squad/",
    "retrieved": "2026-11-04",

@@ -10,26 +10,33 @@
   {
    "name": "K. Mbappé",
    "number": 10,
+   "team": "Real Madrid",
+   "nationality": "France",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefachampionsleague/clubs/50051--real-madrid/squad/",
    "retrieved": "2026-11-04",
    "verified": true
   },
   {
-   "name": "V. Júnior",
+   "name": "Vinícius Jr.",
    "number": 7,
+   "team": "Real Madrid",
+   "nationality": "Brazil",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefachampionsleague/clubs/50051--real-madrid/squad/",
    "retrieved": "2026-11-04",
    "verified": true
   },
   {
-   "name": "Rodrygo",
-   "number": 11,
+   "name": "Y. Diomande",
+   "number": 25,
+   "team": "Real Madrid",
+   "nationality": "Ivory Coast",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefachampionsleague/clubs/50051--real-madrid/squad/",
    "retrieved": "2026-11-04",
-   "verified": true
+   "verified": true,
+   "note": "winger, listed as midfielder by UEFA; third attacker as Max suggested"
   }
  ],
  "fictional_players": [

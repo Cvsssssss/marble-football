@@ -11,30 +11,30 @@
  "players": [
   {
    "name": "C. Pulisic",
-   "number": 10,
+   "team": "United States",
+   "nationality": "United States",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/United_States_men's_national_soccer_team",
-   "retrieved": "2026-11-04",
-   "verified": true,
-   "number_note": "unnumbered in source (recent call-up / no squad number); number set by us"
+   "source_url": "https://www.si.com/soccer/usmnt-november-2026-roster-confirmed-full-list-players-stars-schedule",
+   "retrieved": "2026-11-13",
+   "verified": true
   },
   {
    "name": "F. Balogun",
-   "number": 20,
+   "team": "United States",
+   "nationality": "United States",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/United_States_men's_national_soccer_team",
-   "retrieved": "2026-11-04",
-   "verified": true,
-   "number_note": "unnumbered in source (recent call-up / no squad number); number set by us"
+   "source_url": "https://www.si.com/soccer/usmnt-november-2026-roster-confirmed-full-list-players-stars-schedule",
+   "retrieved": "2026-11-13",
+   "verified": true
   },
   {
-   "name": "T. Weah",
-   "number": 21,
+   "name": "C. Sullivan",
+   "team": "United States",
+   "nationality": "United States",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/United_States_men's_national_soccer_team",
-   "retrieved": "2026-11-04",
-   "verified": true,
-   "number_note": "unnumbered in source (recent call-up / no squad number); number set by us"
+   "source_url": "https://www.si.com/soccer/usmnt-november-2026-roster-confirmed-full-list-players-stars-schedule",
+   "retrieved": "2026-11-13",
+   "verified": true
   }
  ],
  "fictional_players": [

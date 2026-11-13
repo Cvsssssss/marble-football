@@ -1,5 +1,5 @@
 'use strict';
-// P3 A: vertical reels (YouTube Shorts) from the long video's tournament.
+// P3 A / P6: ONE vertical reel (YouTube Shorts) per long video, static full-pitch layout.
 //   npm run reels -- --competition config/competitions/ucl_2026_top16.json [--map <theme>] [--only 1] [--fast] [--out-dir <dir>]
 // Same config + seed cache as the long video -> the reel replays the identical match (same seed, same timeline hash).
 const fs = require('fs');
@@ -7,7 +7,7 @@ const path = require('path');
 const { execFileSync, spawn, spawnSync } = require('child_process');
 const L = require('./sim/config_loader');
 const TOUR = require('./sim/tournament');
-const { selectReels } = require('./sim/selectReels');
+const { selectReel } = require('./sim/selectReels');
 const { buildReel, TARGET_MAX } = require('./sim/reels');
 const ffmpeg = require('ffmpeg-static');
 
@@ -94,15 +94,17 @@ async function main() {
   const index = TOUR.matchesIndex(show);
   // only matches whose reel fits the 30..55 s spec are candidates (P5: was <= 60 s; a busy match may not fit even fast-forwarded)
   const fitIndex = Object.assign({}, index, { matches: index.matches.filter((m) => !m.goals.length || buildReel(show, m.index).seconds <= TARGET_MAX + 1) });
-  const sel = selectReels(fitIndex, 3);
+  const sel = selectReel(fitIndex);
+  // exactly one reel per run: folders of earlier reels (P3-P5 made three) are removed from this run's reels/ folder
+  for (const d of fs.readdirSync(OUT)) if (/^reel/.test(d) && fs.statSync(path.join(OUT, d)).isDirectory() && (!sel.reels[0] || d !== `reel_${sel.reels[0].id}`)) fs.rmSync(path.join(OUT, d), { recursive: true, force: true });
   fs.writeFileSync(path.join(OUT, 'selection.json'), JSON.stringify(sel, null, 1));
-  console.log(`selection: ${sel.reels.length} reels (candidates ${sel.candidates}${sel.shortfall ? ', SHORTFALL ' + sel.shortfall : ''})`);
+  console.log(`selection: ${sel.reels.length} reel (comeback candidates ${sel.candidates}${sel.fallback ? ', FALLBACK latest winning goal' : ''})`);
   const playerNames = show.teams.flatMap((t) => t.players.map((p) => p.name));
   const report = [];
   for (const r of sel.reels) {
     if (ONLY && String(r.rank) !== String(ONLY)) continue;
     const reel = buildReel(show, r.index);
-    const dir = path.join(OUT, `reel${r.rank}_${r.id}`); fs.mkdirSync(dir, { recursive: true });
+    const dir = path.join(OUT, `reel_${r.id}`); fs.mkdirSync(dir, { recursive: true });
     const rj = path.join(BUILD, `reel${r.rank}.json`); fs.writeFileSync(rj, JSON.stringify(reel));
     const t0 = Date.now();
     const out = path.join(dir, 'reel.mp4');
@@ -116,10 +118,8 @@ async function main() {
     execFileSync(process.platform === 'win32' ? 'python' : 'python3', [path.join(ROOT, 'audio', 'make_audio.py'), rj, wav], { stdio: ['ignore', 'ignore', 'inherit'] });
     mux(vid, wav, out);
     } else if (fs.existsSync(out)) fs.rmSync(out); // a stale video of another timeline must not stay next to new info
-    const s = suggestions(conf, sel, r, show);
-    const lint = lintSuggestion(s, playerNames);
-    if (lint.length) throw new Error('suggestions lint: ' + lint.join('; '));
-    fs.writeFileSync(path.join(dir, 'suggestions.txt'), suggestionsTxt(s, r, r.why));
+    // P6: the reel title / description are written by generate.js into <run>/publish/ (sim/publish.js)
+    const stale = path.join(dir, 'suggestions.txt'); if (fs.existsSync(stale)) fs.rmSync(stale);
     fs.writeFileSync(path.join(dir, 'reel_info.json'), JSON.stringify({ rank: r.rank, id: r.id, rendered: !NO_RENDER, seconds: reel.seconds, seed: reel.seed, timeline_hash: reel.timeline_hash,
       ffStretches: reel.ffStretches, segments: reel.segments.map((x) => ({ type: x.type, start: x.start, len: x.len })) }, null, 1));
     report.push(`${r.rank}. ${r.id} ${r.team_a} vs ${r.team_b} -> ${NO_RENDER ? path.relative(ROOT, dir) + ' (info only, not rendered)' : path.relative(ROOT, out)} (${reel.seconds}s, ${((Date.now() - t0) / 1000).toFixed(0)}s build)`);

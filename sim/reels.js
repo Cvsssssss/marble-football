@@ -11,6 +11,7 @@ const FF_MAX_OUT = 1.5;       // s of output per fast-forward stretch (spec)
 const FF_SPEED = 2;
 const QUIET_BEFORE = 2.0, QUIET_AFTER = 1.8; // s around goals / shots / whistles that always play at normal speed
 const TARGET_MAX = 54, TARGET_MIN = 30;      // s total reel length
+const REEL_SCENE = { x: 0, y: 400, w: 720, h: 405 }; // P6: full-width 16:9 scene band (design units of the 720x1280 reel)
 
 function scoreAtT(m, t) { let a = 0, b = 0; for (const g of m.goals) { if (g.t > t + 1e-9) break; if (g.team === 'A') a++; else b++; } return [a, b]; }
 
@@ -92,30 +93,17 @@ function buildReelOnce(show, matchIndex, opts) {
       plan.splice(0, cut); trimmedStart = plan.length ? plan[0].src : 0;
     }
   }
-  // follow camera (design x of the window centre), eased; zone = windmill side or goal side
-  const VIEW = opts.view || { w: 720, h: 610 }; // = render/draw.js reel FIELD (design px)
-  const zoom = VIEW.h / 720;
-  const half = VIEW.w / (2 * zoom);
-  const leftC = half, rightC = 1280 - half;
-  let camX = leftC;
-  const camPath = [];
-  for (const p of plan) {
-    const f = F[p.src];
-    const play = f.b.filter((b) => b[3] === 3 || b[3] === 4);
-    const lead = play.length ? Math.max(...play.map((b) => b[0])) : 0;
-    const target = lead > 560 ? rightC : leftC;
-    const k = p.ff ? 0.16 : 0.08;
-    camX += (target - camX) * k;
-    camPath.push(+camX.toFixed(2));
-  }
+  // P6: static camera. The whole 16:9 scene is always in frame (no pan, no zoom, no crop), so the camera track is one
+  // constant rectangle (design units of the 720x1280 reel = render/draw.js FIELD) for every output frame.
+  const SCENE = Object.assign({}, REEL_SCENE);
   // --- reel segments ---
   const segs = [];
   let fo = 0;
   const add = (type, len, extra) => { const s = Object.assign({ type, start: fo, len }, extra || {}); segs.push(s); fo += len; return s; };
   const dm = deficitMoment(m);
   const hookSrc = Math.min(F.length - 1, Math.round(dm.t * FPS));
-  add('hook', Math.round(hookLen * FPS), { src: hookSrc, cam: leftC, def: dm.def, score: scoreAtT(m, dm.t) });
-  const ms = add('match', plan.length, { plan, camPath });
+  add('hook', Math.round(hookLen * FPS), { src: hookSrc, def: dm.def, score: scoreAtT(m, dm.t) });
+  const ms = add('match', plan.length, { plan });
   const rp = add('replay', Math.round(replayLen * FPS), { goal: dg, t0: rt0, t1: rt1, speed: rSpeed });
   add('motm', Math.round(motmLen * FPS));
   add('end', Math.round(endLen * FPS));
@@ -138,10 +126,11 @@ function buildReelOnce(show, matchIndex, opts) {
   const ti = (s) => (s === 'A' ? m.ta : m.tb);
   return {
     reel: true, fps: FPS, totalFrames: total, winnerSide: m.winnerSide, map: show.map, audioCfg: show.audioCfg, seconds: +(total / FPS).toFixed(2), matchIndex, seed: m.seed, timeline_hash: m.hash,
-    view: Object.assign({ zoom }, VIEW), segments: segs, audio,
+    camera: { mode: 'static', scene: SCENE }, camTrack: { frames: total, rect: [SCENE.x, SCENE.y, SCENE.w, SCENE.h], changes: 0 }, segments: segs, audio,
+    comebackDepth: m.comeback ? m.comeback_depth : 0,
     decisive: { goal: dg, team: ti(g.team), player: g.player, minute: CLOCK.minuteLabel(m, g.t, show.cfg.GAME_MIN_PER_SEC) },
     ffStretches: chunks.filter(([a]) => ffMark[a]).length, quietScale: opts.quietScale, trimmedStartS: +(trimmedStart / FPS).toFixed(2),
   };
 }
 
-module.exports = { buildReel, decisiveGoal, deficitMoment, FF_MAX_OUT, FF_SPEED, TARGET_MAX, TARGET_MIN };
+module.exports = { REEL_SCENE, buildReel, decisiveGoal, deficitMoment, FF_MAX_OUT, FF_SPEED, TARGET_MAX, TARGET_MIN };

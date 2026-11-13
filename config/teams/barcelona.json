@@ -11,6 +11,8 @@
   {
    "name": "L. Yamal",
    "number": 10,
+   "team": "Barcelona",
+   "nationality": "Spain",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefachampionsleague/clubs/50080--barcelona/squad/",
    "retrieved": "2026-11-04",
@@ -19,6 +21,8 @@
   {
    "name": "Raphinha",
    "number": 11,
+   "team": "Barcelona",
+   "nationality": "Brazil",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefachampionsleague/clubs/50080--barcelona/squad/",
    "retrieved": "2026-11-04",
@@ -27,6 +31,8 @@
   {
    "name": "A. Gordon",
    "number": 17,
+   "team": "Barcelona",
+   "nationality": "England",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefachampionsleague/clubs/50080--barcelona/squad/",
    "retrieved": "2026-11-04",

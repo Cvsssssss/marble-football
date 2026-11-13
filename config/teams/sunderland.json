@@ -11,6 +11,8 @@
   {
    "name": "W. Isidor",
    "number": 18,
+   "team": "Sunderland",
+   "nationality": "France",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/53360--sunderland/squad/",
    "retrieved": "2026-11-04",
@@ -19,6 +21,8 @@
   {
    "name": "B. Brobbey",
    "number": 9,
+   "team": "Sunderland",
+   "nationality": "Netherlands",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/53360--sunderland/squad/",
    "retrieved": "2026-11-04",
@@ -27,6 +31,8 @@
   {
    "name": "N. Angulo",
    "number": 10,
+   "team": "Sunderland",
+   "nationality": "Ecuador",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/53360--sunderland/squad/",
    "retrieved": "2026-11-04",

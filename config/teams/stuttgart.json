@@ -11,6 +11,8 @@
   {
    "name": "D. Undav",
    "number": 26,
+   "team": "Stuttgart",
+   "nationality": "Germany",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefachampionsleague/clubs/50107--stuttgart/squad/",
    "retrieved": "2026-11-04",
@@ -19,6 +21,8 @@
   {
    "name": "J. Leweling",
    "number": 18,
+   "team": "Stuttgart",
+   "nationality": "Germany",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefachampionsleague/clubs/50107--stuttgart/squad/",
    "retrieved": "2026-11-04",
@@ -27,6 +31,8 @@
   {
    "name": "T. Tomás",
    "number": 8,
+   "team": "Stuttgart",
+   "nationality": "Portugal",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefachampionsleague/clubs/50107--stuttgart/squad/",
    "retrieved": "2026-11-04",

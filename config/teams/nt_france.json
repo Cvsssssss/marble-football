@@ -10,27 +10,30 @@
  "strength": 80,
  "players": [
   {
-   "name": "O. Dembélé",
-   "number": 7,
+   "name": "K. Mbappé",
+   "team": "France",
+   "nationality": "France",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/France_national_football_team",
-   "retrieved": "2026-11-04",
+   "source_url": "https://khelnow.com/football/france-november-uefa-nations-league-squad-202611",
+   "retrieved": "2026-11-13",
    "verified": true
   },
   {
    "name": "M. Olise",
-   "number": 11,
+   "team": "France",
+   "nationality": "France",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/France_national_football_team",
-   "retrieved": "2026-11-04",
+   "source_url": "https://khelnow.com/football/france-november-uefa-nations-league-squad-202611",
+   "retrieved": "2026-11-13",
    "verified": true
   },
   {
    "name": "D. Doué",
-   "number": 20,
+   "team": "France",
+   "nationality": "France",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/France_national_football_team",
-   "retrieved": "2026-11-04",
+   "source_url": "https://khelnow.com/football/france-november-uefa-nations-league-squad-202611",
+   "retrieved": "2026-11-13",
    "verified": true
   }
  ],

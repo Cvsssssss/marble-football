@@ -11,6 +11,8 @@
   {
    "name": "P. Schick",
    "number": 14,
+   "team": "Bayer Leverkusen",
+   "nationality": "Czechia",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/50109--leverkusen/squad/",
    "retrieved": "2026-11-04",
@@ -19,14 +21,19 @@
   {
    "name": "M. Diaby",
    "number": 19,
+   "team": "Bayer Leverkusen",
+   "nationality": "France",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/50109--leverkusen/squad/",
    "retrieved": "2026-11-04",
-   "verified": true
+   "verified": true,
+   "note": "nationality to confirm"
   },
   {
    "name": "C. Kofane",
    "number": 35,
+   "team": "Bayer Leverkusen",
+   "nationality": "Cameroon",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/50109--leverkusen/squad/",
    "retrieved": "2026-11-04",

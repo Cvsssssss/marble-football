@@ -10,6 +10,8 @@
   {
    "name": "E. Haaland",
    "number": 9,
+   "team": "Manchester City",
+   "nationality": "Norway",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefachampionsleague/clubs/52919--man-city/squad/",
    "retrieved": "2026-11-04",
@@ -18,6 +20,8 @@
   {
    "name": "J. Doku",
    "number": 11,
+   "team": "Manchester City",
+   "nationality": "Belgium",
    "position": "W (listed MF)",
    "source_url": "https://www.uefa.com/uefachampionsleague/clubs/52919--man-city/squad/",
    "retrieved": "2026-11-04",
@@ -26,6 +30,8 @@
   {
    "name": "A. Semenyo",
    "number": 42,
+   "team": "Manchester City",
+   "nationality": "Ghana",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefachampionsleague/clubs/52919--man-city/squad/",
    "retrieved": "2026-11-04",

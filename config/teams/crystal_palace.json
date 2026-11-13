@@ -11,6 +11,8 @@
   {
    "name": "J. Mateta",
    "number": 14,
+   "team": "Crystal Palace",
+   "nationality": "France",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/52916--crystal-palace/squad/",
    "retrieved": "2026-11-04",
@@ -19,6 +21,8 @@
   {
    "name": "I. Sarr",
    "number": 7,
+   "team": "Crystal Palace",
+   "nationality": "Senegal",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/52916--crystal-palace/squad/",
    "retrieved": "2026-11-04",
@@ -27,6 +31,8 @@
   {
    "name": "Y. Pino",
    "number": 10,
+   "team": "Crystal Palace",
+   "nationality": "Spain",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/52916--crystal-palace/squad/",
    "retrieved": "2026-11-04",

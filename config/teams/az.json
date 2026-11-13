@@ -11,6 +11,8 @@
   {
    "name": "M. Meerdink",
    "number": 9,
+   "team": "AZ Alkmaar",
+   "nationality": "Netherlands",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/52327--az-alkmaar/squad/",
    "retrieved": "2026-11-04",
@@ -19,6 +21,8 @@
   {
    "name": "C. Stengs",
    "number": 14,
+   "team": "AZ Alkmaar",
+   "nationality": "Netherlands",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/52327--az-alkmaar/squad/",
    "retrieved": "2026-11-04",
@@ -27,10 +31,13 @@
   {
    "name": "W. Patati",
    "number": 7,
+   "team": "AZ Alkmaar",
+   "nationality": "Netherlands",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/52327--az-alkmaar/squad/",
    "retrieved": "2026-11-04",
-   "verified": true
+   "verified": true,
+   "note": "nationality to confirm"
   }
  ],
  "fictional_players": [

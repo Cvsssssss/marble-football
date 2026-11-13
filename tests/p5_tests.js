@@ -178,7 +178,7 @@ const loadSeeds = (conf) => { const f = path.join(ROOT, 'build', 'cache', `seeds
         const reel = require('../sim/reels').buildReel(s, 0);
         await page.evaluate((j) => window.initReel(JSON.parse(j)), JSON.stringify(reel));
         const seg = reel.segments.find((x) => x.type === 'match');
-        out = await page.evaluate((k) => { window.renderReelFrame(k); const c = document.getElementById('c'); return Array.from(c.getContext('2d').getImageData(470, 1660, 140, 56).data); }, seg.start + 30);
+        out = await page.evaluate((k) => { window.renderReelFrame(k); const c = document.getElementById('c'); return Array.from(c.getContext('2d').getImageData(55, 1148, 170, 50).data); }, seg.start + 30);
       } else if (kind === 'thumb') {
         const m = s.matches[0], gl = m.goals[0];
         out = await page.evaluate(([t, x, y]) => { window.renderThumb(0, t, { z: 2.1, x: x - 90, y: y - 70 }); const c = document.getElementById('c'); return Array.from(c.getContext('2d').getImageData(1240, 980, 680, 100).data); }, [gl.t + 0.2, gl.x, gl.y]);

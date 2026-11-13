@@ -71,9 +71,9 @@ function option3() {
   if (!r || !fs.existsSync(path.join(r, 'run.json'))) { console.log('\nNu există încă un turneu generat. Folosește opțiunea 1 sau 2.'); return; }
   const run = JSON.parse(fs.readFileSync(path.join(r, 'run.json'), 'utf8'));
   const comp = path.join(ROOT, 'build', 'runs', run.run, 'competition.json');
-  if (!fail(runNode(['build_reels.js', '--competition', comp, '--out-dir', path.join(r, 'reels')].concat(run.quality === 'final_1080p' ? [] : ['--fast'])), 'Reel-urile')) return;
+  if (!fail(runNode(['build_reels.js', '--competition', comp, '--out-dir', path.join(r, 'reels')].concat(run.quality === 'final_1080p' ? [] : ['--fast'])), 'Reel-ul')) return;
   runNode(['preflight.js', r]);
-  console.log(`\nReel-uri în: ${path.join(r, 'reels')}`);
+  console.log(`\nReel-ul (unul singur) este în: ${path.join(r, 'reels')}  ·  titlul și descrierea lui: ${path.join(r, 'publish')}`);
 }
 function option4() {
   if (!fail(runNode(['next.js']), 'Recomandarea')) return;
@@ -112,7 +112,7 @@ async function main() {
     console.log('\n==================== MARBLE FOOTBALL ====================');
     console.log('  1. Alege competiția, harta/tema și (opțional) o pereche forțată, apoi generează');
     console.log('  2. Preview rapid (720p)');
-    console.log('  3. Doar reel-uri din ultimul turneu');
+    console.log('  3. Doar reel-ul (unul) din ultimul turneu — tot terenul în cadru');
     console.log('  4. Generează videoul recomandat');
     console.log('  5. Deschide folderul cu rezultate');
     console.log('  6. Verifică configurarea și planul');

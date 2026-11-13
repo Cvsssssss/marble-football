@@ -143,6 +143,150 @@
     ]
    },
    "note": "repetiție P4 (preview)"
+  },
+  {
+   "published_long": null,
+   "published_reels": [],
+   "run": "2026-11-04_ucl_2026_top16_sky_clean",
+   "generated_at": "2026-11-04T14:01:15.296Z",
+   "competition": "ucl_2026_top16",
+   "map": "sky_clean",
+   "accent": "#1F6FEB",
+   "quality": "final_1080p",
+   "status": "generated",
+   "forced_pair": null,
+   "fingerprint": {
+    "id": "2026-11-04_ucl_2026_top16_sky_clean",
+    "competition": "ucl_2026_top16",
+    "competition_name": "MARBLE CHAMPIONS",
+    "map": "sky_clean",
+    "accent": "#1F6FEB",
+    "colours": [
+     "#1F6FEB",
+     "#6db9f5",
+     "#e8553e"
+    ],
+    "music": "v2/up/0/112/seed1234",
+    "bracket": [
+     "barcelona-real_madrid",
+     "lask-man_city",
+     "inter-stuttgart",
+     "liverpool-sporting",
+     "bayern-dortmund",
+     "aston_villa-como",
+     "club_brugge-psg",
+     "arsenal-real_betis"
+    ]
+   }
+  },
+  {
+   "published_long": null,
+   "published_reels": [],
+   "run": "2026-11-06_nations_euro_16_stadium_day",
+   "generated_at": "2026-11-06T00:55:44.431Z",
+   "competition": "nations_euro_16",
+   "map": "stadium_day",
+   "accent": "#56CCF2",
+   "quality": "final_1080p",
+   "status": "generated",
+   "forced_pair": {
+    "a": "nt_spain",
+    "b": "nt_france",
+    "round": "QF"
+   },
+   "fingerprint": {
+    "id": "2026-11-06_nations_euro_16_stadium_day",
+    "competition": "nations_euro_16",
+    "competition_name": "MARBLE EURO NATIONS",
+    "map": "stadium_day",
+    "accent": "#56CCF2",
+    "colours": [
+     "#56CCF2",
+     "#8cc4ee",
+     "#2f6fd1"
+    ],
+    "music": "stride/up/2/116/seed1234",
+    "bracket": [
+     "nt_norway-nt_sweden",
+     "nt_croatia-nt_switzerland",
+     "nt_belgium-nt_italy",
+     "nt_portugal-nt_ukraine",
+     "nt_denmark-nt_turkiye",
+     "nt_england-nt_netherlands",
+     "nt_germany-nt_spain",
+     "nt_austria-nt_france"
+    ]
+   }
+  },
+  {
+   "published_long": null,
+   "published_reels": [],
+   "run": "2026-11-07_nations_world_16_sunset",
+   "generated_at": "2026-11-07T20:05:38.669Z",
+   "competition": "nations_world_16",
+   "map": "sunset",
+   "accent": "#F2994A",
+   "quality": "final_1080p",
+   "status": "generated",
+   "forced_pair": null,
+   "fingerprint": {
+    "id": "2026-11-07_nations_world_16_sunset",
+    "competition": "nations_world_16",
+    "competition_name": "MARBLE WORLD NATIONS",
+    "map": "sunset",
+    "accent": "#F2994A",
+    "colours": [
+     "#F2994A",
+     "#e98a6a",
+     "#2e3a66"
+    ],
+    "music": "warm/down/5/108/seed1234",
+    "bracket": [
+     "nt_colombia-nt_england",
+     "nt_croatia-nt_portugal",
+     "nt_italy-nt_spain",
+     "nt_belgium-nt_switzerland",
+     "nt_morocco-nt_usa",
+     "nt_france-nt_mexico",
+     "nt_argentina-nt_netherlands",
+     "nt_brazil-nt_germany"
+    ]
+   }
+  },
+  {
+   "published_long": null,
+   "published_reels": [],
+   "run": "2026-11-13_uel_top16_sky_clean",
+   "generated_at": "2026-11-13T02:32:24.471Z",
+   "competition": "uel_top16",
+   "map": "sky_clean",
+   "accent": "#6FCF97",
+   "quality": "final_1080p",
+   "status": "generated",
+   "forced_pair": null,
+   "fingerprint": {
+    "id": "2026-11-13_uel_top16_sky_clean",
+    "competition": "uel_top16",
+    "competition_name": "MARBLE CONTINENTAL",
+    "map": "sky_clean",
+    "accent": "#6FCF97",
+    "colours": [
+     "#6FCF97",
+     "#6db9f5",
+     "#e8553e"
+    ],
+    "music": "v2/up/0/112/seed1234",
+    "bracket": [
+     "lyon-olympiacos",
+     "benfica-sparta_praha",
+     "besiktas-leverkusen",
+     "omonia-real_sociedad",
+     "crystal_palace-juventus",
+     "ferencvaros-sunderland",
+     "bournemouth-rennes",
+     "az-union_sg"
+    ]
+   }
   }
  ]
 }

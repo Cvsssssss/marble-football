@@ -10,6 +10,7 @@
 
   // ---------- helpers ----------
   const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+  const numTag = (P) => (P && P.number ? '#' + P.number + ' · ' : ''); // P6: national-team players have no shirt number
   const smooth = (x) => { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); };
   const easeOut = (x) => 1 - Math.pow(1 - clamp(x, 0, 1), 3);
   const easeOutBack = (x) => { x = clamp(x, 0, 1); const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
@@ -790,7 +791,7 @@
   }
   function drawIntroGrid(c, t) {
     const a = smooth((t - 0.6) / 0.5);
-    c.globalAlpha = a; text(c, `${show.teams.length} teams · two-legged ties · golden ball decides level ties`, G.W / 2, 286, 20, '#d6e4ff', 'center', 600); c.globalAlpha = 1;
+    c.globalAlpha = a; text(c, `${show.teams.length} ${show.teams.every((x) => x.national) ? 'nations' : 'teams'} · two-legged ties · golden ball decides level ties`, G.W / 2, 286, 20, '#d6e4ff', 'center', 600); c.globalAlpha = 1;
     const cw = 282, ch = 78, gx = 16, gy = 14, x0 = (G.W - 4 * cw - 3 * gx) / 2, y0 = 330;
     show.teams.forEach((T, i) => {
       const col = i % 4, row = Math.floor(i / 4);
@@ -802,7 +803,9 @@
       teamBar(c, i, x, y, 7, ch);
       drawBall(c, x + 50, y + ch / 2, 26, 0.0, kitStyle(T), 1);
       const z = fitText(c, T.name, cw - 100, 23); text(c, T.name, x + 90, y + ch / 2 - 8, z, '#ffffff', 'left');
-      text(c, `${i + 1}${['st', 'nd', 'rd'][i] || 'th'} in the league phase`, x + 90, y + ch / 2 + 17, 13, '#9fb6d6', 'left', 600);
+      // P6: national teams show their ranking ("Ranked #3", FIFA rank when the standings list it); clubs keep the league-phase wording
+      const sub = T.national ? `Ranked #${T.rank || i + 1}` : `${i + 1}${['st', 'nd', 'rd'][i] || 'th'} in the league phase`;
+      text(c, sub, x + 90, y + ch / 2 + 17, 13, '#9fb6d6', 'left', 600);
       c.restore();
     });
   }
@@ -1096,7 +1099,7 @@
     const cx = x0 + 480;
     const zn = fitText(c, P.name, 470, 58); text(c, P.name, cx, y0 + 140, zn, '#ffffff', 'center', 800);
     kitDot(c, { primary: TM.primary, secondary: TM.secondary }, cx - 120, y0 + 200, 11);
-    text(c, `#${P.number} · ${TM.name}`, cx - 100, y0 + 201, 24, '#c9dcff', 'left', 700);
+    text(c, `${numTag(P)}${TM.name}`, cx - 100, y0 + 201, 24, '#c9dcff', 'left', 700);
     const why = `${mo.goals} goal${mo.goals === 1 ? '' : 's'} in this match${mo.tiebreak === 'decisive_goal' ? ' · decisive goal' : mo.tiebreak === 'last_goal' ? ' · last goal' : ''}`;
     text(c, why, cx, y0 + 252, 21, '#9fb6d6', 'center', 600);
     c.restore();
@@ -1199,7 +1202,7 @@
       ctx.fillStyle = 'rgba(8,20,38,0.9)'; rrect(ctx, bx, by, cw, 82, 10); ctx.fill();
       teamBar(ctx, ti, bx, by, 10, 82);
       text(ctx, cap, bx + 32, by + 32, 40, '#ffffff', 'left', 800);
-      text(ctx, `#${P.number} · ${teamName(ti)}${gl.golden ? ' · GOLDEN GOAL' : ''}`, bx + 32, by + 64, 18, '#9fc7ff', 'left', 700);
+      text(ctx, `${numTag(P)}${teamName(ti)}${gl.golden ? ' · GOLDEN GOAL' : ''}`, bx + 32, by + 64, 18, '#9fc7ff', 'left', 700);
       ctx.globalAlpha = 1;
       ctx.restore();
       fadeIn(lf, 6);
@@ -1225,168 +1228,194 @@
   };
   window.renderFrame = renderFrame;
 
-  // ================= P3 A: vertical reel (1080x1920, design space 720x1280) =================
-  // Same scene renderer, recomposed: header, bracket strip, big scoreboard, follow-camera playfield, lower third.
-  const RW = 720, RH = 1280, FIELD = { y: 490, h: 610 }, SAFE = { x0: 72, x1: 648, y0: 128, y1: 1152 };
-  let reel = null, RS = 1.5;
+  // ================= P6: vertical reel (1080x1920, design space 720x1280) =================
+  // The whole 16:9 scene scaled to the full width (720x405 design = 1080x608 px) in the middle band, STATIC camera
+  // (no pan, no zoom, no crop: windmill/spout side and goal side always visible). Above: big scoreboard; below:
+  // goal/scorer caption, comeback badge, info strip. Background: the map scene, extended and softly blurred (cached).
+  // Key text stays inside SAFE (out of the bottom 25 % and the right 12 %: YouTube Shorts overlays, approximate).
+  const RW = 720, RH = 1280, FIELD = { x: 0, y: 400, w: 720, h: 405 };
+  const SAFE = { x0: 40, x1: Math.floor(RW * 0.88) - 4, y0: 100, y1: Math.floor(RH * 0.75) - 4 };
+  let reel = null, RS = 1.5, reelBgCanvas = null, boxes = [];
   window.initReel = function (r) {
-    reel = r; RS = OUT_W / RW;
+    reel = r; RS = OUT_W / RW; reelBgCanvas = null;
     window.REEL_LAYOUT = { RW, RH, FIELD, SAFE, RS };
     return { frames: reel.totalFrames };
   };
+  const box = (name, x, y, w, h) => boxes.push({ name, x, y, w, h });
   function reelSeg(k) { let s = reel.segments[0]; for (const x of reel.segments) if (x.start <= k) s = x; return s; }
-  function fieldScene(c, m, fr, camX, opts) {
-    // draw the landscape scene into the vertical playfield box, scaled so the full scene height fits the box
-    const s = FIELD.h / G.H, halfW = RW / (2 * s);
-    const cx = clamp(camX, halfW, G.W - halfW);
+  // scene rectangle in output pixels: constant for every frame of the reel (asserted by the tests)
+  function sceneRect() { return { x: FIELD.x * RS, y: FIELD.y * RS, w: FIELD.w * RS, h: FIELD.h * RS }; }
+  function fieldScene(c, m, fr, opts) {
+    const s = FIELD.w / G.W; // full scene width -> full canvas width
     c.save(); c.scale(RS, RS);
-    c.beginPath(); c.rect(0, FIELD.y, RW, FIELD.h); c.clip();
-    c.translate(RW / 2, FIELD.y + FIELD.h / 2); c.scale(s / S, s / S); c.translate(-cx * S, -G.H / 2 * S);
-    drawScene(c, m, fr, Object.assign({ noCam: true }, opts));
+    c.beginPath(); c.rect(FIELD.x, FIELD.y, FIELD.w, FIELD.h); c.clip();
+    c.translate(FIELD.x, FIELD.y); c.scale(s / S, s / S);
+    drawScene(c, m, fr, Object.assign({ noCam: true }, opts)); // noCam: the slow-motion zoom track is ignored in reels
     c.restore();
+    window.__reelSceneRect = sceneRect();
+  }
+  function reelBG(c, m) {
+    if (!reelBgCanvas) { // the map scene (first frame) scaled to cover the canvas, blurred and darkened; drawn once per reel
+      reelBgCanvas = document.createElement('canvas'); reelBgCanvas.width = OUT_W; reelBgCanvas.height = OUT_H;
+      const b = reelBgCanvas.getContext('2d');
+      const cover = (RH * RS) / (G.H * S);
+      b.save(); b.filter = 'blur(22px)';
+      b.translate(OUT_W / 2 - (G.W * S * cover) / 2, 0); b.scale(cover, cover);
+      drawScene(b, m, m.frames[0], { noCam: true, trail: false, noFx: true, frameIndex: 0 });
+      b.restore(); b.filter = 'none';
+      const g = b.createLinearGradient(0, 0, 0, OUT_H);
+      g.addColorStop(0, 'rgba(6,14,28,0.62)'); g.addColorStop(0.5, 'rgba(6,14,28,0.40)'); g.addColorStop(1, 'rgba(6,14,28,0.70)');
+      b.fillStyle = g; b.fillRect(0, 0, OUT_W, OUT_H);
+    }
+    c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.drawImage(reelBgCanvas, 0, 0); c.restore();
+  }
+  function reelHeader(c) {
+    const label = `${show.competition.name}`;
+    const z = fitText(c, label, SAFE.x1 - SAFE.x0, 30, 900);
+    text(c, label, (SAFE.x0 + SAFE.x1) / 2, 136, z, '#ffffff', 'center', 900); box('competition', SAFE.x0, 118, SAFE.x1 - SAFE.x0, 36);
   }
   function reelScoreboard(c, m, sc, clock, extra) {
-    const y = 300, h = 170;
-    c.fillStyle = 'rgba(8,20,38,0.92)'; rrect(c, SAFE.x0, y, SAFE.x1 - SAFE.x0, h, 22); c.fill();
-    const L = SAFE.x0 + 24, R = SAFE.x1 - 24;
-    // team names (top row) with kit dots
-    kitDot(c, m.kits.A, L + 10, y + 34, 10); kitDot(c, m.kits.B, R - 10, y + 34, 10);
-    let z = fitText(c, teamName(m.ta), 220, 26); text(c, teamName(m.ta), L + 28, y + 35, z, '#ffffff', 'left', 800);
-    z = fitText(c, teamName(m.tb), 220, 26); text(c, teamName(m.tb), R - 28, y + 35, z, '#ffffff', 'right', 800);
-    // big score
-    c.fillStyle = '#ffffff'; rrect(c, RW / 2 - 120, y + 58, 240, 88, 16); c.fill();
-    text(c, `${sc[0]} – ${sc[1]}`, RW / 2, y + 104, 74, '#0b1a2e', 'center', 900);
-    // clock + leg / aggregate
-    c.fillStyle = 'rgba(255,255,255,0.12)'; rrect(c, L, y + 80, 110, 44, 12); c.fill();
-    text(c, clock, L + 55, y + 103, fitText(c, clock, 100, 28), '#ffffff', 'center', 800);
+    const x = SAFE.x0, y = 168, w = SAFE.x1 - SAFE.x0, h = 210, cx = x + w / 2;
+    c.fillStyle = 'rgba(8,20,38,0.92)'; rrect(c, x, y, w, h, 22); c.fill(); box('scoreboard', x, y, w, h);
+    const L = x + 22, R = x + w - 22;
+    kitDot(c, m.kits.A, L + 10, y + 36, 10); kitDot(c, m.kits.B, R - 10, y + 36, 10);
+    let z = fitText(c, teamName(m.ta), w / 2 - 50, 28, 800); text(c, teamName(m.ta), L + 28, y + 37, z, '#ffffff', 'left', 800);
+    z = fitText(c, teamName(m.tb), w / 2 - 50, 28, 800); text(c, teamName(m.tb), R - 28, y + 37, z, '#ffffff', 'right', 800);
+    c.fillStyle = '#ffffff'; rrect(c, cx - 125, y + 64, 250, 92, 16); c.fill();
+    text(c, `${sc[0]} – ${sc[1]}`, cx, y + 112, 78, '#0b1a2e', 'center', 900);
+    c.fillStyle = 'rgba(255,255,255,0.12)'; rrect(c, L, y + 88, 104, 44, 12); c.fill();
+    text(c, clock, L + 52, y + 111, fitText(c, clock, 94, 28), '#ffffff', 'center', 800);
     const legTxt = m.leg === 'FINAL' ? 'FINAL' : m.leg;
-    text(c, legTxt, R - 60, y + 92, 20, '#c9dcff', 'center', 800);
-    if (m.leg === 'LEG 2') text(c, `AGG ${m.prev[0] + sc[0]}–${m.prev[1] + sc[1]}`, R - 60, y + 120, 20, '#ffd84a', 'center', 800);
-    if (extra) text(c, extra, RW / 2, y + h - 14, 16, '#ffd84a', 'center', 800);
+    text(c, legTxt, R - 52, y + 100, 20, '#c9dcff', 'center', 800);
+    if (m.leg === 'LEG 2') text(c, `AGG ${m.prev[0] + sc[0]}–${m.prev[1] + sc[1]}`, R - 52, y + 126, 19, '#ffd84a', 'center', 800);
+    const st = (m.stage || '').toUpperCase();
+    text(c, st, cx, y + 182, fitText(c, st, w - 40, 18, 800), '#9fb6d6', 'center', 800);
+    if (extra) text(c, extra, cx, y + h + 8, 16, '#ffd84a', 'center', 800);
   }
-  function reelBracketStrip(c, m) {
-    const ties = []; show.matches.forEach((x) => { if (x.round === m.round && !ties.some((t) => t.tie === x.tie)) ties.push(x); });
-    const y = 196, h = 84, n = ties.length, w = (SAFE.x1 - SAFE.x0) / n;
-    text(c, (m.roundName || m.stage).toUpperCase(), RW / 2, y - 12, 15, '#9fb6d6', 'center', 800);
-    ties.forEach((t, i) => {
-      const x = SAFE.x0 + i * w, cur = t.tie === m.tie;
-      c.fillStyle = cur ? 'rgba(255,216,74,0.95)' : 'rgba(255,255,255,0.10)'; rrect(c, x + 3, y, w - 6, h, 10); c.fill();
-      const col = cur ? '#0b1a2e' : '#dfe8f5';
-      const sa = show.teams[t.ta].short || '', sb = show.teams[t.tb].short || '';
-      text(c, sa, x + w / 2, y + 26, fitText(c, sa, w - 14, 18), col, 'center', 800);
-      text(c, 'v', x + w / 2, y + 43, 12, cur ? '#334' : '#8fa3bd', 'center', 700);
-      text(c, sb, x + w / 2, y + 60, fitText(c, sb, w - 14, 18), col, 'center', 800);
-    });
-  }
-  function reelHeader(c, m) {
-    const label = `${show.competition.name}`;
-    text(c, label, RW / 2, 146, fitText(c, label, 560, 30), '#ffffff', 'center', 900);
+  // below the field: info strip (always) + comeback badge (once the winner has come from behind)
+  function reelInfo(c, m, comebackNow) {
+    const y = 905, x = SAFE.x0, w = SAFE.x1 - SAFE.x0;
+    c.fillStyle = 'rgba(8,20,38,0.80)'; rrect(c, x, y, w, 46, 12); c.fill(); box('info', x, y, w, 46);
+    const t = `${(m.roundName || m.stage)} · ${m.leg === 'FINAL' ? 'final' : m.leg.toLowerCase()} · computer simulation`;
+    text(c, t, x + w / 2, y + 24, fitText(c, t, w - 30, 18, 700), '#c9dcff', 'center', 700);
+    if (comebackNow) {
+      const bw = 300, bx = x + w / 2 - bw / 2, by = 856;
+      const bt = reel.comebackDepth >= 2 ? `COMEBACK FROM ${reel.comebackDepth} DOWN` : 'COMEBACK!';
+      c.fillStyle = '#ffd84a'; rrect(c, bx, by, bw, 40, 20); c.fill(); box('comeback', bx, by, bw, 40);
+      text(c, bt, x + w / 2, by + 21, fitText(c, bt, bw - 24, 20, 900), '#0b1a2e', 'center', 900);
+    }
   }
   function reelSimLabel(c) {
     if (!simLabelOn()) return;
     c.font = `800 15px ${FONT}`; const w = c.measureText('SIMULATION').width + 22;
-    c.fillStyle = 'rgba(8,20,38,0.78)'; rrect(c, RW / 2 - w / 2, 1112, w, 28, 10); c.fill();
-    text(c, 'SIMULATION', RW / 2, 1126.5, 15, '#ffffff', 'center', 800);
+    c.fillStyle = 'rgba(8,20,38,0.78)'; rrect(c, SAFE.x0, FIELD.y + FIELD.h - 36, w, 26, 10); c.fill();
+    text(c, 'SIMULATION', SAFE.x0 + w / 2, FIELD.y + FIELD.h - 22.5, 15, '#ffffff', 'center', 800);
   }
-  function reelBG(c) {
-    const g = c.createLinearGradient(0, 0, 0, RH); g.addColorStop(0, '#0d2340'); g.addColorStop(1, '#081426');
-    c.fillStyle = g; c.fillRect(0, 0, RW, RH);
-  }
-  function lowerThird(c, title, sub, ti, a) {
+  // goal / scorer caption under the field (y 815..899); the comeback badge uses y 856..896 only when no caption is up
+  function caption(c, title, sub, ti, a) {
+    if (a <= 0.001) return;
     c.save(); c.globalAlpha = a;
-    const x = SAFE.x0, y = 980, w = SAFE.x1 - SAFE.x0, h = 108;
-    c.fillStyle = 'rgba(8,20,38,0.92)'; rrect(c, x, y, w, h, 14); c.fill();
+    const x = SAFE.x0, y = 813, w = SAFE.x1 - SAFE.x0, h = 84;
+    c.fillStyle = 'rgba(8,20,38,0.96)'; rrect(c, x, y, w, h, 14); c.fill(); box('caption', x, y, w, h);
     if (ti != null) teamBar(c, ti, x, y, 12, h);
-    text(c, title, x + 34, y + 44, fitText(c, title, w - 60, 44), '#ffffff', 'left', 900);
-    if (sub) text(c, sub, x + 34, y + 86, fitText(c, sub, w - 60, 22), '#9fc7ff', 'left', 700);
+    text(c, title, x + 30, y + 31, fitText(c, title, w - 50, 34, 900), '#ffffff', 'left', 900);
+    if (sub) text(c, sub, x + 30, y + 66, fitText(c, sub, w - 50, 20, 700), '#9fc7ff', 'left', 700);
     c.restore();
   }
   function scoreAt(m, t) { let a = 0, b = 0; for (const g of m.goals) { if (g.t > t + 1e-9) break; if (g.team === 'A') a++; else b++; } return [a, b]; }
   window.renderReelFrame = function (k) {
     const seg = reelSeg(k), lf = k - seg.start, m = show.matches[reel.matchIndex];
+    boxes = [];
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.save(); ctx.scale(RS, RS); reelBG(ctx); reelHeader(ctx, m); reelBracketStrip(ctx, m); ctx.restore();
+    reelBG(ctx, m);
+    ctx.save(); ctx.scale(RS, RS); reelHeader(ctx); ctx.restore();
     const CL = (t) => { const ck = clockText(m, t); return ck.main + (ck.plus && ck.phase !== 'shots' ? ` +${ck.plus}` : ''); };
     const XT = (t) => { const ck = clockText(m, t); return ck.golden ? 'GOLDEN BALL' : ck.phase === 'shots' ? `ADDED-TIME SHOT ${ck.shot}/${ck.added}` : ''; };
+    const dg = m.goals[reel.decisive.goal];
+    const finish = () => { window.REEL_BOXES = boxes.slice(); };
     if (seg.type === 'hook') {
       const fr = matchFrame(m, seg.src);
-      fieldScene(ctx, m, fr, seg.cam, { frameIndex: seg.src, trail: false, noFx: true });
+      fieldScene(ctx, m, fr, { frameIndex: seg.src, trail: false, noFx: true });
       ctx.save(); ctx.scale(RS, RS);
       reelScoreboard(ctx, m, seg.score, CL(fr.t));
-      ctx.fillStyle = 'rgba(5,12,25,0.55)'; ctx.fillRect(0, FIELD.y, RW, FIELD.h);
-      const p = easeOutBack(clamp(lf / 12, 0, 1));
-      ctx.save(); ctx.translate(RW / 2, FIELD.y + 250); ctx.scale(p, p);
-      text(ctx, `${seg.score[0]} – ${seg.score[1]}`, 0, 0, 150, '#ffffff', 'center', 900);
-      ctx.restore();
+      ctx.fillStyle = 'rgba(5,12,25,0.55)'; ctx.fillRect(FIELD.x, FIELD.y, FIELD.w, FIELD.h);
+      const p = easeOutBack(clamp(lf / 12, 0, 1)), cx = (SAFE.x0 + SAFE.x1) / 2;
+      ctx.save(); ctx.translate(cx, FIELD.y + 190); ctx.scale(p, p);
+      text(ctx, `${seg.score[0]} – ${seg.score[1]}`, 0, 0, 130, '#ffffff', 'center', 900);
+      ctx.restore(); box('hook_score', cx - 160, FIELD.y + 125, 320, 130);
       const behind = reel.winnerSide === 'A' ? teamName(m.ta) : teamName(m.tb);
-      text(ctx, `${behind} are behind…`, RW / 2, FIELD.y + 380, fitText(ctx, `${behind} are behind…`, 540, 34), '#ffd84a', 'center', 800);
-      reelSimLabel(ctx); ctx.restore(); fadeIn(lf, 6); return;
+      const ht = seg.def > 0 ? `${behind} are behind…` : `${teamName(m.ta)} vs ${teamName(m.tb)}`;
+      caption(ctx, ht, 'watch what happens next', null, 1);
+      reelInfo(ctx, m, false);
+      reelSimLabel(ctx); ctx.restore(); fadeIn(lf, 6); return finish();
     }
     if (seg.type === 'match') {
       const p = seg.plan[lf], fr = matchFrame(m, p.src), v = p.src / FPS;
-      fieldScene(ctx, m, fr, seg.camPath[lf], { frameIndex: p.src, v, trailStep: p.ff ? 2 : 1 });
+      fieldScene(ctx, m, fr, { frameIndex: p.src, v, trailStep: p.ff ? 2 : 1 });
       ctx.save(); ctx.scale(RS, RS);
       reelScoreboard(ctx, m, fr.sc || scoreAt(m, fr.t), CL(fr.t), XT(fr.t));
-      if (p.ff) { // fast-forward indicator (top-right of the field)
-        ctx.fillStyle = 'rgba(8,20,38,0.85)'; rrect(ctx, SAFE.x1 - 104, FIELD.y + 16, 104, 40, 12); ctx.fill();
-        text(ctx, '>> x2', SAFE.x1 - 52, FIELD.y + 36.5, 22, '#ffd84a', 'center', 900);
+      if (p.ff) { // fast-forward indicator (top-left of the field, away from the Shorts buttons on the right)
+        ctx.fillStyle = 'rgba(8,20,38,0.85)'; rrect(ctx, SAFE.x0, FIELD.y + 10, 96, 36, 12); ctx.fill();
+        text(ctx, '>> x2', SAFE.x0 + 48, FIELD.y + 28.5, 20, '#ffd84a', 'center', 900); box('ff', SAFE.x0, FIELD.y + 10, 96, 36);
       }
       const lg = lastEventBeforeV(m, 'goal', v);
-      if (lg && v - evV(lg) < 1.8) { // goal: team only (no player names during play)
-        const u = v - evV(lg), a = smooth(u / 0.15) * (1 - smooth((u - 1.5) / 0.3));
-        const ti = lg.team === 'A' ? m.ta : m.tb;
-        ctx.save(); ctx.globalAlpha = a; const kit = m.kits[lg.team];
-        ctx.fillStyle = 'rgba(8,20,38,0.92)'; rrect(ctx, SAFE.x0 + 40, FIELD.y + 90, SAFE.x1 - SAFE.x0 - 80, 130, 18); ctx.fill();
-        ctx.fillStyle = kit.ring || kit.primary; ctx.fillRect(SAFE.x0 + 40, FIELD.y + 90, 14, 130);
-        text(ctx, lg.golden ? 'GOLDEN GOAL!' : 'GOAL!', RW / 2, FIELD.y + 145, 70, '#ffffff', 'center', 900);
-        text(ctx, `${teamName(ti)} · ${window.CLOCK.minuteLabel(m, lg.t, show.cfg.GAME_MIN_PER_SEC)}`, RW / 2, FIELD.y + 196, 24, '#ffd84a', 'center', 800);
-        ctx.restore();
+      let capOn = false;
+      if (lg && v - evV(lg) < 2.2) { // goal: team + minute only (no player names during play)
+        const u = v - evV(lg), a = smooth(u / 0.15) * (1 - smooth((u - 1.9) / 0.3));
+        const ti = lg.team === 'A' ? m.ta : m.tb; capOn = a > 0.001;
+        caption(ctx, lg.golden ? 'GOLDEN GOAL!' : 'GOAL!', `${teamName(ti)} · ${window.CLOCK.minuteLabel(m, lg.t, show.cfg.GAME_MIN_PER_SEC)}`, ti, a);
       }
-      reelSimLabel(ctx); ctx.restore(); if (lf < 6) fadeIn(lf, 6); return;
+      reelInfo(ctx, m, !capOn && reel.comebackDepth > 0 && dg && fr.t >= dg.t);
+      reelSimLabel(ctx); ctx.restore(); if (lf < 6) fadeIn(lf, 6); return finish();
     }
     if (seg.type === 'replay') {
       const at = frameAtTime(m, seg.t0 + (lf / FPS) * seg.speed);
-      fieldScene(ctx, m, at.fr, 1280, { frameIndex: at.i, noFx: true });
+      fieldScene(ctx, m, at.fr, { frameIndex: at.i, noFx: true });
       ctx.save(); ctx.scale(RS, RS);
       reelScoreboard(ctx, m, scoreAt(m, at.fr.t), CL(at.fr.t), XT(at.fr.t));
-      ctx.fillStyle = 'rgba(20,30,50,0.10)'; ctx.fillRect(0, FIELD.y, RW, FIELD.h);
-      ctx.fillStyle = 'rgba(5,8,13,0.88)'; rrect(ctx, SAFE.x0, FIELD.y + 16, 190, 42, 12); ctx.fill();
-      if (Math.floor(lf / 15) % 2 === 0) { ctx.fillStyle = '#ff3b3b'; ctx.beginPath(); ctx.arc(SAFE.x0 + 24, FIELD.y + 37, 7, 0, Math.PI * 2); ctx.fill(); }
-      text(ctx, 'REPLAY', SAFE.x0 + 40, FIELD.y + 38, 22, '#ffffff', 'left', 900);
+      ctx.fillStyle = 'rgba(5,8,13,0.88)'; rrect(ctx, SAFE.x0, FIELD.y + 10, 150, 36, 12); ctx.fill(); box('replay', SAFE.x0, FIELD.y + 10, 150, 36);
+      if (Math.floor(lf / 15) % 2 === 0) { ctx.fillStyle = '#ff3b3b'; ctx.beginPath(); ctx.arc(SAFE.x0 + 20, FIELD.y + 28, 6, 0, Math.PI * 2); ctx.fill(); }
+      text(ctx, 'REPLAY', SAFE.x0 + 34, FIELD.y + 29, 20, '#ffffff', 'left', 900);
       const gl = m.goals[seg.goal], ti = gl.team === 'A' ? m.ta : m.tb, P = show.teams[ti].players[gl.player];
-      lowerThird(ctx, `${P.name} · ${window.CLOCK.minuteLabel(m, gl.t, show.cfg.GAME_MIN_PER_SEC)}`, `#${P.number} · ${teamName(ti)} · decisive goal`, ti, smooth((lf - 6) / 10));
-      reelSimLabel(ctx); ctx.restore(); fadeIn(lf, 6); return;
+      caption(ctx, `${P.name} · ${window.CLOCK.minuteLabel(m, gl.t, show.cfg.GAME_MIN_PER_SEC)}`, `${numTag(P)}${teamName(ti)} · decisive goal`, ti, Math.max(0.002, smooth((lf - 6) / 10)));
+      reelInfo(ctx, m, false);
+      reelSimLabel(ctx); ctx.restore(); fadeIn(lf, 6); return finish();
     }
     const last = m.frames[m.frames.length - 1];
     if (seg.type === 'motm') {
-      fieldScene(ctx, m, last, 640, { frameIndex: m.frames.length - 1, trail: false, noFx: true });
+      fieldScene(ctx, m, last, { frameIndex: m.frames.length - 1, trail: false, noFx: true });
       ctx.save(); ctx.scale(RS, RS);
       reelScoreboard(ctx, m, m.score, 'FT');
-      ctx.fillStyle = 'rgba(5,12,25,0.62)'; ctx.fillRect(0, FIELD.y, RW, FIELD.h);
+      ctx.fillStyle = 'rgba(5,12,25,0.62)'; ctx.fillRect(FIELD.x, FIELD.y, FIELD.w, FIELD.h);
       const mo = m.motm, ti = mo.team === 'A' ? m.ta : m.tb, TM = show.teams[ti], P = TM.players[mo.player];
-      const a = smooth(lf / 8);
+      const a = smooth(lf / 8), x = SAFE.x0, w = SAFE.x1 - SAFE.x0, y = FIELD.y + 22, h = FIELD.h - 44, cx = x + w / 2;
       ctx.globalAlpha = a;
-      ctx.fillStyle = 'rgba(8,20,38,0.96)'; rrect(ctx, SAFE.x0, FIELD.y + 120, SAFE.x1 - SAFE.x0, 340, 22); ctx.fill();
-      ctx.fillStyle = TM.primary; ctx.fillRect(SAFE.x0, FIELD.y + 120, SAFE.x1 - SAFE.x0, 10);
-      text(ctx, 'MAN OF THE MATCH', RW / 2, FIELD.y + 172, 28, '#ffd84a', 'center', 900);
-      drawStarAward(ctx, RW / 2, FIELD.y + 262, 0.85);
-      text(ctx, P.name, RW / 2, FIELD.y + 370, fitText(ctx, P.name, 520, 52), '#ffffff', 'center', 900);
-      text(ctx, `#${P.number} · ${TM.name}`, RW / 2, FIELD.y + 420, 24, '#c9dcff', 'center', 700);
+      ctx.fillStyle = 'rgba(8,20,38,0.96)'; rrect(ctx, x, y, w, h, 22); ctx.fill(); box('motm', x, y, w, h);
+      ctx.fillStyle = TM.primary; ctx.fillRect(x, y, w, 10);
+      text(ctx, 'MAN OF THE MATCH', cx, y + 50, 28, '#ffd84a', 'center', 900);
+      drawStarAward(ctx, cx, y + 140, 0.75);
+      text(ctx, P.name, cx, y + 252, fitText(ctx, P.name, w - 60, 50, 900), '#ffffff', 'center', 900);
+      text(ctx, `${numTag(P)}${TM.name}`, cx, y + 300, 24, '#c9dcff', 'center', 700);
       ctx.globalAlpha = 1;
-      reelSimLabel(ctx); ctx.restore(); return;
+      reelInfo(ctx, m, reel.comebackDepth > 0);
+      reelSimLabel(ctx); ctx.restore(); return finish();
     }
     // end card
+    fieldScene(ctx, m, last, { frameIndex: m.frames.length - 1, trail: false, noFx: true });
     ctx.save(); ctx.scale(RS, RS);
     reelScoreboard(ctx, m, m.score, 'FT');
-    ctx.fillStyle = '#0a1830'; ctx.fillRect(0, FIELD.y, RW, FIELD.h);
-    const a = smooth(lf / 10); ctx.globalAlpha = a;
-    const wn = reel.winnerSide === 'A' ? teamName(m.ta) : teamName(m.tb);
-    text(ctx, `${wn} go through`, RW / 2, FIELD.y + 170, fitText(ctx, `${wn} go through`, 560, 44), '#ffd84a', 'center', 900);
-    text(ctx, 'Full simulation', RW / 2, FIELD.y + 300, 58, '#ffffff', 'center', 900);
-    text(ctx, 'on the channel', RW / 2, FIELD.y + 370, 58, '#ffffff', 'center', 900);
-    text(ctx, 'Computer simulation · not real results', RW / 2, FIELD.y + 470, 22, '#9fb6d6', 'center', 700);
+    ctx.fillStyle = 'rgba(10,24,48,0.90)'; ctx.fillRect(FIELD.x, FIELD.y, FIELD.w, FIELD.h);
+    const a = smooth(lf / 10), cx = (SAFE.x0 + SAFE.x1) / 2, w = SAFE.x1 - SAFE.x0; ctx.globalAlpha = a;
+    const wn = reel.winnerSide === 'A' ? teamName(m.ta) : reel.winnerSide === 'B' ? teamName(m.tb) : null;
+    const head = wn ? (m.leg === 'LEG 1' ? `${wn} win the first leg` : m.leg === 'FINAL' ? `${wn} win` : `${wn} go through`) : 'All square';
+    text(ctx, head, cx, FIELD.y + 80, fitText(ctx, head, w, 40, 900), '#ffd84a', 'center', 900);
+    text(ctx, 'Full simulation', cx, FIELD.y + 190, 54, '#ffffff', 'center', 900);
+    text(ctx, 'on the channel', cx, FIELD.y + 255, 54, '#ffffff', 'center', 900);
+    text(ctx, 'Computer simulation · not real results', cx, FIELD.y + 345, 21, '#9fb6d6', 'center', 700);
+    box('end', SAFE.x0, FIELD.y + 50, w, 310);
     ctx.globalAlpha = 1;
-    reelSimLabel(ctx); ctx.restore();
+    reelInfo(ctx, m, reel.comebackDepth > 0);
+    reelSimLabel(ctx); ctx.restore(); return finish();
   };
   // P4 thumbnails: the play scene only (no HUD, no captions, no names, no text), zoomed on a goal moment
   window.renderThumb = function (matchIndex, t, zoom) {

@@ -11,6 +11,8 @@
   {
    "name": "S. Guirassy",
    "number": 9,
+   "team": "Dortmund",
+   "nationality": "Guinea",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefachampionsleague/clubs/52758--b-dortmund/squad/",
    "retrieved": "2026-11-04",
@@ -19,6 +21,8 @@
   {
    "name": "M. Beier",
    "number": 14,
+   "team": "Dortmund",
+   "nationality": "Germany",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefachampionsleague/clubs/52758--b-dortmund/squad/",
    "retrieved": "2026-11-04",
@@ -27,6 +31,8 @@
   {
    "name": "F. Silva",
    "number": 21,
+   "team": "Dortmund",
+   "nationality": "Portugal",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefachampionsleague/clubs/52758--b-dortmund/squad/",
    "retrieved": "2026-11-04",

@@ -11,26 +11,29 @@
  "players": [
   {
    "name": "R. Leão",
-   "number": 7,
+   "team": "Portugal",
+   "nationality": "Portugal",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Portugal_national_football_team",
-   "retrieved": "2026-11-04",
+   "source_url": "https://khelnow.com/football/portugal-november-uefa-nations-league-squad-202611",
+   "retrieved": "2026-11-13",
    "verified": true
   },
   {
    "name": "G. Ramos",
-   "number": 9,
+   "team": "Portugal",
+   "nationality": "Portugal",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Portugal_national_football_team",
-   "retrieved": "2026-11-04",
+   "source_url": "https://khelnow.com/football/portugal-november-uefa-nations-league-squad-202611",
+   "retrieved": "2026-11-13",
    "verified": true
   },
   {
    "name": "J. Félix",
-   "number": 11,
+   "team": "Portugal",
+   "nationality": "Portugal",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Portugal_national_football_team",
-   "retrieved": "2026-11-04",
+   "source_url": "https://khelnow.com/football/portugal-november-uefa-nations-league-squad-202611",
+   "retrieved": "2026-11-13",
    "verified": true
   }
  ],

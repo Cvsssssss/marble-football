@@ -10,27 +10,30 @@
  "strength": 80,
  "players": [
   {
-   "name": "L. Suárez",
-   "number": 9,
+   "name": "J. Arias",
+   "team": "Colombia",
+   "nationality": "Colombia",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Colombia_national_football_team",
-   "retrieved": "2026-11-04",
-   "verified": true
-  },
-  {
-   "name": "K. Viveros",
-   "number": 20,
-   "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Colombia_national_football_team",
-   "retrieved": "2026-11-04",
+   "source_url": "https://www.clarosports.com/colombia/seleccion-colombiana/oficial-la-convocatoria-de-nestor-lorenzo-para-los-partidos-amistosos-ante-chile/",
+   "retrieved": "2026-11-13",
    "verified": true
   },
   {
    "name": "Ó. Perea",
-   "number": 7,
+   "team": "Colombia",
+   "nationality": "Colombia",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Colombia_national_football_team",
-   "retrieved": "2026-11-04",
+   "source_url": "https://www.clarosports.com/colombia/seleccion-colombiana/oficial-la-convocatoria-de-nestor-lorenzo-para-los-partidos-amistosos-ante-chile/",
+   "retrieved": "2026-11-13",
+   "verified": true
+  },
+  {
+   "name": "D. Mosquera",
+   "team": "Colombia",
+   "nationality": "Colombia",
+   "position": "FW",
+   "source_url": "https://www.clarosports.com/colombia/seleccion-colombiana/oficial-la-convocatoria-de-nestor-lorenzo-para-los-partidos-amistosos-ante-chile/",
+   "retrieved": "2026-11-13",
    "verified": true
   }
  ],

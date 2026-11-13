@@ -11,6 +11,8 @@
   {
    "name": "O. Dembélé",
    "number": 10,
+   "team": "Paris Saint-Germain",
+   "nationality": "France",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefachampionsleague/clubs/52747--paris/squad/",
    "retrieved": "2026-11-04",
@@ -19,6 +21,8 @@
   {
    "name": "K. Kvaratskhelia",
    "number": 7,
+   "team": "Paris Saint-Germain",
+   "nationality": "Georgia",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefachampionsleague/clubs/52747--paris/squad/",
    "retrieved": "2026-11-04",
@@ -27,6 +31,8 @@
   {
    "name": "D. Doué",
    "number": 14,
+   "team": "Paris Saint-Germain",
+   "nationality": "France",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefachampionsleague/clubs/52747--paris/squad/",
    "retrieved": "2026-11-04",

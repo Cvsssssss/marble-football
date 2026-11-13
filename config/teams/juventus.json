@@ -11,6 +11,8 @@
   {
    "name": "K. Yıldız",
    "number": 10,
+   "team": "Juventus",
+   "nationality": "Türkiye",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/50139--juventus/squad/",
    "retrieved": "2026-11-04",
@@ -19,6 +21,8 @@
   {
    "name": "R. Kolo Muani",
    "number": 9,
+   "team": "Juventus",
+   "nationality": "France",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/50139--juventus/squad/",
    "retrieved": "2026-11-04",
@@ -27,6 +31,8 @@
   {
    "name": "F. Conceição",
    "number": 7,
+   "team": "Juventus",
+   "nationality": "Portugal",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/50139--juventus/squad/",
    "retrieved": "2026-11-04",

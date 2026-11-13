@@ -11,30 +11,30 @@
  "players": [
   {
    "name": "J. Álvarez",
-   "number": 9,
+   "team": "Argentina",
+   "nationality": "Argentina",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Argentina_national_football_team",
-   "retrieved": "2026-11-04",
-   "verified": true,
-   "number_note": "unnumbered in source (recent call-up / no squad number); number set by us"
+   "source_url": "https://442.perfil.com/noticias/seleccion-argentina/lionel-scaloni-confirmo-los-convocados-de-la-seleccion-argentina-para-la-fecha-fifa.phtml",
+   "retrieved": "2026-11-13",
+   "verified": true
   },
   {
    "name": "T. Almada",
-   "number": 16,
+   "team": "Argentina",
+   "nationality": "Argentina",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Argentina_national_football_team",
-   "retrieved": "2026-11-04",
-   "verified": true,
-   "number_note": "unnumbered in source (recent call-up / no squad number); number set by us"
+   "source_url": "https://442.perfil.com/noticias/seleccion-argentina/lionel-scaloni-confirmo-los-convocados-de-la-seleccion-argentina-para-la-fecha-fifa.phtml",
+   "retrieved": "2026-11-13",
+   "verified": true
   },
   {
-   "name": "G. Simeone",
-   "number": 20,
+   "name": "S. Castro",
+   "team": "Argentina",
+   "nationality": "Argentina",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Argentina_national_football_team",
-   "retrieved": "2026-11-04",
-   "verified": true,
-   "number_note": "unnumbered in source (recent call-up / no squad number); number set by us"
+   "source_url": "https://442.perfil.com/noticias/seleccion-argentina/lionel-scaloni-confirmo-los-convocados-de-la-seleccion-argentina-para-la-fecha-fifa.phtml",
+   "retrieved": "2026-11-13",
+   "verified": true
   }
  ],
  "fictional_players": [

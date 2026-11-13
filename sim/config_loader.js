@@ -7,11 +7,15 @@ const crypto = require('crypto');
 
 const ROOT = path.join(__dirname, '..');
 const HEX = /^#[0-9A-Fa-f]{6}$/;
+// seed-gate version: part of simHash, so a change of the gate preferences never replays seeds chosen by an older gate
+const GATE_VERSION = 'p6-1';
 
 // ---------- schemas ----------
 // type: 'string' | 'number' | 'integer' | 'boolean' | 'hex' | 'array' | 'object'
-const PLAYERS = { type: 'array', minItems: 3, maxItems: 3, items: { type: 'object', required: ['name', 'number'],
+// P6: number optional (national-team numbers change per camp); team + nationality checked by sim/players.js
+const PLAYERS = { type: 'array', minItems: 3, maxItems: 3, items: { type: 'object', required: ['name'],
   props: { name: { type: 'string', minLen: 2, maxLen: 24 }, number: { type: 'integer', min: 1, max: 99 }, position: { type: 'string' },
+    team: { type: 'string' }, nationality: { type: 'string' }, note: { type: 'string' },
     source_url: { type: 'string', pattern: /^https?:\/\// }, retrieved: { type: 'string', pattern: /^\d{4}-\d{2}-\d{2}$/ }, verified: { type: 'boolean' }, number_note: { type: 'string' } } } };
 const S = {
   team: {
@@ -196,7 +200,7 @@ function loadCompetition(compFile, opts) {
     const f = path.join(cfgDir, 'teams', id + '.json');
     const t = check(readJson(f), 'team', f);
     if (t.id !== id) errs.push(`${path.relative(ROOT, f)}: id "${t.id}" does not match file name "${id}"`);
-    const nums = t.players.map((p) => p.number);
+    const nums = t.players.map((p) => p.number).filter((n) => n !== undefined);
     if (new Set(nums).size !== nums.length) errs.push(`${path.relative(ROOT, f)}: duplicate shirt numbers`);
     if (comp.real_names === false) {
       if (!t.fictional_players) errs.push(`${path.relative(ROOT, f)}: real_names is false but "fictional_players" is missing`);
@@ -224,6 +228,8 @@ function loadCompetition(compFile, opts) {
   if (comp.GAME_MIN_PER_SEC !== undefined) rules.GAME_MIN_PER_SEC = comp.GAME_MIN_PER_SEC; // competition override
   const audioF = path.join(cfgDir, 'audio.json');
   const audio = check(readJson(audioF), 'audio', audioF);
+  // P6: player data validator at startup (real names only; fictional names are not checked)
+  if (comp.real_names !== false && !opts.skipPlayerCheck) errs.push(...require('./players').validateTeams(teams, { today: opts.today }).errors);
   if (errs.length) throw new ConfigError(errs);
   const all = { competition: comp, teams, map, rules, audio };
   // P5 bracket draw seed: fixed by competition.draw_seed, else derived from competition id + seed_salt + map,
@@ -232,7 +238,7 @@ function loadCompetition(compFile, opts) {
   all.drawSeed = comp.draw_seed !== undefined ? comp.draw_seed
     : parseInt(crypto.createHash('sha256').update(`${comp.id}|${comp.seed_salt || 0}|${mapName}`).digest('hex').slice(0, 8), 16);
   // sim hash: only what changes the simulation (render cache key = simHash + seed)
-  const simPart = { engine: require('./config').ENGINE_VERSION, rules: Object.assign({}, rules, { logos_on_balls: undefined, show_simulation_label: undefined }), pairing: comp.pairing, format: comp.format,
+  const simPart = { engine: require('./config').ENGINE_VERSION, gate: GATE_VERSION, rules: Object.assign({}, rules, { logos_on_balls: undefined, show_simulation_label: undefined }), pairing: comp.pairing, format: comp.format,
     teams: comp.teams, draw: all.drawSeed, forced: comp.forced_pairs || [], ...(comp.seed_salt ? { salt: comp.seed_salt } : {}), strength: teams.map((t) => t.strength) };
   all.simHash = crypto.createHash('sha256').update(JSON.stringify(simPart)).digest('hex').slice(0, 16);
   all.hash = crypto.createHash('sha256').update(JSON.stringify(all)).digest('hex').slice(0, 16);

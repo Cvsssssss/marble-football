@@ -10,27 +10,30 @@
  "strength": 80,
  "players": [
   {
-   "name": "N. Woltemade",
-   "number": 11,
+   "name": "K. Havertz",
+   "team": "Germany",
+   "nationality": "Germany",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Germany_national_football_team",
-   "retrieved": "2026-11-04",
+   "source_url": "https://www.90min.de/klopp-nominiert-zum-zweiten-mal-diese-24-spieler-stehen-im-dfb-kader",
+   "retrieved": "2026-11-13",
    "verified": true
   },
   {
-   "name": "J. Burkardt",
-   "number": 10,
+   "name": "N. Füllkrug",
+   "team": "Germany",
+   "nationality": "Germany",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Germany_national_football_team",
-   "retrieved": "2026-11-04",
+   "source_url": "https://www.dfb.de/news/mit-fuellkrug-und-mohya-klopp-nominiert-kader-fuer-serbien-und-niederlande",
+   "retrieved": "2026-11-13",
    "verified": true
   },
   {
-   "name": "D. Scherhant",
-   "number": 9,
+   "name": "Y. Ebnoutalib",
+   "team": "Germany",
+   "nationality": "Germany",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Germany_national_football_team",
-   "retrieved": "2026-11-04",
+   "source_url": "https://www.90min.de/klopp-nominiert-zum-zweiten-mal-diese-24-spieler-stehen-im-dfb-kader",
+   "retrieved": "2026-11-13",
    "verified": true
   }
  ],

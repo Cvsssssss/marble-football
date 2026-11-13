@@ -11,22 +11,30 @@
   {
    "name": "K. Rodriguez",
    "number": 13,
+   "team": "Union Saint-Gilloise",
+   "nationality": "Ecuador",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/64125--union-sg/squad/",
    "retrieved": "2026-11-04",
-   "verified": true
+   "verified": true,
+   "note": "nationality to confirm"
   },
   {
    "name": "M. Biondic",
    "number": 9,
+   "team": "Union Saint-Gilloise",
+   "nationality": "Croatia",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/64125--union-sg/squad/",
    "retrieved": "2026-11-04",
-   "verified": true
+   "verified": true,
+   "note": "nationality to confirm"
   },
   {
    "name": "R. Florucz",
    "number": 30,
+   "team": "Union Saint-Gilloise",
+   "nationality": "Austria",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefaeuropaleague/clubs/64125--union-sg/squad/",
    "retrieved": "2026-11-04",

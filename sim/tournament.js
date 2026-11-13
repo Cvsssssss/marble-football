@@ -14,8 +14,11 @@ const ROOT = path.join(__dirname, '..');
 const FPS = CFG.FPS;
 
 function teamsFromConf(conf) {
-  return conf.teams.map((t) => ({ id: t.id, name: t.name, short: t.short || t.name.slice(0, 3).toUpperCase(), short_name: t.short_name || t.name, national: !!t.national, primary: t.primary, secondary: t.secondary,
-    rating: t.strength, hasLogo: !!t.logoFile, players: t.players.map((p) => ({ name: p.name, number: p.number })) }));
+  // P6: national teams carry their ranking (FIFA rank from competition.standings when listed) for the intro grid
+  const table = (conf.competition && conf.competition.standings && conf.competition.standings.table) || [];
+  const rankOf = (id) => { const r = table.find((x) => x.team === id); return r ? (r.fifa_rank || r.pos) : null; };
+  return conf.teams.map((t) => ({ rank: t.national ? rankOf(t.id) : null, id: t.id, name: t.name, short: t.short || t.name.slice(0, 3).toUpperCase(), short_name: t.short_name || t.name, national: !!t.national, primary: t.primary, secondary: t.secondary,
+    rating: t.strength, hasLogo: !!t.logoFile, players: t.players.map((p) => ({ name: p.name, number: p.number, team: p.team || t.name })) }));
 }
 
 // Hard rules (spec): goals 1..10, stuck limit, safety, golden resolution, ball accounting, decisive result.
@@ -176,7 +179,9 @@ function buildTournament(conf, opts) {
   const usedSeeds = {};
   const log = [];
   const matches = [];
-  const niceGoals = (r) => { const g = r.score.A + r.score.B; const gi = pickReplayGoal(r); return g >= 2 && g <= 7 && gi !== null && (r.goals[gi].keeperAir || r.goals[gi].keeperCrouch || r.goals[gi].golden); };
+  // P6: golden-neutral replay-quality preference (2..7 goals and a regulation goal past an airborne/crouching keeper).
+  // It never looks at golden-ball flags or added-time goals: seeds are never chosen because they contain or lack a golden ball.
+  const niceGoals = (r) => { const g = r.score.A + r.score.B; return g >= 2 && g <= 7 && r.goals.some((x) => !x.golden && !x.shot && (x.keeperAir || x.keeperCrouch)); };
   const run = (key, ctx, prefs, extra) => {
     const r = gate(key, ctx, prefs, Object.assign({}, rc, extra || {}), log, cache[key], opts.budget, comp.seed_salt || 0);
     if (r) usedSeeds[key] = r.seed;
@@ -197,19 +202,15 @@ function buildTournament(conf, opts) {
     curTies.forEach(([ta, tb], ti) => {
       const sc = strengthCtx(TEAMS, ta, tb, rc);
       const early = format === 'knockout16' && ri <= 1; // round of 16 + quarter-finals (reel candidates)
-      const lastTwoLegRound = ri === rounds.length - 2;
       if (rd.twoLegs) {
         // --- leg 1 ---
-        let p1 = [niceGoals];
-        if (format === 'semis_two_legs_final' && ti === 0) p1 = [(r) => niceGoals(r) && r.goals.some((g) => g.shot), niceGoals]; // demo: added-time goal
+        let p1 = [niceGoals]; // P6: the demo "added-time goal" preference is gone
         if (early) p1 = cbPrefs(p1);
         const l1 = run(++key, Object.assign({ kind: 'leg1' }, sc), p1);
         noteCB(l1, early);
         // --- leg 2 ---
-        let wantGolden = false;
-        if (format === 'semis_two_legs_final') wantGolden = ti === 1;
-        else if (lastTwoLegRound && ti === curTies.length - 1 && goldenSeen === 0) wantGolden = true; // show one golden ball at least
-        let p2 = wantGolden ? [(r) => niceGoals(r) && r.goldenStart !== null, niceGoals] : [(r) => niceGoals(r) && r.goldenStart === null, niceGoals];
+        // P6: no golden-ball preference of any kind (it was "force one golden ball" + "avoid it elsewhere")
+        let p2 = [niceGoals];
         if (early) p2 = cbPrefs(p2);
         const c2 = Object.assign({ kind: 'leg2', prevA: l1.score.A, prevB: l1.score.B }, sc);
         let l2 = run(++key, c2, p2);
@@ -225,7 +226,7 @@ function buildTournament(conf, opts) {
         ties.push({ round: ri, index: ti, ta, tb, legs: [i1, i1 + 1], l1: [l1.score.A, l1.score.B], l2: [l2.score.A, l2.score.B], agg, golden: l2.goldenStart !== null, winner, winnerSide });
       } else {
         const c = Object.assign({ kind: 'final' }, sc);
-        let fin = run(++key, c, [(r) => niceGoals(r) && r.goldenStart === null, niceGoals]);
+        let fin = run(++key, c, [niceGoals]);
         if (!fin) fin = run(key, c, null, { GOLDEN_FLOW_BOOST: 1.25 });
         const winnerSide = fin.goldenWinner || (fin.score.A > fin.score.B ? 'A' : 'B');
         const i1 = matches.length;
@@ -245,6 +246,7 @@ function buildTournament(conf, opts) {
     teams: TEAMS, matches, rounds: R, bracketSeeding: bracket, sf: R[R.length - 2].ties, final: finalRes, champion: finalRes.winner, gateLog: log, usedSeeds,
     comebacks: cb.list, kitNotes: matches.filter((m) => m.kitNote).map((m) => `${m.stage} ${m.leg}: ${m.kitNote}`) };
   T.topScorers = topScorers(T, 3);
+  require('./players').assertScorers(T, conf.teams); // P6: every goal's scorer is a player of the scoring team
   return T;
 
   // comeback preference for round-of-16 / quarter-final matches: every 4th one (from the 2nd) asks for a comeback

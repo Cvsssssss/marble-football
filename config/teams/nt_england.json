@@ -11,26 +11,29 @@
  "players": [
   {
    "name": "H. Kane",
-   "number": 9,
+   "team": "England",
+   "nationality": "England",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/England_national_football_team",
-   "retrieved": "2026-11-04",
-   "verified": true
-  },
-  {
-   "name": "B. Saka",
-   "number": 7,
-   "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/England_national_football_team",
-   "retrieved": "2026-11-04",
+   "source_url": "https://www.sportsmole.co.uk/football/england/uefa-nations-league/news/palmer-white-king-decisions-england-squad-for-november-confirmed_608569.html",
+   "retrieved": "2026-11-13",
    "verified": true
   },
   {
    "name": "A. Gordon",
-   "number": 11,
+   "team": "England",
+   "nationality": "England",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/England_national_football_team",
-   "retrieved": "2026-11-04",
+   "source_url": "https://www.sportsmole.co.uk/football/england/uefa-nations-league/news/palmer-white-king-decisions-england-squad-for-november-confirmed_608569.html",
+   "retrieved": "2026-11-13",
+   "verified": true
+  },
+  {
+   "name": "E. Eze",
+   "team": "England",
+   "nationality": "England",
+   "position": "FW",
+   "source_url": "https://www.sportsmole.co.uk/football/england/uefa-nations-league/news/palmer-white-king-decisions-england-squad-for-november-confirmed_608569.html",
+   "retrieved": "2026-11-13",
    "verified": true
   }
  ],

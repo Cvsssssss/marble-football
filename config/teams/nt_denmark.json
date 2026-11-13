@@ -11,27 +11,33 @@
  "players": [
   {
    "name": "R. Højlund",
-   "number": 9,
+   "team": "Denmark",
+   "nationality": "Denmark",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Denmark_national_football_team",
-   "retrieved": "2026-11-04",
-   "verified": true
+   "source_url": "https://www.fourfourtwo.com/team/denmark-world-cup-2026-squad",
+   "retrieved": "2026-11-13",
+   "verified": false,
+   "note": "Nov 2026 squad not found"
   },
   {
    "name": "G. Isaksen",
-   "number": 8,
+   "team": "Denmark",
+   "nationality": "Denmark",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Denmark_national_football_team",
-   "retrieved": "2026-11-04",
-   "verified": true
+   "source_url": "https://www.fourfourtwo.com/team/denmark-world-cup-2026-squad",
+   "retrieved": "2026-11-13",
+   "verified": false,
+   "note": "Nov 2026 squad not found"
   },
   {
-   "name": "A. Skov Olsen",
-   "number": 11,
+   "name": "J. Wind",
+   "team": "Denmark",
+   "nationality": "Denmark",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Denmark_national_football_team",
-   "retrieved": "2026-11-04",
-   "verified": true
+   "source_url": "https://www.fourfourtwo.com/team/denmark-world-cup-2026-squad",
+   "retrieved": "2026-11-13",
+   "verified": false,
+   "note": "Nov 2026 squad not found"
   }
  ],
  "fictional_players": [

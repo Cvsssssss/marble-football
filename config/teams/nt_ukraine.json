@@ -10,28 +10,34 @@
  "strength": 80,
  "players": [
   {
-   "name": "R. Yaremchuk",
-   "number": 9,
+   "name": "A. Dovbyk",
+   "team": "Ukraine",
+   "nationality": "Ukraine",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Ukraine_national_football_team",
-   "retrieved": "2026-11-04",
-   "verified": true
-  },
-  {
-   "name": "A. Yarmolenko",
-   "number": 7,
-   "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Ukraine_national_football_team",
-   "retrieved": "2026-11-04",
-   "verified": true
+   "source_url": "https://dynamo.kiev.ua/en/news/703869-serhiy-rebrov-announced-the-ukrainian-national-teams-lineup-for-the-november-world-cup-2026-qualifiers-against-france-and-icela",
+   "retrieved": "2026-11-13",
+   "verified": false,
+   "note": "latest list found is Nov 2025"
   },
   {
    "name": "V. Vanat",
-   "number": 11,
+   "team": "Ukraine",
+   "nationality": "Ukraine",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Ukraine_national_football_team",
-   "retrieved": "2026-11-04",
-   "verified": true
+   "source_url": "https://dynamo.kiev.ua/en/news/703869-serhiy-rebrov-announced-the-ukrainian-national-teams-lineup-for-the-november-world-cup-2026-qualifiers-against-france-and-icela",
+   "retrieved": "2026-11-13",
+   "verified": false,
+   "note": "latest list found is Nov 2025"
+  },
+  {
+   "name": "R. Yaremchuk",
+   "team": "Ukraine",
+   "nationality": "Ukraine",
+   "position": "FW",
+   "source_url": "https://dynamo.kiev.ua/en/news/703869-serhiy-rebrov-announced-the-ukrainian-national-teams-lineup-for-the-november-world-cup-2026-qualifiers-against-france-and-icela",
+   "retrieved": "2026-11-13",
+   "verified": false,
+   "note": "latest list found is Nov 2025"
   }
  ],
  "fictional_players": [

@@ -10,27 +10,30 @@
  "strength": 80,
  "players": [
   {
-   "name": "D. Ndoye",
-   "number": 11,
+   "name": "B. Embolo",
+   "team": "Switzerland",
+   "nationality": "Switzerland",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Switzerland_national_football_team",
-   "retrieved": "2026-11-04",
+   "source_url": "https://www.plattformj.ch/artikel/248250/",
+   "retrieved": "2026-11-13",
    "verified": true
   },
   {
    "name": "Z. Amdouni",
-   "number": 10,
+   "team": "Switzerland",
+   "nationality": "Switzerland",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Switzerland_national_football_team",
-   "retrieved": "2026-11-04",
+   "source_url": "https://www.plattformj.ch/artikel/248250/",
+   "retrieved": "2026-11-13",
    "verified": true
   },
   {
-   "name": "J. Monteiro",
-   "number": 7,
+   "name": "R. Vargas",
+   "team": "Switzerland",
+   "nationality": "Switzerland",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Switzerland_national_football_team",
-   "retrieved": "2026-11-04",
+   "source_url": "https://www.plattformj.ch/artikel/248250/",
+   "retrieved": "2026-11-13",
    "verified": true
   }
  ],

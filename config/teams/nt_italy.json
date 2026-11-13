@@ -11,26 +11,29 @@
  "players": [
   {
    "name": "P. Esposito",
-   "number": 9,
+   "team": "Italy",
+   "nationality": "Italy",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Italy_national_football_team",
-   "retrieved": "2026-11-04",
+   "source_url": "https://sport.sky.it/calcio/nazionale/convocati-italia-mancini-nazionale-nations-league-novembre-2026",
+   "retrieved": "2026-11-13",
    "verified": true
   },
   {
    "name": "G. Scamacca",
-   "number": 11,
+   "team": "Italy",
+   "nationality": "Italy",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Italy_national_football_team",
-   "retrieved": "2026-11-04",
+   "source_url": "https://sport.sky.it/calcio/nazionale/convocati-italia-mancini-nazionale-nations-league-novembre-2026",
+   "retrieved": "2026-11-13",
    "verified": true
   },
   {
-   "name": "D. Maldini",
-   "number": 17,
+   "name": "N. Cambiaghi",
+   "team": "Italy",
+   "nationality": "Italy",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Italy_national_football_team",
-   "retrieved": "2026-11-04",
+   "source_url": "https://sport.sky.it/calcio/nazionale/convocati-italia-mancini-nazionale-nations-league-novembre-2026",
+   "retrieved": "2026-11-13",
    "verified": true
   }
  ],

@@ -11,30 +11,32 @@
  "players": [
   {
    "name": "A. Kramarić",
-   "number": 9,
+   "team": "Croatia",
+   "nationality": "Croatia",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Croatia_national_football_team",
-   "retrieved": "2026-11-04",
+   "source_url": "https://hns.team/en/news/31688/bilic-the-best-players-play-for-the-national-teamthat-is-the-only-criterion/",
+   "retrieved": "2026-11-13",
    "verified": true,
-   "number_note": "unnumbered in source (recent call-up / no squad number); number set by us"
+   "note": "Sep/Oct 2026 squad; reported unavailable (injury) in Nov"
   },
   {
-   "name": "I. Perišić",
-   "number": 4,
+   "name": "F. Ivanović",
+   "team": "Croatia",
+   "nationality": "Croatia",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Croatia_national_football_team",
-   "retrieved": "2026-11-04",
-   "verified": true,
-   "number_note": "unnumbered in source (recent call-up / no squad number); number set by us"
+   "source_url": "https://hns.team/en/news/31688/bilic-the-best-players-play-for-the-national-teamthat-is-the-only-criterion/",
+   "retrieved": "2026-11-13",
+   "verified": true
   },
   {
-   "name": "A. Budimir",
-   "number": 17,
+   "name": "L. Majer",
+   "team": "Croatia",
+   "nationality": "Croatia",
    "position": "FW",
-   "source_url": "https://en.wikipedia.org/wiki/Croatia_national_football_team",
-   "retrieved": "2026-11-04",
-   "verified": true,
-   "number_note": "unnumbered in source (recent call-up / no squad number); number set by us"
+   "source_url": "https://hns.team/en/news/31688/bilic-the-best-players-play-for-the-national-teamthat-is-the-only-criterion/",
+   "retrieved": "2026-11-13",
+   "verified": false,
+   "note": "listed among forwards by HNS; usually an attacking midfielder"
   }
  ],
  "fictional_players": [

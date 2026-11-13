@@ -10,6 +10,8 @@
   {
    "name": "B. Saka",
    "number": 7,
+   "team": "Arsenal",
+   "nationality": "England",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefachampionsleague/clubs/52280--arsenal/squad/",
    "retrieved": "2026-11-04",
@@ -18,6 +20,8 @@
   {
    "name": "V. Gyökeres",
    "number": 14,
+   "team": "Arsenal",
+   "nationality": "Sweden",
    "position": "FW",
    "source_url": "https://www.uefa.com/uefachampionsleague/clubs/52280--arsenal/squad/",
    "retrieved": "2026-11-04",
@@ -26,6 +30,8 @@
   {
    "name": "E. Eze",
    "number": 10,
+   "team": "Arsenal",
+   "nationality": "England",
    "position": "W/AM (listed MF)",
    "source_url": "https://www.uefa.com/uefachampionsleague/clubs/52280--arsenal/squad/",
    "retrieved": "2026-11-04",
