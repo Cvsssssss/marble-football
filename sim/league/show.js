@@ -20,6 +20,7 @@ const L = require('../config_loader');
 const ST = require('./strength');
 const TB = require('./standings');
 const SEASON = require('./season');
+const ATMO = require('../atmosphere');
 const ROOT = path.join(__dirname, '..', '..');
 const FPS = CFG.FPS;
 
@@ -178,11 +179,19 @@ function buildMatchweekShow(C, week, opts) {
   const at = (frame, type, extra) => audio.push(Object.assign({ t: +(frame / FPS).toFixed(4), type }, extra || {}));
   const chap = (seg, title) => chapters.push({ t: seg.start / FPS, title });
   const name = (ti) => teams[ti].name;
+  // P10: transitions (club-colour stripe with the next fixture, ~1 s) and the match intro (camera glide, ~2.8 s) on
+  // the "pro" (Premier League) maps; flags in config/atmosphere.json. Pre-roll only: the match timeline is untouched.
+  const map = weekAudioMap(loadMap(opts.map || wr.map), week);
+  const AC = opts.atmosphere || L.loadAtmosphere(), proAtmo = ATMO.active({ map }, AC);
   const intro = add('lgIntro', DUR.intro, { week, fixtures: matches.map((m) => [m.ta, m.tb]) }); at(intro.start, 'sting_intro'); chap(intro, `Matchweek ${week} fixtures`);
   matches.forEach((m, mi) => {
     const rA = rowOf(T0, C.ids[m.ta]), rB = rowOf(T0, C.ids[m.tb]);
-    const pre = add('lgPre', DUR.pre, { match: mi, pos: week === 1 ? [null, null] : [rA.pos, rB.pos], pts: [rA.pts, rB.pts], form: [rA.form.slice(-5), rB.form.slice(-5)] });
-    at(pre.start + 8, 'swoosh'); chap(pre, `${name(m.ta)} vs ${name(m.tb)}`);
+    const tr = proAtmo && AC.match_transitions !== false ? add('lgTrans', AC.transition_s || 1.0, { match: mi }) : null;
+    if (tr) at(tr.start, 'swoosh');
+    const pre = add('lgPre', DUR.pre, { match: mi, noFade: !!tr, pos: week === 1 ? [null, null] : [rA.pos, rB.pos], pts: [rA.pts, rB.pts], form: [rA.form.slice(-5), rB.form.slice(-5)] });
+    if (!tr) at(pre.start + 8, 'swoosh');
+    chap(tr || pre, `${name(m.ta)} vs ${name(m.tb)}`);
+    if (proAtmo && AC.match_intro !== false) add('lgKick', AC.intro_s || 2.8, { match: mi });
     const ms = add('match', m.frames.length / FPS, { match: mi }); ms.len = m.frames.length; f = ms.start + ms.len;
     for (const e of m.events) { const x = Object.assign({}, e, { match: mi }); delete x.t; delete x.type; delete x.vf; at(ms.start + (e.vf !== undefined ? e.vf : e.t * FPS), e.type, x); }
     const ft = add('fulltime', DUR.fulltime, { match: mi }); at(ft.start + 2, 'crowd_end');
@@ -237,7 +246,6 @@ function buildMatchweekShow(C, week, opts) {
     };
     const st = add('lgStats', DUR.stats, { stats }); at(st.start, 'swoosh'); chap(st, 'Season stats');
   }
-  const map = weekAudioMap(loadMap(opts.map || wr.map), week);
   const bg = opts.noBackground ? null : backgroundPart(map);
   const lp = (() => { const conf = { rules: C.rules, teams: C.teams }; const r = require('../logos').prepareLogos(conf); return { logos: r.logos, logosMissing: r.missing }; })();
   const show = Object.assign({
@@ -253,6 +261,7 @@ function buildMatchweekShow(C, week, opts) {
     fps: FPS, totalFrames: f, segments: segs, audio: audio.sort((a, b) => a.t - b.t), chapters,
   }, lp);
   show.audioCfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'config', 'audio.json'), 'utf8'));
+  ATMO.annotate(show, AC); // P10: show.atmo (crowd reactions, wind, smoke...) + crowd audio events; null on non-pro maps
   return show;
 }
 
@@ -263,7 +272,7 @@ function matchesIndexLeague(show) {
   return {
     competition: show.competition.name, week: show.league.week, note: 'Computer simulation, not real results. No player names here.', total_s: +(show.totalFrames / show.fps).toFixed(2),
     matches: show.matches.map((m, mi) => {
-      const pre = segOf('lgPre', mi), ms = segOf('match', mi), tb = segOf('lgTable', mi);
+      const pre = segOf('lgTrans', mi) || segOf('lgPre', mi), ms = segOf('match', mi), tb = segOf('lgTable', mi);
       return { id: `MW${show.league.week}-M${mi + 1}`, index: mi, stage: m.stage, leg: m.leg, team_a: name(m.ta), team_b: name(m.tb), seed: m.seed, timeline_hash: m.hash, score: m.score,
         winner: m.winnerSide ? name(m.winnerSide === 'A' ? m.ta : m.tb) : null, comeback: m.comeback, comeback_depth: m.comeback_depth,
         goals: m.goals.map((g) => ({ team: name(g.team === 'A' ? m.ta : m.tb), minute: CLOCK.minuteLabel(m, g.t, show.cfg.GAME_MIN_PER_SEC), added_time_shot: !!g.shot })),

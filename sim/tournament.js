@@ -391,7 +391,8 @@ function makeShow(conf, T) {
   const style = conf.competition.bracket_style || 'left_to_right';
   return Object.assign({
     geometryNote: 'design space 1280x720', configHash: conf.hash, simHash: conf.simHash,
-    map: conf.map, audioCfg: conf.audio, bracketStyle: style, logosOnBalls: conf.rules.logos_on_balls !== false,
+    map: conf.map, audioCfg: conf.audio, atmoCfg: { trophy_v2: require('./config_loader').loadAtmosphere().trophy_v2 !== false }, // P10: only the trophy flag applies to cups
+    bracketStyle: style, logosOnBalls: conf.rules.logos_on_balls !== false,
     cfg: { OMEGA: CFG.OMEGA, GAME_MIN_PER_SEC: conf.rules.GAME_MIN_PER_SEC, BALLS_PER_TEAM: conf.rules.BALLS_PER_TEAM, BALL_RADIUS: conf.rules.ball_radius || G.BALL_R, SHOW_SIM_LABEL: conf.rules.show_simulation_label === true },
     bracket: bracketSteps(T, style),
   }, logoPart(conf), T, S);

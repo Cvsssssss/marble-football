@@ -5,12 +5,12 @@
  "map": "premier_pitchside",
  "mode": "engine",
  "stub": false,
- "generated_at": "2026-11-13T06:39:50.774Z",
+ "generated_at": "2026-11-13T18:44:35.567Z",
  "rules": "league",
  "strength": {
   "_comment": "rating = 2025/26 points / 38 (points per game). Promoted clubs get the rating of the weakest club that stayed up (Tottenham, 41 pts). eff(r) compresses the gaps among the top clubs (r > 1.8: 1.8 + 0.3*(r-1.8)). Signed edge = beta*(eff(home)-eff(away)) + home_advantage; the favourite (sign) takes the spout release turn with probability min(edge_max, |edge|). Values chosen with tools/league_calibrate.js --search (see league/premier_league_2026_27/calibration.json).",
-  "beta": 0.7,
-  "home_advantage": 0.16,
+  "beta": 0.5,
+  "home_advantage": 0.08,
   "edge_max": 0.9,
   "promoted_rating_from": "tottenham",
   "top_compress": {
@@ -23,23 +23,67 @@
    "idx": 0,
    "home": "hull",
    "away": "ipswich",
-   "hg": 0,
-   "ag": 1,
+   "hg": 3,
+   "ag": 2,
    "seed": 2838106292,
    "attempt": 0,
-   "timeline_hash": "3e33a140fcdd87114fa935fcfb8929ae3590309264a1f93262b47182cd9b76ab",
+   "timeline_hash": "20a576249925a8d96f6ea7a90b6ccf664d298c01c64a09eb33dbe1407bdcfffd",
    "added_time": 2,
    "strength": {
     "fav": "home",
-    "edge": 0.16
+    "edge": 0.08
    },
    "goals": [
     {
      "side": "away",
      "club": "ipswich",
-     "t": 67.14,
-     "minute": "135'",
+     "t": 5.03,
+     "minute": "13'",
      "shot": null,
+     "ball": 1,
+     "player": 0,
+     "scorer": "J. Clarke",
+     "scorer_team": "Ipswich Town"
+    },
+    {
+     "side": "home",
+     "club": "hull",
+     "t": 10.74,
+     "minute": "26'",
+     "shot": null,
+     "ball": 4,
+     "player": 2,
+     "scorer": "M. Belloumi",
+     "scorer_team": "Hull City"
+    },
+    {
+     "side": "home",
+     "club": "hull",
+     "t": 24.9,
+     "minute": "60'",
+     "shot": null,
+     "ball": 0,
+     "player": 0,
+     "scorer": "O. McBurnie",
+     "scorer_team": "Hull City"
+    },
+    {
+     "side": "home",
+     "club": "hull",
+     "t": 31.76,
+     "minute": "77'",
+     "shot": null,
+     "ball": 4,
+     "player": 2,
+     "scorer": "M. Belloumi",
+     "scorer_team": "Hull City"
+    },
+    {
+     "side": "away",
+     "club": "ipswich",
+     "t": 46.1,
+     "minute": "90+2'",
+     "shot": 2,
      "ball": 3,
      "player": 1,
      "scorer": "C. Akpom",
@@ -52,21 +96,43 @@
    "home": "coventry",
    "away": "leeds",
    "hg": 1,
-   "ag": 2,
+   "ag": 8,
    "seed": 4096929093,
    "attempt": 0,
-   "timeline_hash": "4e1efa7523cdacc0346465031fb3bc1be82078974ab9209cd06fa5fa63c2619f",
+   "timeline_hash": "e4d3f694e0c2f84529027229949acd61d452978280c27df099d9a0faa232b32c",
    "added_time": 3,
    "strength": {
     "fav": "home",
-    "edge": 0.04947
+    "edge": 0.00105
    },
    "goals": [
     {
      "side": "away",
      "club": "leeds",
-     "t": 30.12,
-     "minute": "61'",
+     "t": 4.46,
+     "minute": "11'",
+     "shot": null,
+     "ball": 1,
+     "player": 0,
+     "scorer": "D. Calvert-Lewin",
+     "scorer_team": "Leeds United"
+    },
+    {
+     "side": "home",
+     "club": "coventry",
+     "t": 6.82,
+     "minute": "17'",
+     "shot": null,
+     "ball": 2,
+     "player": 1,
+     "scorer": "E. Simms",
+     "scorer_team": "Coventry City"
+    },
+    {
+     "side": "away",
+     "club": "leeds",
+     "t": 8.28,
+     "minute": "20'",
      "shot": null,
      "ball": 3,
      "player": 1,
@@ -76,24 +142,68 @@
     {
      "side": "away",
      "club": "leeds",
-     "t": 94.46,
-     "minute": "90+1'",
-     "shot": 1,
+     "t": 12.62,
+     "minute": "31'",
+     "shot": null,
+     "ball": 5,
+     "player": 2,
+     "scorer": "D. James",
+     "scorer_team": "Leeds United"
+    },
+    {
+     "side": "away",
+     "club": "leeds",
+     "t": 15.68,
+     "minute": "38'",
+     "shot": null,
+     "ball": 1,
+     "player": 0,
+     "scorer": "D. Calvert-Lewin",
+     "scorer_team": "Leeds United"
+    },
+    {
+     "side": "away",
+     "club": "leeds",
+     "t": 19.52,
+     "minute": "47'",
+     "shot": null,
      "ball": 3,
      "player": 1,
      "scorer": "N. Okafor",
      "scorer_team": "Leeds United"
     },
     {
-     "side": "home",
-     "club": "coventry",
-     "t": 98.23,
-     "minute": "90+2'",
-     "shot": 2,
-     "ball": 0,
-     "player": 0,
-     "scorer": "H. Wright",
-     "scorer_team": "Coventry City"
+     "side": "away",
+     "club": "leeds",
+     "t": 23.6,
+     "minute": "57'",
+     "shot": null,
+     "ball": 5,
+     "player": 2,
+     "scorer": "D. James",
+     "scorer_team": "Leeds United"
+    },
+    {
+     "side": "away",
+     "club": "leeds",
+     "t": 32.04,
+     "minute": "77'",
+     "shot": null,
+     "ball": 3,
+     "player": 1,
+     "scorer": "N. Okafor",
+     "scorer_team": "Leeds United"
+    },
+    {
+     "side": "away",
+     "club": "leeds",
+     "t": 36.31,
+     "minute": "88'",
+     "shot": null,
+     "ball": 5,
+     "player": 2,
+     "scorer": "D. James",
+     "scorer_team": "Leeds United"
     }
    ]
   },
@@ -101,22 +211,22 @@
    "idx": 2,
    "home": "tottenham",
    "away": "sunderland",
-   "hg": 2,
-   "ag": 2,
+   "hg": 3,
+   "ag": 0,
    "seed": 2216268269,
    "attempt": 0,
-   "timeline_hash": "2bc5daa5b73196a222261067398c1dc7c95044f8651df9dace4753f4efab0e1d",
+   "timeline_hash": "5cd6c258f963e5415a8287447a3debf3b2671557992c8b0cdd083e4e74daed17",
    "added_time": 1,
    "strength": {
     "fav": "away",
-    "edge": 0.07954
+    "edge": 0.0911
    },
    "goals": [
     {
      "side": "home",
      "club": "tottenham",
-     "t": 2.52,
-     "minute": "6'",
+     "t": 15.6,
+     "minute": "38'",
      "shot": null,
      "ball": 0,
      "player": 0,
@@ -124,36 +234,25 @@
      "scorer_team": "Tottenham Hotspur"
     },
     {
-     "side": "away",
-     "club": "sunderland",
-     "t": 30.6,
-     "minute": "62'",
+     "side": "home",
+     "club": "tottenham",
+     "t": 19.8,
+     "minute": "48'",
      "shot": null,
-     "ball": 3,
+     "ball": 2,
      "player": 1,
-     "scorer": "B. Brobbey",
-     "scorer_team": "Sunderland"
-    },
-    {
-     "side": "away",
-     "club": "sunderland",
-     "t": 85.95,
-     "minute": "172'",
-     "shot": null,
-     "ball": 3,
-     "player": 1,
-     "scorer": "B. Brobbey",
-     "scorer_team": "Sunderland"
+     "scorer": "O. Marmoush",
+     "scorer_team": "Tottenham Hotspur"
     },
     {
      "side": "home",
      "club": "tottenham",
-     "t": 94.68,
+     "t": 42.41,
      "minute": "90+1'",
      "shot": 1,
-     "ball": 4,
-     "player": 2,
-     "scorer": "Richarlison",
+     "ball": 0,
+     "player": 0,
+     "scorer": "D. Solanke",
      "scorer_team": "Tottenham Hotspur"
     }
    ]
@@ -162,33 +261,22 @@
    "idx": 3,
    "home": "brighton",
    "away": "nottingham_forest",
-   "hg": 2,
+   "hg": 1,
    "ag": 0,
    "seed": 2862949318,
    "attempt": 0,
-   "timeline_hash": "516bd178022a11ecf6df35990a08428d0100085610c5828acd1bbb0cdbcdc5d3",
+   "timeline_hash": "d8375105d3f2572f6452c51664a9aae2c513f2107439944af5fd644e0a965f19",
    "added_time": 1,
    "strength": {
     "fav": "home",
-    "edge": 0.32576
+    "edge": 0.1984
    },
    "goals": [
     {
      "side": "home",
      "club": "brighton",
-     "t": 66.46,
-     "minute": "133'",
-     "shot": null,
-     "ball": 2,
-     "player": 1,
-     "scorer": "Y. Minteh",
-     "scorer_team": "Brighton & Hove Albion"
-    },
-    {
-     "side": "home",
-     "club": "brighton",
-     "t": 75.28,
-     "minute": "151'",
+     "t": 10.13,
+     "minute": "25'",
      "shot": null,
      "ball": 4,
      "player": 2,
@@ -201,42 +289,164 @@
    "idx": 4,
    "home": "brentford",
    "away": "crystal_palace",
-   "hg": 0,
-   "ag": 0,
+   "hg": 5,
+   "ag": 3,
    "seed": 1317313283,
    "attempt": 0,
-   "timeline_hash": "275253e59c0d5ee6a959a98d4959bd73a825988a5c121f1d8924e8771248aa3c",
+   "timeline_hash": "2006cea6c7ec20d4d0bee311172a63813716c7d453e66a8b0bd0e4e2fe7fe0a7",
    "added_time": 2,
    "strength": {
     "fav": "home",
-    "edge": 0.30735
+    "edge": 0.18525
    },
-   "goals": []
+   "goals": [
+    {
+     "side": "home",
+     "club": "brentford",
+     "t": 7.08,
+     "minute": "17'",
+     "shot": null,
+     "ball": 2,
+     "player": 1,
+     "scorer": "D. Ouattara",
+     "scorer_team": "Brentford"
+    },
+    {
+     "side": "home",
+     "club": "brentford",
+     "t": 17.15,
+     "minute": "42'",
+     "shot": null,
+     "ball": 2,
+     "player": 1,
+     "scorer": "D. Ouattara",
+     "scorer_team": "Brentford"
+    },
+    {
+     "side": "home",
+     "club": "brentford",
+     "t": 21.3,
+     "minute": "52'",
+     "shot": null,
+     "ball": 4,
+     "player": 2,
+     "scorer": "C. Wilson",
+     "scorer_team": "Brentford"
+    },
+    {
+     "side": "away",
+     "club": "crystal_palace",
+     "t": 24.49,
+     "minute": "59'",
+     "shot": null,
+     "ball": 3,
+     "player": 1,
+     "scorer": "I. Sarr",
+     "scorer_team": "Crystal Palace"
+    },
+    {
+     "side": "away",
+     "club": "crystal_palace",
+     "t": 26.98,
+     "minute": "65'",
+     "shot": null,
+     "ball": 5,
+     "player": 2,
+     "scorer": "Y. Pino",
+     "scorer_team": "Crystal Palace"
+    },
+    {
+     "side": "home",
+     "club": "brentford",
+     "t": 32.27,
+     "minute": "78'",
+     "shot": null,
+     "ball": 4,
+     "player": 2,
+     "scorer": "C. Wilson",
+     "scorer_team": "Brentford"
+    },
+    {
+     "side": "home",
+     "club": "brentford",
+     "t": 36.14,
+     "minute": "87'",
+     "shot": null,
+     "ball": 0,
+     "player": 0,
+     "scorer": "Igor Thiago",
+     "scorer_team": "Brentford"
+    },
+    {
+     "side": "away",
+     "club": "crystal_palace",
+     "t": 44.72,
+     "minute": "90+2'",
+     "shot": 2,
+     "ball": 3,
+     "player": 1,
+     "scorer": "I. Sarr",
+     "scorer_team": "Crystal Palace"
+    }
+   ]
   },
   {
    "idx": 5,
    "home": "everton",
    "away": "newcastle",
-   "hg": 0,
-   "ag": 1,
+   "hg": 2,
+   "ag": 2,
    "seed": 706582156,
    "attempt": 0,
-   "timeline_hash": "72b8c114a25557cb61182d4bf3ae3b6b377bc9524f0130a92199ce1f89ccc40f",
+   "timeline_hash": "78074c2aa28d8dabb3077786d0d53dcb4b18cc15d0b307eeba00e16864b43131",
    "added_time": 1,
    "strength": {
     "fav": "home",
-    "edge": 0.16
+    "edge": 0.08
    },
    "goals": [
     {
      "side": "away",
      "club": "newcastle",
-     "t": 13.15,
-     "minute": "27'",
+     "t": 5.9,
+     "minute": "15'",
      "shot": null,
      "ball": 1,
      "player": 0,
      "scorer": "Y. Wissa",
+     "scorer_team": "Newcastle United"
+    },
+    {
+     "side": "home",
+     "club": "everton",
+     "t": 16.1,
+     "minute": "39'",
+     "shot": null,
+     "ball": 0,
+     "player": 0,
+     "scorer": "T. Barry",
+     "scorer_team": "Everton"
+    },
+    {
+     "side": "home",
+     "club": "everton",
+     "t": 29.94,
+     "minute": "72'",
+     "shot": null,
+     "ball": 2,
+     "player": 1,
+     "scorer": "B. Johnson",
+     "scorer_team": "Everton"
+    },
+    {
+     "side": "away",
+     "club": "newcastle",
+     "t": 32.14,
+     "minute": "78'",
+     "shot": null,
+     "ball": 5,
+     "player": 2,
+     "scorer": "W. Osula",
      "scorer_team": "Newcastle United"
     }
    ]
@@ -245,38 +455,94 @@
    "idx": 6,
    "home": "fulham",
    "away": "chelsea",
-   "hg": 0,
-   "ag": 0,
+   "hg": 3,
+   "ag": 2,
    "seed": 3689520469,
    "attempt": 0,
-   "timeline_hash": "a697138ad73eb9ab4dc4f4f10067cb329be45b312a65696b64751c9ee3847b6a",
+   "timeline_hash": "800c7d4ee1a22c60728f137c5cb12a161fe819c56d6ca90efca2d5242a90262c",
    "added_time": 1,
    "strength": {
     "fav": "home",
-    "edge": 0.16
+    "edge": 0.08
    },
-   "goals": []
+   "goals": [
+    {
+     "side": "home",
+     "club": "fulham",
+     "t": 18.34,
+     "minute": "45'",
+     "shot": null,
+     "ball": 2,
+     "player": 1,
+     "scorer": "A. Iwobi",
+     "scorer_team": "Fulham"
+    },
+    {
+     "side": "home",
+     "club": "fulham",
+     "t": 21.7,
+     "minute": "53'",
+     "shot": null,
+     "ball": 4,
+     "player": 2,
+     "scorer": "Kevin",
+     "scorer_team": "Fulham"
+    },
+    {
+     "side": "home",
+     "club": "fulham",
+     "t": 29.38,
+     "minute": "71'",
+     "shot": null,
+     "ball": 2,
+     "player": 1,
+     "scorer": "A. Iwobi",
+     "scorer_team": "Fulham"
+    },
+    {
+     "side": "away",
+     "club": "chelsea",
+     "t": 36.78,
+     "minute": "89'",
+     "shot": null,
+     "ball": 5,
+     "player": 2,
+     "scorer": "Estêvão",
+     "scorer_team": "Chelsea"
+    },
+    {
+     "side": "away",
+     "club": "chelsea",
+     "t": 37.28,
+     "minute": "90'",
+     "shot": null,
+     "ball": 3,
+     "player": 1,
+     "scorer": "P. Neto",
+     "scorer_team": "Chelsea"
+    }
+   ]
   },
   {
    "idx": 7,
    "home": "bournemouth",
    "away": "aston_villa",
-   "hg": 2,
-   "ag": 0,
+   "hg": 1,
+   "ag": 2,
    "seed": 3785130954,
    "attempt": 0,
-   "timeline_hash": "a768d0d04ce0579bd0210a0829c8001a5a9d23f65293253eb0c6c2e6166c0333",
+   "timeline_hash": "012158861bb031cca2d5f81d1e81c96bc48fb31042ed57d27a6e2137f8691d6d",
    "added_time": 1,
    "strength": {
-    "fav": "home",
-    "edge": 0.01265
+    "fav": "away",
+    "edge": 0.02525
    },
    "goals": [
     {
      "side": "home",
      "club": "bournemouth",
-     "t": 2.42,
-     "minute": "5'",
+     "t": 2.61,
+     "minute": "7'",
      "shot": null,
      "ball": 0,
      "player": 0,
@@ -284,15 +550,26 @@
      "scorer_team": "Bournemouth"
     },
     {
-     "side": "home",
-     "club": "bournemouth",
-     "t": 80.88,
-     "minute": "162'",
+     "side": "away",
+     "club": "aston_villa",
+     "t": 13.57,
+     "minute": "33'",
      "shot": null,
-     "ball": 2,
+     "ball": 5,
+     "player": 2,
+     "scorer": "T. Abraham",
+     "scorer_team": "Aston Villa"
+    },
+    {
+     "side": "away",
+     "club": "aston_villa",
+     "t": 23.62,
+     "minute": "57'",
+     "shot": null,
+     "ball": 3,
      "player": 1,
-     "scorer": "J. Kluivert",
-     "scorer_team": "Bournemouth"
+     "scorer": "N. Jackson",
+     "scorer_team": "Aston Villa"
     }
    ]
   },
@@ -301,33 +578,55 @@
    "home": "liverpool",
    "away": "man_city",
    "hg": 1,
-   "ag": 1,
+   "ag": 3,
    "seed": 361318563,
    "attempt": 0,
-   "timeline_hash": "8612a0fcfb2d1db6d7ec7c9cc5a670a5e5d1f18036e9cac7813288811c3e3aea",
+   "timeline_hash": "672fc031d238cf1289e2cd9430bb551f4410324900125c88ac2c6c8a1f029103",
    "added_time": 3,
    "strength": {
     "fav": "away",
-    "edge": 0.04782
+    "edge": 0.06844
    },
    "goals": [
     {
+     "side": "away",
+     "club": "man_city",
+     "t": 18.26,
+     "minute": "44'",
+     "shot": null,
+     "ball": 1,
+     "player": 0,
+     "scorer": "E. Haaland",
+     "scorer_team": "Manchester City"
+    },
+    {
      "side": "home",
      "club": "liverpool",
-     "t": 2.92,
-     "minute": "6'",
+     "t": 24.74,
+     "minute": "60'",
      "shot": null,
-     "ball": 0,
-     "player": 0,
-     "scorer": "A. Isak",
+     "ball": 4,
+     "player": 2,
+     "scorer": "C. Gakpo",
      "scorer_team": "Liverpool"
     },
     {
      "side": "away",
      "club": "man_city",
-     "t": 87.52,
-     "minute": "176'",
-     "shot": null,
+     "t": 42.37,
+     "minute": "90+1'",
+     "shot": 1,
+     "ball": 1,
+     "player": 0,
+     "scorer": "E. Haaland",
+     "scorer_team": "Manchester City"
+    },
+    {
+     "side": "away",
+     "club": "man_city",
+     "t": 49.85,
+     "minute": "90+3'",
+     "shot": 3,
      "ball": 3,
      "player": 1,
      "scorer": "J. Doku",
@@ -339,22 +638,99 @@
    "idx": 9,
    "home": "arsenal",
    "away": "man_utd",
-   "hg": 2,
-   "ag": 1,
+   "hg": 6,
+   "ag": 3,
    "seed": 745093182,
    "attempt": 0,
-   "timeline_hash": "2d7ddd82b6b9826f1bbd548c508e70d3cf57ac1f8ae10b300c8dcc8beb33c53e",
+   "timeline_hash": "ad623bb8877423fe6849866473adb00a9f4ea6279cc8c196e2572af78104db13",
    "added_time": 3,
    "strength": {
     "fav": "home",
-    "edge": 0.23736
+    "edge": 0.13526
    },
    "goals": [
     {
      "side": "home",
      "club": "arsenal",
-     "t": 22.52,
-     "minute": "46'",
+     "t": 3.01,
+     "minute": "8'",
+     "shot": null,
+     "ball": 0,
+     "player": 0,
+     "scorer": "B. Saka",
+     "scorer_team": "Arsenal"
+    },
+    {
+     "side": "home",
+     "club": "arsenal",
+     "t": 10.33,
+     "minute": "25'",
+     "shot": null,
+     "ball": 4,
+     "player": 2,
+     "scorer": "E. Eze",
+     "scorer_team": "Arsenal"
+    },
+    {
+     "side": "away",
+     "club": "man_utd",
+     "t": 11.71,
+     "minute": "29'",
+     "shot": null,
+     "ball": 5,
+     "player": 2,
+     "scorer": "B. Šeško",
+     "scorer_team": "Manchester United"
+    },
+    {
+     "side": "away",
+     "club": "man_utd",
+     "t": 15.57,
+     "minute": "38'",
+     "shot": null,
+     "ball": 1,
+     "player": 0,
+     "scorer": "B. Mbeumo",
+     "scorer_team": "Manchester United"
+    },
+    {
+     "side": "home",
+     "club": "arsenal",
+     "t": 22.53,
+     "minute": "55'",
+     "shot": null,
+     "ball": 4,
+     "player": 2,
+     "scorer": "E. Eze",
+     "scorer_team": "Arsenal"
+    },
+    {
+     "side": "home",
+     "club": "arsenal",
+     "t": 28.72,
+     "minute": "69'",
+     "shot": null,
+     "ball": 2,
+     "player": 1,
+     "scorer": "V. Gyökeres",
+     "scorer_team": "Arsenal"
+    },
+    {
+     "side": "home",
+     "club": "arsenal",
+     "t": 34.07,
+     "minute": "82'",
+     "shot": null,
+     "ball": 0,
+     "player": 0,
+     "scorer": "B. Saka",
+     "scorer_team": "Arsenal"
+    },
+    {
+     "side": "home",
+     "club": "arsenal",
+     "t": 36.16,
+     "minute": "87'",
      "shot": null,
      "ball": 2,
      "player": 1,
@@ -364,38 +740,27 @@
     {
      "side": "away",
      "club": "man_utd",
-     "t": 51.02,
-     "minute": "103'",
-     "shot": null,
-     "ball": 5,
-     "player": 2,
-     "scorer": "B. Šeško",
-     "scorer_team": "Manchester United"
-    },
-    {
-     "side": "home",
-     "club": "arsenal",
-     "t": 62.23,
-     "minute": "125'",
-     "shot": null,
-     "ball": 0,
+     "t": 45.87,
+     "minute": "90+2'",
+     "shot": 2,
+     "ball": 1,
      "player": 0,
-     "scorer": "B. Saka",
-     "scorer_team": "Arsenal"
+     "scorer": "B. Mbeumo",
+     "scorer_team": "Manchester United"
     }
    ]
   }
  ],
  "standings": [
   {
-   "id": "bournemouth",
+   "id": "leeds",
    "p": 1,
    "w": 1,
    "d": 0,
    "l": 0,
-   "gf": 2,
-   "ga": 0,
-   "gd": 2,
+   "gf": 8,
+   "ga": 1,
+   "gd": 7,
    "pts": 3,
    "form": [
     "W"
@@ -405,14 +770,14 @@
    "prev_pos": null
   },
   {
-   "id": "brighton",
+   "id": "arsenal",
    "p": 1,
    "w": 1,
    "d": 0,
    "l": 0,
-   "gf": 2,
-   "ga": 0,
-   "gd": 2,
+   "gf": 6,
+   "ga": 3,
+   "gd": 3,
    "pts": 3,
    "form": [
     "W"
@@ -422,14 +787,14 @@
    "prev_pos": null
   },
   {
-   "id": "arsenal",
+   "id": "tottenham",
    "p": 1,
    "w": 1,
    "d": 0,
    "l": 0,
-   "gf": 2,
-   "ga": 1,
-   "gd": 1,
+   "gf": 3,
+   "ga": 0,
+   "gd": 3,
    "pts": 3,
    "form": [
     "W"
@@ -439,14 +804,14 @@
    "prev_pos": null
   },
   {
-   "id": "leeds",
+   "id": "brentford",
    "p": 1,
    "w": 1,
    "d": 0,
    "l": 0,
-   "gf": 2,
-   "ga": 1,
-   "gd": 1,
+   "gf": 5,
+   "ga": 3,
+   "gd": 2,
    "pts": 3,
    "form": [
     "W"
@@ -456,14 +821,14 @@
    "prev_pos": null
   },
   {
-   "id": "newcastle",
+   "id": "man_city",
    "p": 1,
    "w": 1,
    "d": 0,
    "l": 0,
-   "gf": 1,
-   "ga": 0,
-   "gd": 1,
+   "gf": 3,
+   "ga": 1,
+   "gd": 2,
    "pts": 3,
    "form": [
     "W"
@@ -473,13 +838,13 @@
    "prev_pos": null
   },
   {
-   "id": "ipswich",
+   "id": "fulham",
    "p": 1,
    "w": 1,
    "d": 0,
    "l": 0,
-   "gf": 1,
-   "ga": 0,
+   "gf": 3,
+   "ga": 2,
    "gd": 1,
    "pts": 3,
    "form": [
@@ -490,64 +855,64 @@
    "prev_pos": null
   },
   {
-   "id": "tottenham",
+   "id": "hull",
    "p": 1,
-   "w": 0,
-   "d": 1,
+   "w": 1,
+   "d": 0,
    "l": 0,
-   "gf": 2,
+   "gf": 3,
    "ga": 2,
-   "gd": 0,
-   "pts": 1,
+   "gd": 1,
+   "pts": 3,
    "form": [
-    "D"
+    "W"
    ],
    "pos": 7,
    "zone": "uel",
    "prev_pos": null
   },
   {
-   "id": "sunderland",
+   "id": "aston_villa",
    "p": 1,
-   "w": 0,
-   "d": 1,
+   "w": 1,
+   "d": 0,
    "l": 0,
    "gf": 2,
-   "ga": 2,
-   "gd": 0,
-   "pts": 1,
+   "ga": 1,
+   "gd": 1,
+   "pts": 3,
    "form": [
-    "D"
+    "W"
    ],
    "pos": 8,
    "zone": "uecl",
    "prev_pos": null
   },
   {
-   "id": "man_city",
+   "id": "brighton",
    "p": 1,
-   "w": 0,
-   "d": 1,
+   "w": 1,
+   "d": 0,
    "l": 0,
    "gf": 1,
-   "ga": 1,
-   "gd": 0,
-   "pts": 1,
+   "ga": 0,
+   "gd": 1,
+   "pts": 3,
    "form": [
-    "D"
+    "W"
    ],
    "pos": 9,
    "zone": null,
    "prev_pos": null
   },
   {
-   "id": "liverpool",
+   "id": "newcastle",
    "p": 1,
    "w": 0,
    "d": 1,
    "l": 0,
-   "gf": 1,
-   "ga": 1,
+   "gf": 2,
+   "ga": 2,
    "gd": 0,
    "pts": 1,
    "form": [
@@ -558,13 +923,13 @@
    "prev_pos": null
   },
   {
-   "id": "fulham",
+   "id": "everton",
    "p": 1,
    "w": 0,
    "d": 1,
    "l": 0,
-   "gf": 0,
-   "ga": 0,
+   "gf": 2,
+   "ga": 2,
    "gd": 0,
    "pts": 1,
    "form": [
@@ -575,64 +940,64 @@
    "prev_pos": null
   },
   {
-   "id": "chelsea",
+   "id": "ipswich",
    "p": 1,
    "w": 0,
-   "d": 1,
-   "l": 0,
-   "gf": 0,
-   "ga": 0,
-   "gd": 0,
-   "pts": 1,
+   "d": 0,
+   "l": 1,
+   "gf": 2,
+   "ga": 3,
+   "gd": -1,
+   "pts": 0,
    "form": [
-    "D"
+    "L"
    ],
    "pos": 12,
    "zone": null,
    "prev_pos": null
   },
   {
-   "id": "crystal_palace",
+   "id": "chelsea",
    "p": 1,
    "w": 0,
-   "d": 1,
-   "l": 0,
-   "gf": 0,
-   "ga": 0,
-   "gd": 0,
-   "pts": 1,
+   "d": 0,
+   "l": 1,
+   "gf": 2,
+   "ga": 3,
+   "gd": -1,
+   "pts": 0,
    "form": [
-    "D"
+    "L"
    ],
    "pos": 13,
    "zone": null,
    "prev_pos": null
   },
   {
-   "id": "brentford",
-   "p": 1,
-   "w": 0,
-   "d": 1,
-   "l": 0,
-   "gf": 0,
-   "ga": 0,
-   "gd": 0,
-   "pts": 1,
-   "form": [
-    "D"
-   ],
-   "pos": 14,
-   "zone": null,
-   "prev_pos": null
-  },
-  {
-   "id": "coventry",
+   "id": "bournemouth",
    "p": 1,
    "w": 0,
    "d": 0,
    "l": 1,
    "gf": 1,
    "ga": 2,
+   "gd": -1,
+   "pts": 0,
+   "form": [
+    "L"
+   ],
+   "pos": 14,
+   "zone": null,
+   "prev_pos": null
+  },
+  {
+   "id": "nottingham_forest",
+   "p": 1,
+   "w": 0,
+   "d": 0,
+   "l": 1,
+   "gf": 0,
+   "ga": 1,
    "gd": -1,
    "pts": 0,
    "form": [
@@ -643,14 +1008,14 @@
    "prev_pos": null
   },
   {
-   "id": "man_utd",
+   "id": "crystal_palace",
    "p": 1,
    "w": 0,
    "d": 0,
    "l": 1,
-   "gf": 1,
-   "ga": 2,
-   "gd": -1,
+   "gf": 3,
+   "ga": 5,
+   "gd": -2,
    "pts": 0,
    "form": [
     "L"
@@ -660,14 +1025,14 @@
    "prev_pos": null
   },
   {
-   "id": "everton",
+   "id": "liverpool",
    "p": 1,
    "w": 0,
    "d": 0,
    "l": 1,
-   "gf": 0,
-   "ga": 1,
-   "gd": -1,
+   "gf": 1,
+   "ga": 3,
+   "gd": -2,
    "pts": 0,
    "form": [
     "L"
@@ -677,14 +1042,14 @@
    "prev_pos": null
   },
   {
-   "id": "hull",
+   "id": "man_utd",
    "p": 1,
    "w": 0,
    "d": 0,
    "l": 1,
-   "gf": 0,
-   "ga": 1,
-   "gd": -1,
+   "gf": 3,
+   "ga": 6,
+   "gd": -3,
    "pts": 0,
    "form": [
     "L"
@@ -694,14 +1059,14 @@
    "prev_pos": null
   },
   {
-   "id": "nottingham_forest",
+   "id": "sunderland",
    "p": 1,
    "w": 0,
    "d": 0,
    "l": 1,
    "gf": 0,
-   "ga": 2,
-   "gd": -2,
+   "ga": 3,
+   "gd": -3,
    "pts": 0,
    "form": [
     "L"
@@ -711,14 +1076,14 @@
    "prev_pos": null
   },
   {
-   "id": "aston_villa",
+   "id": "coventry",
    "p": 1,
    "w": 0,
    "d": 0,
    "l": 1,
-   "gf": 0,
-   "ga": 2,
-   "gd": -2,
+   "gf": 1,
+   "ga": 8,
+   "gd": -7,
    "pts": 0,
    "form": [
     "L"
@@ -728,5 +1093,5 @@
    "prev_pos": null
   }
  ],
- "results_hash": "833dc388ca6764d0"
+ "results_hash": "f7b23512bd0f0e4e"
 }

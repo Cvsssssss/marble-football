@@ -392,8 +392,19 @@ for e in show['audio']:
     elif ty == 'firework':        place(S['firework'], t, 0.42, float(np.clip(((e.get('k', 0) * 37) % 10) / 10.0 * 1.2 - 0.6, -0.6, 0.6)))
     elif ty == 'ceremony_sting':  place(S['ceremony_sting'], t, 0.7, 0.0); goal_times.append(t)
 
-# ambient crowd murmur during matches
+# P10: crowd + weather bus (audio/crowd.py) when the show carries crowd events (Premier League "pro" maps)
+HAS_BED = any(e['type'] == 'crowd_bed' for e in show['audio'])
+crowd_counts = {}
+if HAS_BED:
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import crowd
+    _cb = np.zeros((2, N), np.float64)
+    crowd_counts = crowd.render_into(show, _cb)
+    fx += _cb.astype(np.float32)
+    del _cb
+# ambient crowd murmur during matches (P10: replaced by the crowd bed on the match segments)
 for seg in show['segments']:
+    if HAS_BED and seg['type'] in ('match', 'lgKick'): continue
     if seg['type'] in ('match', 'matchPre', 'fulltime', 'lgPre'):
         d = seg['len'] / FPS
         amb = snd_crowd(d, 0.6, 0.6) if d < 60 else snd_crowd(d, 0.6, 0.6)
@@ -466,7 +477,7 @@ lvl = np.full(N, 0.16, np.float32)
 for seg in show['segments']:
     a = int(seg['start'] / FPS * SR); b = int((seg['start'] + seg['len']) / FPS * SR)
     if seg['type'] in ('intro', 'bracket', 'roundCard', 'hook', 'end'): lvl[a:b] = 0.42  # reels: hook + end card  # P2: round title cards like bracket screens
-    elif seg['type'] in ('lgIntro', 'lgTable', 'lgTableFull', 'lgResults', 'lgScorers', 'lgGotwCard', 'lgNext', 'lgEurope', 'lgBoot', 'lgPodium', 'lgStats'): lvl[a:b] = 0.36  # P7 league screens
+    elif seg['type'] in ('lgIntro', 'lgTrans', 'lgTable', 'lgTableFull', 'lgResults', 'lgScorers', 'lgGotwCard', 'lgNext', 'lgEurope', 'lgBoot', 'lgPodium', 'lgStats'): lvl[a:b] = 0.36  # P7 league screens
     elif seg['type'] in ('winner', 'lgChampion', 'ceremony'): lvl[a:b] = 0.30
     elif seg['type'] == 'replay': lvl[a:b] = 0.22
 # ducking under goals / whistles / fanfare
@@ -495,7 +506,7 @@ out = (mix.T * 32767).astype(np.int16)
 path = OUT_PATH
 with wave.open(path, 'wb') as w:
     w.setnchannels(2); w.setsampwidth(2); w.setframerate(SR); w.writeframes(out.tobytes())
-print('audio written', path, 'seconds', end / SR, 'events', sum(cnt.values()), json.dumps(cnt))
+print('audio written', path, 'seconds', end / SR, 'events', sum(cnt.values()), json.dumps(cnt), 'crowd', json.dumps(crowd_counts))
 
 if show.get('reel'): sys.exit(0)  # reels: no goal-sample report (it belongs to the long video)
 # ---------------- goal sound samples + peak / loudness / masking report ----------------

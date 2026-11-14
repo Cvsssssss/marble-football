@@ -4,7 +4,7 @@
   "private": true,
   "type": "commonjs",
   "scripts": {
-    "test": "node tests/run_tests.js && node tests/p2_tests.js && node tests/p3_tests.js && node tests/p4_tests.js && node tests/p5_tests.js && node tests/p6_tests.js && node tests/p7_tests.js && node tests/p7b_tests.js && node tests/p8_tests.js && node tests/p9_tests.js",
+    "test": "node tests/run_tests.js && node tests/p2_tests.js && node tests/p3_tests.js && node tests/p4_tests.js && node tests/p5_tests.js && node tests/p6_tests.js && node tests/p7_tests.js && node tests/p7b_tests.js && node tests/p8_tests.js && node tests/p9_tests.js && node tests/p10_tests.js",
     "all": "node build_all.js --competition config/competitions/demo_4teams.json",
     "start": "node launcher.js",
     "test:crossbar": "node tests/crossbar_test.js 5000 both",
@@ -27,6 +27,7 @@
     "test:p7": "node tests/p7_tests.js && node tests/p7b_tests.js",
     "test:p8": "node tests/p8_tests.js",
     "test:p9": "node tests/p9_tests.js",
+    "test:p10": "node tests/p10_tests.js",
     "art:bench": "node tools/p9_bench.js now",
     "league": "node league.js",
     "league:calibrate": "node tools/league_calibrate.js",

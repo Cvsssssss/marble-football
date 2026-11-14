@@ -38,3 +38,35 @@ Fundalul static (stadion, platforme) se desenează o singură dată și se păst
 - `render/draw.js` – alege kitul când `art_style` este `"pro"`
 - `tools/p9_stills.js` – cadre de control (PNG), `tools/p9_bench.js` – timp pe cadru, `tools/p9_pixels.js`, `tools/p9_hashes.js` – pentru teste
 - `tests/p9_tests.js` – teste (`npm run test:p9`)
+
+# Atmosferă „Premier” (P10)
+
+Totul se configurează în `config/atmosphere.json` (doar hărțile cu `art_style: "pro"`). Pui `false` la un efect ca să-l oprești; `"enabled": false` oprește tot P10 dintr-o linie. Fizica NU se schimbă niciodată (aceleași hash-uri ca P9).
+
+| Flag | Ce face |
+|---|---|
+| `match_intro`, `intro_s` | intro de ~2,8 s înainte de fiecare meci: cameră de sus, blur → clar, scorul intră din lateral |
+| `match_transitions`, `transition_s` | tranziție de 1 s între meciuri (dungă în culorile echipelor, „MATCH n OF 10”, swoosh) |
+| `earth_platforms` | platformele laterale din pământ (straturi, pietre, rădăcini) în loc de piatră |
+| `wind` | vânt pe meci: iarba, norii, plasa porții și ploaia se înclină în aceeași direcție |
+| `rain` | ploaie pe hărțile înnorate / de noapte (3 straturi, stropi pe gazon) |
+| `lens_droplets` | picături pe „obiectiv” când plouă |
+| `rounded_goal` | colțurile porții rotunjite, cu cleme și umbră |
+| `split_stands` | tribunele împărțite: stânga în culorile gazdei, dreapta în ale oaspeților |
+| `stand_flags` | steaguri în două culori și bannere cu prescurtarea echipei (fără sponsori) |
+| `stand_smoke` | fum colorat + torțe rare (o dată pe meci + la goluri, partea care marchează) |
+| `crowd_reactions` | la gol jumătatea echipei care marchează sare, cealaltă se întunecă; ocazii mari = reacție mică |
+| `crowd_audio`, `crowd_gain` | sunetul publicului (sintetizat de noi: murmur, urale, oftat, aplauze, tobe, bubuitura morii) |
+| `trophy_v2` | trofeul nostru original nou (cupă-lalea, bandă de marmură, minge aurie, piedestal) |
+| `birds`, `insects` | păsări pe cer ziua, insecte în lumina reflectoarelor noaptea |
+| `corner_flags` | steaguri de colț care flutură în vânt |
+| `whistle_flash` | sclipire scurtă la fluierul de start/final |
+| `dust_puffs` | praf la loviturile foarte puternice ale morii |
+| `net_sparkle`, `goal_banner_flash` | sclipiri în plasă și pe banner la gol |
+| `replay_swoosh` | „swoosh” la intrarea în reluare |
+| `pitch_reflections` | reflexii ușoare ale reflectoarelor pe gazonul ud |
+
+Dacă un render devine prea lent: oprește întâi `stand_smoke`, `split_stands`, `rain`, apoi `earth_platforms`.
+Viteză (cadre fixe 1920×1080): P9 19,2 ms/cadru → P10 ~22,4 ms/cadru (≈ +17%).
+Fișiere: `sim/atmosphere.js` (date din cronologia meciului), `render/atmo.js` (tribune, fum, intro, tranziții, trofeu), `render/art_pro.js` + `render/draw.js` (pământ, vânt, ploaie, poartă), `audio/crowd.py` (sunet public).
+Teste: `npm run test:p10`.

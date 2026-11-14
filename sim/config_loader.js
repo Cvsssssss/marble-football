@@ -80,6 +80,15 @@ const S = {
       generate_thumbnails: { type: 'boolean' },
     },
   },
+  // P10: atmosphere flags of the Premier League ("pro") map family (config/atmosphere.json). Every major effect can be
+  // switched off in one line; all are visual/audio only (no physics change).
+  atmosphere: {
+    type: 'object', required: ['enabled'],
+    props: Object.assign({ _comment: { type: 'string' } }, ...['enabled', 'match_intro', 'match_transitions', 'earth_platforms', 'wind', 'rain', 'lens_droplets', 'rounded_goal',
+      'split_stands', 'stand_flags', 'stand_smoke', 'crowd_reactions', 'crowd_audio', 'trophy_v2', 'birds', 'insects', 'corner_flags', 'whistle_flash',
+      'dust_puffs', 'net_sparkle', 'replay_swoosh', 'pitch_reflections', 'goal_banner_flash'].map((k) => ({ [k]: { type: 'boolean' } })),
+    { intro_s: { type: 'number', min: 1.5, max: 3.5 }, transition_s: { type: 'number', min: 0.6, max: 1.5 }, crowd_gain: { type: 'number', min: 0, max: 2 } }),
+  },
   audio: {
     type: 'object', required: ['goal_sfx'],
     props: { goal_sfx: { type: 'string', enum: ['A', 'B', 'C', 'v2_A', 'v2_B', 'v2_C'] }, music_seed: { type: 'integer', min: 0 } },
@@ -279,4 +288,8 @@ function rulesToCfg(rules) {
   };
 }
 
-module.exports = { loadCompetition, rulesToCfg, matchKits, ringOf, NEUTRAL_RING, deltaE76, hexToRgb, ConfigError, validate, SCHEMAS: S, CONTRAST_MIN_DE };
+function loadAtmosphere() { // P10: flags (missing file -> everything off except what the defaults say)
+  const f = path.join(ROOT, 'config', 'atmosphere.json');
+  return fs.existsSync(f) ? check(readJson(f), 'atmosphere', f) : { enabled: false };
+}
+module.exports = { loadAtmosphere, loadCompetition, rulesToCfg, matchKits, ringOf, NEUTRAL_RING, deltaE76, hexToRgb, ConfigError, validate, SCHEMAS: S, CONTRAST_MIN_DE };

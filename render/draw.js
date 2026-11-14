@@ -10,6 +10,11 @@
   // P9: "pro" art kit (render/art_pro.js), on when show.map.art_style === 'pro'; SKY_PRO = sky + clouds drawn per frame
   const ART = window.ARTPRO || null;
   let PRO = false, SKY_PRO = false, lastSway = null, bgOut = null, bgBuilds = 0, bgFast = 0;
+  // P10: atmosphere kit (render/atmo.js): per-match stands in the two teams' colours (the bowl is rebuilt when the match
+  // changes, standBuilds), reaction groups, flags, smoke, intro/transition helpers, the original trophy
+  const ATM = window.ATMO || null;
+  const AON = (k) => !!(ATM && ATM.on(k));
+  let platLayer = null, standMatch = -1, standBuilds = 0, crowdKits = null, crowdTeams = null, standFans = null, standTone = null, REBUILD = false, trophyT = 0, trophyCols = null, lastKick = null;
 
   // ---------- helpers ----------
   const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
@@ -43,6 +48,8 @@
     PRO = !!(ART && ART.enabled(MAP));
     SKY_PRO = PRO && !bgImg && MAP.scenery === 'bowl';
     if (PRO) ART.setup({ hash, rrect, hexA, shade, mixHex, lum, hexRgb, cloud }, G, show); // 'art:pro' is appended last to bgLayers
+    if (ATM) ATM.setup({ hash, rrect, hexA, hexRgb, lum, text, inkOn, fitText, mixHex }, G, show);
+    standMatch = -1; crowdKits = null; crowdTeams = null; standFans = null; platLayer = null;
     if (bgImg) { // P7 §7b: Max's image as the background layer (cover-fit, bottom-anchored); nothing procedural behind it
       const F = bgFitInfo();
       c.drawImage(bgImg, F.dx, F.dy, F.dw, F.dh); bgLayers.push('image');
@@ -53,18 +60,44 @@
       sky.addColorStop(0, MAP.sky[0]); sky.addColorStop(0.55, MAP.sky[1]); sky.addColorStop(1, MAP.sky[2]);
       if (!SKY_PRO) { c.fillStyle = sky; c.fillRect(0, 0, G.W, G.H); } bgLayers.push('sky'); // P9 pro: the sky is drawn live (ART.drawSky), still the first layer
       drawScenery(c, MAP); bgLayers.push('scenery:' + (MAP.scenery || 'none'));
+      if (MAP.scenery === 'bowl' && PRO) bgLayers.push('touchline_wall'); // P10: plain wall instead of ad boards (drawn inside the bowl)
     }
     // pipe (vertical part in the sky)
-    if (PRO) ART.pipeStatic(c, 'sky'); else drawPipeBase(c, 'sky');
+    if (PRO) { // P10: pipe + platforms cached as one layer (reused when the stands are rebuilt for another match)
+      platLayer = document.createElement('canvas'); platLayer.width = G.W * BG_SS; platLayer.height = G.H * BG_SS;
+      const q = platLayer.getContext('2d'); q.scale(BG_SS, BG_SS);
+      ART.pipeStatic(q, 'sky'); ART.platform(q, G.LEFT_PLAT[0] - 20, G.LEFT_PLAT[1], 1); ART.platform(q, G.RIGHT_PLAT[0], G.RIGHT_PLAT[1] + 20, 2); ART.pipeStatic(q, 'ground');
+      c.drawImage(platLayer, 0, 0, G.W, G.H);
+      bgLayers.push('platforms', 'pipe', 'art:pro'); buildBgOut(); return;
+    }
+    drawPipeBase(c, 'sky');
     // platforms
-    const plat = PRO ? ART.platform : MAP.platform_style === 'blocks' ? drawPlatformBlocks : drawPlatform;
+    const plat = MAP.platform_style === 'blocks' ? drawPlatformBlocks : drawPlatform;
     plat(c, G.LEFT_PLAT[0] - 20, G.LEFT_PLAT[1], 1);
     plat(c, G.RIGHT_PLAT[0], G.RIGHT_PLAT[1] + 20, 2); bgLayers.push('platforms');
-    if (PRO) { ART.pipeStatic(c, 'ground'); bgLayers.push('pipe', 'art:pro'); buildBgOut(); return; }
     drawPipeBase(c, 'ground'); bgLayers.push('pipe');
     // spout hole + collar
     const sx = G.SPOUT_X, gy = G.GROUND_Y;
     c.fillStyle = '#2b2622'; c.beginPath(); c.ellipse(sx, gy + 1, G.BALL_R + 4, 5, 0, 0, Math.PI * 2); c.fill();
+  }
+  // P10: stands in the two teams' colours: the bowl is redrawn for match mi (home = left half, away = right half), the
+  // cached pipe/platform layer goes on top, the output-size copy is refreshed and the reaction groups are rebuilt
+  function rebuildStands(m, mi) {
+    standMatch = mi; standBuilds++;
+    crowdKits = { A: m.kits.A, B: m.kits.B }; crowdTeams = { A: show.teams[m.ta], B: show.teams[m.tb] };
+    const cvs = document.createElement('canvas'); cvs.width = G.W * BG_SS; cvs.height = G.H * BG_SS;
+    const c = cvs.getContext('2d'); c.scale(BG_SS, BG_SS);
+    REBUILD = true; standFans = []; drawScenery(c, show.map); REBUILD = false;
+    c.drawImage(platLayer, 0, 0, G.W, G.H);
+    bgCanvas = cvs;
+    bgOut = document.createElement('canvas'); bgOut.width = Math.round(G.W * S); bgOut.height = Math.round(G.H * S);
+    const o = bgOut.getContext('2d'); o.imageSmoothingEnabled = true; o.imageSmoothingQuality = 'high'; o.drawImage(bgCanvas, 0, 0, bgOut.width, bgOut.height);
+    if (AON('crowd_reactions')) ATM.buildGroups(standFans, fan, standTone, S);
+  }
+  function standPath(c, side) { // clip path of one half of the stands (between the roof edge and the touchline wall)
+    const xa = side === 'A' ? 0 : 640, xb = side === 'A' ? 640 : G.W;
+    c.beginPath(); c.moveTo(xa, STAD.roofInner(xa)); for (let x = xa; x <= xb; x += 16) c.lineTo(x, STAD.roofInner(x));
+    for (let x = xb; x >= xa; x -= 16) c.lineTo(x, STAD.boards(x)); c.closePath();
   }
   function buildBgOut() { // P9 pro: the static background at output resolution (see drawScene)
     bgOut = document.createElement('canvas'); bgOut.width = Math.round(G.W * S); bgOut.height = Math.round(G.H * S);
@@ -177,11 +210,11 @@
   function drawBowl(c, MAP) {
     const L = stadLook(MAP), CR = L.CR, ST = L.ST;
     // sky detail: clouds (day / evening), a grey deck (overcast); night stars come from drawScenery
-    if (L.night && SKY_PRO) ART.buildSky(MAP, [], '#ffffff', 0, false);
+    if (L.night && SKY_PRO && !REBUILD) ART.buildSky(MAP, [], '#ffffff', 0, false);
     if (!L.night) {
       const ccol = L.overcast ? '#e9edf2' : L.evening ? '#f2b9a0' : '#ffffff';
       const CL = [[150, 70, 46], [330, 112, 30], [560, 48, 22], [800, 92, 34], [1010, 60, 26], [1170, 120, 40], [455, 170, 20], [905, 175, 22]];
-      if (SKY_PRO) ART.buildSky(MAP, L.overcast ? CL.concat([[250, 30, 52], [700, 26, 48], [1100, 34, 50]]) : CL, ccol, L.overcast ? 0.6 : 0.88, L.overcast);
+      if (SKY_PRO && !REBUILD) ART.buildSky(MAP, L.overcast ? CL.concat([[250, 30, 52], [700, 26, 48], [1100, 34, 50]]) : CL, ccol, L.overcast ? 0.6 : 0.88, L.overcast);
       else for (const [x, y, s] of CL) cloud(c, x, y, s, ccol, L.overcast ? 0.55 : 0.85);
       if (L.overcast && !SKY_PRO) { const g = c.createLinearGradient(0, 0, 0, 220); g.addColorStop(0, 'rgba(120,128,140,0.45)'); g.addColorStop(1, 'rgba(120,128,140,0)'); c.fillStyle = g; c.fillRect(0, 0, G.W, 220); }
     }
@@ -201,10 +234,13 @@
           const h = hash(ti * 1000003 + r * 7919 + k * 31 + 17), h2 = hash(ti * 7 + r * 104729 + k * 13 + 5);
           if (h2 < 0.04) continue; // empty seat
           const xx = x + (h - 0.5) * step * 0.35, yy = top(xx) + u * (bot(xx) - top(xx)) - sz * 0.6;
-          const shirt = h < 0.5 ? CR[0] : h < 0.62 ? CR[1] : CR[Math.floor(hash(k * 3 + r * 11 + ti) * CR.length)];
+          const neutral = CR[Math.floor(hash(k * 3 + r * 11 + ti) * CR.length)];
+          const side = crowdKits ? ATM.sideOf(xx, hash(ti * 31 + r * 977 + k * 7 + 3)) : null; // P10: home left, away right, mixed middle
+          const shirt = crowdKits ? ATM.fanColour(side, crowdKits, hash(ti * 53 + r * 389 + k * 11 + 1), neutral) : h < 0.5 ? CR[0] : h < 0.62 ? CR[1] : neutral;
           const skin = SKIN[Math.floor(h2 * SKIN.length)];
-          if (ti > 0 && h2 > 0.965 && xx > 70 && xx < G.W - 10) { live.push([xx, yy, sz, shirt, skin, h * 6.283]); continue; }
+          if (ti > 0 && h2 > 0.965 && xx > 70 && xx < G.W - 10) { live.push([xx, yy, sz, shirt, skin, h * 6.283, side]); continue; }
           fan(c, xx, yy, sz, shirt, skin, 0);
+          if (standFans && crowdKits) standFans.push([xx, yy, sz, shirt, skin, side, hash(k * 17 + r * 3 + ti * 5) < 0.5 ? 0 : 1]);
         }
       }
     });
@@ -223,6 +259,12 @@
       c.fillStyle = hz; bandPath(c, top, bot); c.fill();
     });
     if (L.dim < 1) { c.fillStyle = `rgba(6,10,26,${(1 - L.dim) * 0.9})`; bandPath(c, STAD.roofInner, STAD.boards); c.fill(); }
+    standTone = (q) => { // P10: the same stand overlays for the reaction copies (drawn source-atop on the fan canvases)
+      tiers.forEach(([top, bot], ti) => { const hz = q.createLinearGradient(0, top(SCX), 0, bot(SCX)); hz.addColorStop(0, `rgba(15,20,45,${0.22 - ti * 0.06})`); hz.addColorStop(1, 'rgba(15,20,45,0)'); q.fillStyle = hz; bandPath(q, top, bot); q.fill(); });
+      if (L.dim < 1) { q.fillStyle = `rgba(6,10,26,${(1 - L.dim) * 0.9})`; q.fillRect(0, 150, G.W, 420); }
+      if (MAP.tint) { q.fillStyle = MAP.tint[0]; q.fillRect(0, 150, G.W, 420); }
+      q.fillStyle = `rgba(5,8,20,${L.night ? 0.12 : 0.08})`; q.fillRect(0, 150, G.W, 420);
+    };
     // purple ribbons (LED fascias) along the tier fronts, with glow
     for (const rb of [STAD.rib1, STAD.rib2]) {
       c.save(); c.globalCompositeOperation = 'lighter';
@@ -234,7 +276,11 @@
     }
     // LED boards at pitch level: purple with plain "PREMIER LEAGUE" panels (no logos, no brands)
     const label = (show.league && show.league.display_name) || 'PREMIER LEAGUE';
-    {
+    if (PRO) { // P10 §6 (Max, 14 Nov 2026): NO advertising boards: a plain low touchline wall, no text, no LED glow
+      const g = c.createLinearGradient(0, 526, 0, STAD.pitch); g.addColorStop(0, shade(ST[1], -0.25)); g.addColorStop(1, shade(ST[1], -0.6));
+      c.fillStyle = g; bandPath(c, STAD.boards, () => STAD.pitch); c.fill();
+      c.fillStyle = 'rgba(255,255,255,0.16)'; bandPath(c, STAD.boards, (x) => STAD.boards(x) + 1); c.fill();
+    } else {
       const g = c.createLinearGradient(0, 526, 0, STAD.pitch); g.addColorStop(0, shade(L.ribbon, -0.15)); g.addColorStop(1, shade(L.ribbon, -0.55));
       c.fillStyle = g; bandPath(c, STAD.boards, () => STAD.pitch); c.fill();
       c.fillStyle = 'rgba(255,255,255,0.45)'; bandPath(c, STAD.boards, (x) => STAD.boards(x) + 1); c.fill();
@@ -298,6 +344,14 @@
       flags.push([x, y, ti === 1 ? 9 : 12, [L.ribbon, '#ffffff', CR[1], shade(L.ribbon, 0.3)][i % 4], hash(i * 13 + 1) * 6.283]);
     }
     stadLive = { fans: live, flags, dim: L.dim };
+    if (crowdKits) { // P10: two-colour flags and hanging banners in the team colours of their half
+      stadLive.flags2 = flags.map(([x, y, w, , ph], i) => { const sd = ATM.sideOf(x, hash(i * 71 + 5)), k = crowdKits[sd]; return [x, y, w, k.primary, k.secondary, ph, sd]; });
+      const lab = (sd) => { const T = crowdTeams[sd]; return String(T.short || T.name.slice(0, 3)).toUpperCase().slice(0, 4); };
+      stadLive.banners = [[150, 'A', 2], [300, 'A', 2], [455, 'A', 2], [230, 'A', 1], [830, 'B', 2], [985, 'B', 2], [1135, 'B', 2], [1050, 'B', 1]].map(([x, sd, rb], i) => {
+        const k = crowdKits[sd], y = (rb === 1 ? STAD.rib1(x) : STAD.rib2(x)) + 8;
+        return [x, y, 46 + hash(i * 19 + 3) * 16, i % 2 ? k.secondary : k.primary, i % 2 ? k.primary : k.secondary, lab(sd), sd];
+      });
+    }
   }
   // moving part of the stadium, drawn every frame right after the cached background (t = match time, so slow motion
   // slows the crowd too). Deterministic: depends only on t.
@@ -738,6 +792,9 @@
     opts = opts || {};
     const t = fr.t;
     const v = opts.v !== undefined ? opts.v : t;
+    // P10: atmosphere context of this match (wind, reactions); va = match-local video time of this frame
+    const actx = ATM ? ATM.match(m) : null, va = opts.v !== undefined ? opts.v : opts.frameIndex != null ? opts.frameIndex / FPS : t;
+    if (actx && PRO && SKY_PRO && platLayer && AON('split_stands') && standMatch !== actx.mi) rebuildStands(m, actx.mi);
     // camera: cinematic track (good hit in added time) or goal zoom + shake, both eased in and out
     let zoom = 1, cx = G.W / 2, cy = G.H / 2, shx = 0, shy = 0;
     if (!opts.noCam && fr.cam) { zoom = fr.cam[0]; cx = fr.cam[1]; cy = fr.cam[2]; }
@@ -774,8 +831,14 @@
     if (bgOut && Math.abs(eff - S) < 0.05 * S) { c.imageSmoothingQuality = 'medium'; c.drawImage(bgOut, 0, 0, G.W, G.H); c.imageSmoothingQuality = 'high'; bgFast++; }
     else if (PRO) { c.imageSmoothingQuality = 'medium'; c.drawImage(bgCanvas, 0, 0, G.W, G.H); c.imageSmoothingQuality = 'high'; } // zoomed: 2x cache, mipmapped
     else c.drawImage(bgCanvas, 0, 0, G.W, G.H);
-    if (!bgImg && show.map.scenery === 'bowl') drawStadiumLive(c, t); // P8: moving fans + flags
-    if (PRO) { ART.ambient(c, t); ART.blades(c, t); }
+    if (!bgImg && show.map.scenery === 'bowl') {
+      if (actx && stadLive && stadLive.flags2) { // P10: reactions, live fans, team flags, banners, smoke, flares
+        ATM.standsReact(c, actx, va, standPath);
+        ATM.standsLive(c, t, va, actx, stadLive.fans, stadLive.flags2, stadLive.banners, fan, stadLive.dim);
+        ATM.standsFx(c, t, va, actx);
+      } else drawStadiumLive(c, t); // P8: moving fans + flags
+    }
+    if (PRO) { ART.ambient(c, t); ART.blades(c, t); if (actx) ART.cornerFlag(c, t); }
     // balls inside the pipe (dim), then pipe glass over them
     fr.b.forEach((b, i) => { if (b[3] === 0 || b[3] === 1) drawBall(c, b[0], b[1], ballR(m, i) * 0.97, b[2], styleOf(m, i), 0.55); });
     if (PRO) ART.pipeGlass(c); else drawPipeGlass(c);
@@ -805,10 +868,11 @@
     fr.b.forEach((b, i) => { if (b[3] === 4) drawBall(c, b[0], b[1], ballR(m, i), b[2], styleOf(m, i), 1); });
     if (PRO) {
       const st = { rip: null, vib: 0, barFlash: bh && t - bh.t < 0.25 ? 1 - (t - bh.t) / 0.25 : 0, barX: bh && bh.x != null ? bh.x : 1220, flash: 0, fx: 0, fy: 0 };
+      if (ne && t - ne.t < 1.8 && t - ne.t >= 1.2) st.spark = t - ne.t;
       if (ne && t - ne.t < 1.2) {
         const u = t - ne.t, gb = frameAtTime(m, ne.t).fr.b[ne.ball] || [1235, 500];
         st.rip = { x: clamp(gb[0], G.GOAL_LINE_X + 10, G.W - 10), y: clamp(gb[1], G.BAR_Y + 10, G.GROUND_Y - 6), u, a: 7 };
-        st.vib = 1.1 * Math.exp(-u * 6); st.flash = u < 0.3 ? 1 - u / 0.3 : 0; st.fx = st.rip.x; st.fy = st.rip.y;
+        st.vib = 1.1 * Math.exp(-u * 6); st.flash = u < 0.3 ? 1 - u / 0.3 : 0; st.fx = st.rip.x; st.fy = st.rip.y; st.spark = u;
       }
       if (bh && t - bh.t < 0.6) st.vib = Math.max(st.vib, 1.4 * Math.exp(-(t - bh.t) * 7));
       ART.goalFront(c, t, st);
@@ -827,6 +891,7 @@
       const pf = opts.frameIndex != null ? matchFrame(m, opts.frameIndex - 1) : fr;
       ART.windmill(c, fr.m, fr.m - pf.m, t, (cc) => millBar(cc, WM[0], WM[1]));
       if (opts.frameIndex != null && !opts.noFx) for (const h of millHits(m, opts.frameIndex)) ART.millSpark(c, h.x, h.y, t - h.t, h.nx, h.ny, h.seed);
+      if (actx && actx.at) actx.at.thumps.forEach((th, k) => { const u = va - th.v; if (u >= 0 && u < 0.9) ART.dustPuff(c, th.x, th.y, u, k + 1, true); }); // P10: bomb hits
     } else drawWindmill(c, fr.m);
     // motion trails for fast balls (P9 pro: tapered streak, only for bomb shots)
     if (opts.trail !== false && opts.frameIndex != null) {
@@ -1022,6 +1087,7 @@
       const sg = c.createLinearGradient(0, cy - H1, 0, cy + H1); sg.addColorStop(0, 'rgba(255,255,255,0.16)'); sg.addColorStop(0.48, 'rgba(255,255,255,0.03)'); sg.addColorStop(0.5, 'rgba(0,0,0,0)'); sg.addColorStop(1, 'rgba(0,0,0,0.18)');
       c.fillStyle = sg; slant(cx - W2, cx + W2, cy - H1, cy + H1, 22); c.fill();
       const q = clamp((u - 0.35) / 0.55, 0, 1);
+      if (AON('goal_banner_flash') && u > 0.3 && u < 0.6) { c.save(); c.globalAlpha = (1 - outU) * 0.8 * (1 - (u - 0.3) / 0.3); c.fillStyle = '#ffffff'; slant(cx - W2, cx + W2, cy - H1, cy + H1, 22); c.fill(); c.restore(); } // P10: white flash as it lands
       if (q > 0 && q < 1) { c.save(); slant(cx - W2, cx + W2, cy - H1, cy + H1, 22); c.clip(); const gx = cx - W2 - 80 + q * (2 * W2 + 160), gg = c.createLinearGradient(gx - 50, 0, gx + 50, 0); gg.addColorStop(0, 'rgba(255,255,255,0)'); gg.addColorStop(0.5, 'rgba(255,255,255,0.22)'); gg.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = gg; c.fillRect(gx - 50, cy - H1, 100, 2 * H1); c.restore(); }
     }
     for (const [dx, col] of [[-W2 - 2, kit.primary], [-W2 + 16, kit.secondary], [W2 - 16, kit.secondary], [W2 - 34, kit.primary]]) {
@@ -1369,6 +1435,7 @@
     c.restore();
   }
   function drawTrophy(c, x, y, s, alpha) {
+    if (ATM && ATM.trophyOn()) { ATM.trophy(c, x, y, s, { alpha: alpha == null ? 1 : alpha, t: trophyT, cols: trophyCols, ribbons: !!trophyCols }); return; } // P10: original trophy v2
     // original simple trophy: bowl + two handles + stem + plinth + star
     c.save(); c.translate(x, y); c.scale(s, s); c.globalAlpha = alpha == null ? 1 : alpha;
     const gold = c.createLinearGradient(-70, 0, 70, 0);
@@ -1405,6 +1472,7 @@
     // divider
     c.fillStyle = 'rgba(255,255,255,0.08)'; c.fillRect(660, 120, 2, 520);
     const u = easeOutBack(t / 1.1);
+    trophyT = t; trophyCols = null;
     drawTrophy(c, LX, 300 + 200 * (1 - clamp(u, 0, 1.2)), 1.25 * clamp(0.4 + 0.6 * u, 0, 1.15), clamp(t / 0.4, 0, 1));
     const a = smooth((t - 0.9) / 0.5);
     c.globalAlpha = a;
@@ -1642,7 +1710,8 @@
   };
   LG.lgPre = (c, seg, lf) => {
     const m = show.matches[seg.match], fr = m.frames[0];
-    drawScene(c, m, fr, { noCam: true, noFx: true }); drawHUD(c, m, fr);
+    const intro = show.segments.some((x) => x.type === 'lgKick' && x.match === seg.match); // P10: the scoreboard slides in during the intro
+    drawScene(c, m, fr, { noCam: true, noFx: true }); if (!intro) drawHUD(c, m, fr);
     const a = smooth(lf / 8) * (1 - smooth((lf - seg.len + 8) / 8));
     c.save(); c.scale(S, S); c.globalAlpha = a;
     const x0 = G.W / 2 - 400, y0 = 196, w = 800, h = 260;
@@ -1659,7 +1728,36 @@
     text(c, 'vs', G.W / 2, y0 + 120, 30, LG_ACC, 'center', 900);
     text(c, 'KICK-OFF', G.W / 2, y0 + 160, 20, '#ffd84a', 'center', 800);
     text(c, 'last 5', G.W / 2, y0 + 228, 13, '#7f93b3', 'center', 700);
-    c.restore(); fadeIn(lf, 8);
+    c.restore(); if (!seg.noFade) fadeIn(lf, 8);
+  };
+  // P10 §9: transition between matches (~1 s): stripes in the two clubs' colours sweep across with the next fixture;
+  // the previous screen is under them on the way in, the next match's pitch on the way out
+  LG.lgTrans = (c, seg, lf, g) => {
+    const u = lf / seg.len, m = show.matches[seg.match], i = show.segments.indexOf(seg), prev = show.segments[i - 1];
+    if (u < 0.5) { if (prev && LG[prev.type]) LG[prev.type](c, prev, prev.len - 1, prev.start + prev.len - 1); else { c.fillStyle = '#05080f'; c.fillRect(0, 0, OUT_W, OUT_H); } }
+    else drawScene(c, m, m.frames[0], { noCam: true, noFx: true });
+    c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.scale(S, S);
+    ATM.transition(c, u, m, [teamName(m.ta), teamName(m.tb)], `${show.league.display_name} · MATCH ${seg.match + 1} OF ${show.matches.length}`);
+    c.restore();
+  };
+  // P10 §1: match intro (pre-roll, the timeline starts after it): the camera starts above the pitch, blurred, and glides
+  // down; the blur resolves; floodlights flicker on (evening/night); the scoreboard slides in from the left with a small
+  // overshoot and a light sweeps over the team names. The clock shows the kick-off time all along.
+  LG.lgKick = (c, seg, lf) => {
+    const m = show.matches[seg.match], fr0 = m.frames[0], len = seg.len / FPS, u = lf / FPS, tt = u - len;
+    const k = smooth(clamp(u / (len * 0.7), 0, 1)), z = lerp(1.45, 1, k), cy = lerp(150, 360, k);
+    drawScene(c, m, Object.assign({}, fr0, { t: tt }), { noCam: true, noFx: true, zoom: z > 1.0005 ? { z, x: G.W / 2, y: cy } : null, v: tt });
+    const kind = ART && PRO ? ART.look().kind : 'day';
+    if (kind === 'evening' || kind === 'night') {
+      const d = ATM.lightsDark(u);
+      if (d > 0) { c.fillStyle = `rgba(3,6,16,${d})`; c.fillRect(0, 0, OUT_W, OUT_H); }
+      if (u > 0.45 && u < 1.4 && d < 0.3) { c.save(); c.scale(S, S); ART.flareBurst(c, (1 - d / 0.3) * (1 - smooth((u - 1.0) / 0.4))); c.restore(); }
+    }
+    const blurPx = 16 * (1 - smooth(u / (len * 0.62))); ATM.blur(c, canvas, blurPx);
+    const su = clamp((u - 1.05) / 0.75, 0, 1); lastKick = { u, blur: blurPx, slide: su, zoom: z };
+    if (su > 0) { c.save(); c.translate(-(G.W / 2 + 300) * S * (1 - easeOutBack(su)), 0); drawHUD(c, m, fr0); c.restore(); }
+    c.save(); c.scale(S, S); ATM.sweep(c, G.W / 2 - 270, 16, 540, 52, (u - 1.85) / 0.7); c.restore();
+    ATM.droplets(c, tt, OUT_W, OUT_H);
   };
   // animated live-table update after a match (rows slide, points count up, arrows, zone pulse)
   function tableAnimRows(seg, t) {
@@ -1873,7 +1971,14 @@
     cerBg = document.createElement('canvas'); cerBg.width = G.W * 2; cerBg.height = G.H * 2;
     const c = cerBg.getContext('2d'); c.scale(2, 2);
     if (bgImg) { const F = window.BGFIT.bgFit(bgImg.naturalWidth, bgImg.naturalHeight, G.W, G.H, {}); c.drawImage(bgImg, F.dx, F.dy, F.dw, F.dh); }
-    else { const MAP = show.map; const sky = c.createLinearGradient(0, 0, 0, G.H); sky.addColorStop(0, MAP.sky[0]); sky.addColorStop(0.55, MAP.sky[1]); sky.addColorStop(1, MAP.sky[2]); c.fillStyle = sky; c.fillRect(0, 0, G.W, G.H); drawBowl(c, Object.assign({}, MAP, { center_screen_rect: MAP.center_screen_rect || [530, 250, 220, 62] })); }
+    else {
+      const MAP = show.map; const sky = c.createLinearGradient(0, 0, 0, G.H); sky.addColorStop(0, MAP.sky[0]); sky.addColorStop(0.55, MAP.sky[1]); sky.addColorStop(1, MAP.sky[2]); c.fillStyle = sky; c.fillRect(0, 0, G.W, G.H);
+      const seg = show.segments.find((x) => x.type === 'ceremony'), keep = [crowdKits, crowdTeams, standFans, REBUILD, stadLive];
+      if (ATM && PRO && seg && AON('split_stands')) { const T = show.teams[seg.team], kk = { primary: T.primary, secondary: T.secondary }; crowdKits = { A: kk, B: kk }; crowdTeams = { A: T, B: T }; standFans = null; REBUILD = true; } // P10: the whole stadium in the champion's colours
+      if (SKY_PRO) ART.drawSky(c, 0);
+      drawBowl(c, Object.assign({}, MAP, { center_screen_rect: MAP.center_screen_rect || [530, 250, 220, 62] }));
+      [crowdKits, crowdTeams, standFans, REBUILD, stadLive] = keep; standMatch = -1; // the match stands are rebuilt on the next match frame
+    }
     return cerBg;
   }
   function fireworks(c, t, cols, region, n) {
@@ -1907,6 +2012,7 @@
   LG.ceremony = (c, seg, lf) => {
     const t = lf / FPS, TM = show.teams[seg.team], sh = cerShotAt(seg, t), st = t - sh.from, dur = sh.to - sh.from;
     const cols = [TM.primary, TM.secondary, '#ffd84a', '#ffffff'];
+    trophyT = t; trophyCols = [TM.primary, TM.secondary];
     c.save(); c.scale(S, S);
     if (sh.angle === 'wide') {
       const z = 1 + 0.07 * (st / dur);
@@ -1920,6 +2026,7 @@
       const sg = c.createLinearGradient(0, 620, 0, 668); sg.addColorStop(0, '#2b2f45'); sg.addColorStop(1, '#151829');
       c.fillStyle = sg; c.beginPath(); c.ellipse(G.W / 2, 640, 180, 26, 0, 0, Math.PI * 2); c.fill(); c.fillRect(G.W / 2 - 180, 640, 360, 18); c.beginPath(); c.ellipse(G.W / 2, 658, 180, 26, 0, 0, Math.PI); c.fill();
       c.strokeStyle = hexA(TM.primary, 0.9); c.lineWidth = 3; c.beginPath(); c.ellipse(G.W / 2, 640, 180, 26, 0, 0, Math.PI * 2); c.stroke();
+      if (ATM && ATM.trophyOn()) { c.save(); c.globalCompositeOperation = 'lighter'; for (const [bx, d] of [[G.W / 2 - 420, 1], [G.W / 2 + 420, -1]]) { const bg2 = c.createLinearGradient(bx, 120, G.W / 2, 600); bg2.addColorStop(0, `rgba(255,240,200,${0.16 + 0.05 * Math.sin(st * 2 + d)})`); bg2.addColorStop(1, 'rgba(255,240,200,0)'); c.fillStyle = bg2; c.beginPath(); c.moveTo(bx - 10, 120); c.lineTo(bx + 10, 120); c.lineTo(G.W / 2 + 70 * d, 650); c.lineTo(G.W / 2 - 110 * d, 650); c.closePath(); c.fill(); } c.restore(); } // P10: two spotlight beams on the stage
       drawTrophy(c, G.W / 2, 578, 0.58, 1); // stands on the stage
       const tglow = c.createRadialGradient(G.W / 2, 545, 4, G.W / 2, 545, 90); tglow.addColorStop(0, `rgba(255,225,140,${0.35 + 0.1 * Math.sin(st * 3)})`); tglow.addColorStop(1, 'rgba(255,225,140,0)'); c.fillStyle = tglow; c.fillRect(G.W / 2 - 90, 455, 180, 180);
       [-130, 130].forEach((dx) => crest(c, seg.team, G.W / 2 + dx, 616, 24));
@@ -1964,9 +2071,12 @@
       for (let i = 0; i < 24; i++) { const a2 = i / 24 * Math.PI * 2, fx = Math.cos(a2) * RX * 0.62, fy = Math.sin(a2) * RY * 0.62; c.save(); c.translate(fx, fy); c.rotate(a2 + Math.PI / 2); c.fillStyle = i % 2 ? TM.primary : TM.secondary; c.beginPath(); c.moveTo(0, 0); for (let q = 0; q <= 6; q++) c.lineTo(q * 6, -2 + 4 * Math.sin(st * 6 + q * 0.9 + i)); for (let q = 6; q >= 0; q--) c.lineTo(q * 6, 18 + 4 * Math.sin(st * 6 + q * 0.9 + i + 0.4)); c.closePath(); c.fill(); c.fillStyle = '#ddd'; c.fillRect(-1.5, -4, 3, 26); c.restore(); }
       // champion balls in a circle + trophy seen from above
       for (let k = 0; k < 6; k++) { const a2 = k / 6 * Math.PI * 2 - ang * 2; crest(c, seg.team, Math.cos(a2) * 120, Math.sin(a2) * 120, 26); }
+      if (ATM && ATM.trophyOn()) ATM.trophyTop(c, st, [TM.primary, TM.secondary]); // P10: the new trophy seen from above
+      else {
       const tg = c.createRadialGradient(-10, -10, 4, 0, 0, 46); tg.addColorStop(0, '#fff3b0'); tg.addColorStop(0.6, '#ffcc33'); tg.addColorStop(1, '#a87406');
       c.fillStyle = tg; c.beginPath(); c.arc(0, 0, 44, 0, Math.PI * 2); c.fill(); c.strokeStyle = '#d9a520'; c.lineWidth = 9; c.beginPath(); c.arc(-58, 0, 16, 0, Math.PI * 2); c.stroke(); c.beginPath(); c.arc(58, 0, 16, 0, Math.PI * 2); c.stroke();
       c.fillStyle = '#fff6d0'; c.beginPath(); for (let i = 0; i < 10; i++) { const a3 = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? 8 : 19; c.lineTo(Math.cos(a3) * r, Math.sin(a3) * r); } c.closePath(); c.fill();
+      }
       // confetti swirl
       for (let i = 0; i < 260; i++) { const a2 = hash(i * 5) * Math.PI * 2 + st * (0.6 + hash(i) * 0.6), rr = 40 + ((hash(i * 9) * 500 + st * 60) % 520); c.save(); c.translate(Math.cos(a2) * rr, Math.sin(a2) * rr * 0.75); c.rotate(st * 4 + i); c.fillStyle = cols[i % cols.length]; c.fillRect(-4, -2.5, 8, 5); c.restore(); }
       c.restore();
@@ -2028,6 +2138,11 @@
       if (lg && v - evV(lg) < 0.7) { const u = (v - evV(lg)) / 0.7; scorePop = { side: lg.team === 'A' ? 0 : 1, p: Math.sin(Math.PI * clamp(u, 0, 1)) * (u < 0.3 ? easeOutBack(u / 0.3) : 1), color: m.kits[lg.team].primary }; }
       drawHUD(ctx, m, fr, { scorePop });
       matchOverlays(ctx, m, fr, v);
+      const actx = ATM ? ATM.match(m) : null;
+      if (actx && actx.at) { // P10: whistle flash at kick-off and full time, lens droplets in the rain
+        ctx.save(); ctx.scale(S, S); ATM.whistleFlash(ctx, v / 0.6); ATM.whistleFlash(ctx, (v - actx.at.end) / 0.6); ctx.restore();
+        ATM.droplets(ctx, fr.t, OUT_W, OUT_H);
+      }
       return;
     }
     if (seg.type === 'fulltime') {
@@ -2077,6 +2192,7 @@
       text(ctx, cap, bx + 32, by + 32, 40, '#ffffff', 'left', 800);
       text(ctx, `${numTag(P)}${teamName(ti)}${gl.golden ? ' · GOLDEN GOAL' : ''}`, bx + 32, by + 64, 18, '#9fc7ff', 'left', 700);
       ctx.globalAlpha = 1;
+      if (AON('replay_swoosh') && lf < 14) { const k = m.kits[gl.team]; ATM.swoosh(ctx, lf / 14, [k.primary, k.secondary]); ctx.restore(); return; } // P10 swoosh replaces the black fade
       ctx.restore();
       fadeIn(lf, 6);
       return;
@@ -2116,6 +2232,7 @@
     }));
   };
   // P7 §7b test hooks: background layer order and the cover-fit actually used
+  window.atmoInfo = () => ({ lastKick, standBuilds, standMatch, groups: ATM ? ATM.groupInfo() : null, atm: ATM ? ATM.stats() : null, wind: ART ? ART.windInfo() : null, layers: bgLayers.slice(), banners: stadLive && stadLive.banners ? stadLive.banners.length : 0, flags2: stadLive && stadLive.flags2 ? stadLive.flags2.map((f) => [f[3], f[6]]) : null }); // P10 tests
   window.artInfo = () => ({ pro: PRO, skyLive: SKY_PRO, sway: lastSway, bgBuilds, bgFast, bgOut: bgOut ? [bgOut.width, bgOut.height] : null, stats: ART ? ART.stats() : null, layers: bgLayers.slice() }); // P9 tests
   window.bgLayerInfo = () => ({ image: !!bgImg, layers: bgLayers.slice(), fit: bgImg ? bgFitInfo() : null, imgSize: bgImg ? [bgImg.naturalWidth, bgImg.naturalHeight] : null });
   window.stadiumInfo = () => (stadLive ? { fans: stadLive.fans.length, flags: stadLive.flags.length, curves: { roofInner: STAD.roofInner(640), rib1: STAD.rib1(640), rib2: STAD.rib2(640), boards: STAD.boards(640), pitch: STAD.pitch } } : null); // P8 tests

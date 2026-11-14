@@ -14,6 +14,14 @@
   const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
   const sm = (x) => { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); };
   const eo = (x) => 1 - Math.pow(1 - clamp(x, 0, 1), 3);
+  // P10: atmosphere flags (config/atmosphere.json -> show.atmoCfg) and one global wind field per match
+  let AC = {}, EARTH = false, WIND = { dir: 1, str: 0.4, ph: 0, gust: 0.3 }, insects = [];
+  const on = (k) => !!(AC.enabled && AC[k] !== false);
+  A.on = on;
+  A.setWind = (w) => { WIND = w || { dir: 1, str: 0.4, ph: 0, gust: 0.3 }; };
+  A.windInfo = () => Object.assign({}, WIND);
+  // signed wind at time t and scene x (+ = blowing to the right), about -1.3 .. 1.3; smooth gusts travel across the scene
+  A.wind = (t, x) => { x = x || 0; const g = Math.pow(Math.max(0, Math.sin(t * 0.23 + WIND.ph - x * 0.0025 * WIND.dir)), 3) * WIND.gust; return WIND.dir * WIND.str * (0.72 + 0.28 * Math.sin(t * 0.41 + WIND.ph * 2 - x * 0.004 * WIND.dir) + g); };
 
   A.enabled = (map) => !!map && map.art_style === 'pro';
   // lighting per variant: key light colour, horizontal direction it comes FROM (-1 = from the left), shadow strength,
@@ -28,32 +36,40 @@
       evening: { key: '#ffbe85', dir: -1, shadow: 0.38, rim: 0.75, flood: 0.75, amb: '#a99bd6' },
       night: { key: '#dfe9ff', dir: 0.45, shadow: 0.42, rim: 0.6, flood: 1, amb: '#7d8fc0' },
     }[kind];
-    return Object.assign({ kind, night, wet: !!MAP.rain, rain: !!MAP.rain }, P);
+    const rain = show && show.atmo ? !!show.atmo.rain : !!MAP.rain; // P10: drizzle also in the overcast variant (flag "rain")
+    return Object.assign({ kind, night, wet: rain, rain }, P);
   }
   A.look = () => LK;
-  A.stats = () => Object.assign({}, stats, { blades: blades.length, dust: dust.length, ripples: ripples.length, lights: lights.length, clouds: cloudSprites.length, kind: LK && LK.kind });
+  A.stats = () => Object.assign({}, stats, { earth: EARTH, insects: insects.length, blades: blades.length, dust: dust.length, ripples: ripples.length, lights: lights.length, clouds: cloudSprites.length, kind: LK && LK.kind });
 
   // ---------- setup (once per initRenderer) ----------
   A.setup = function (helpers, geom, sh) {
-    H = helpers; G = geom; show = sh; LK = lookOf(sh.map); stats.setups++;
+    H = helpers; G = geom; show = sh; AC = (sh.atmo && sh.atmoCfg) || {}; EARTH = on('earth_platforms'); LK = lookOf(sh.map); stats.setups++; WIND = { dir: 1, str: 0.4, ph: 0, gust: 0.3 };
     sky = null; cloudSprites = []; lights = [];
     flareSprite = makeFlare(); glowSprite = makeGlow();
     // grass blades along both platform tops (per frame: sway). Skip the spout hole and the goal-post foot.
     blades = [];
     const sx = G.SPOUT_X, hole = G.BALL_R + 11;
     for (const [x0, x1, s] of [[G.LEFT_PLAT[0], G.LEFT_PLAT[1] - 3, 1], [G.RIGHT_PLAT[0] + 3, G.RIGHT_PLAT[1], 2]]) {
-      for (let x = x0 + 1, k = 0; x < x1; x += 2.6, k++) {
+      if (!EARTH) for (let x = x0 + 1, k = 0; x < x1; x += 2.6, k++) {
         if (Math.abs(x - sx) < hole) continue;
         const h1 = H.hash(s * 7919 + k * 31 + 3), h2 = H.hash(s * 104729 + k * 17 + 9);
         blades.push([x + (h1 - 0.5) * 1.6, 2.2 + h2 * 4.6 + (h1 > 0.93 ? 3 : 0), h1 < 0.5 ? 0 : h1 < 0.85 ? 1 : 2, h1 * TAU]);
+      }
+      else for (const [step, row] of [[2.6, 3], [1.7, 0]]) for (let x = x0 + 1 + row * 0.3, k = 0; x < x1; x += step, k++) { // P10: back row (darker, shorter) + dense front row
+        if (Math.abs(x - sx) < hole) continue;
+        const h1 = H.hash(s * 7919 + k * 31 + 3 + row * 977), h2 = H.hash(s * 104729 + k * 17 + 9 + row * 131);
+        blades.push([x + (h1 - 0.5) * 1.2, (row ? 1.8 : 2.4) + h2 * (row ? 3.4 : 5.2) + (h1 > 0.95 ? 3.2 : 0), row ? 3 : h1 < 0.5 ? 0 : h1 < 0.85 ? 1 : 2, h1 * TAU]);
       }
     }
     // floating dust in the floodlight cones (evening / night)
     dust = [];
     if (LK.flood >= 0.7) for (let i = 0; i < 46; i++) dust.push([H.hash(i * 13 + 1), H.hash(i * 29 + 2), 0.6 + H.hash(i * 31 + 3) * 1.1, H.hash(i * 37 + 4) * TAU]);
     // rain splash / puddle ripple spots: wet pitch in the gap + the turf tops
+    insects = [];
+    if (on('insects') && LK.flood >= 0.7) for (let i = 0; i < 24; i++) insects.push([H.hash(i * 41 + 7), H.hash(i * 43 + 9), H.hash(i * 47 + 11)]);
     ripples = [];
-    if (LK.rain) for (let i = 0; i < 26; i++) {
+    if (LK.rain) for (let i = 0; i < (on('rain') ? 40 : 26); i++) {
       const onPitch = i < 16, h1 = H.hash(i * 71 + 5), h2 = H.hash(i * 53 + 7);
       const x = onPitch ? 400 + h1 * 480 : (i % 2 ? 40 + h1 * 320 : 920 + h1 * 230), y = onPitch ? 575 + h2 * 130 : G.GROUND_Y + 3 + h2 * 7;
       ripples.push([x, y, onPitch ? 1 : 0.55, H.hash(i * 97 + 11)]);
@@ -110,11 +126,11 @@
     c.drawImage(sky, 0, 0, G.W, 260);
     const span = G.W + 420;
     for (const cl of cloudSprites) {
-      let x = cl.x + t * cl.v; x = ((x + 210) % span + span) % span - 210;
+      let x = cl.x + t * cl.v * (on('wind') ? (0.35 + 1.5 * WIND.str) * WIND.dir : 1); x = ((x + 210) % span + span) % span - 210;
       c.drawImage(cl.cv, x, cl.y, cl.w, cl.h);
     }
     c.imageSmoothingQuality = q0;
-    if (LK.kind === 'day') drawBirds(c, t);
+    if (LK.kind === 'day' && (!AC.enabled || on('birds'))) drawBirds(c, t);
   };
   function drawBirds(c, t) {
     c.save(); c.strokeStyle = 'rgba(30,40,60,0.55)'; c.lineWidth = 1.1; c.lineCap = 'round';
@@ -137,11 +153,62 @@
   }
   // smooth 1D value noise (seeded) for the tint drift across the wall (no obvious tiling)
   function vnoise(x, seed) { const i = Math.floor(x), f = x - i, a = H.hash(seed * 1013 + i), b = H.hash(seed * 1013 + i + 1); return a + (b - a) * sm(f); }
+  // P10 §2: earth island body (inside the platform outline, clipped): soil strata, grain, embedded stones, roots hanging
+  // from the turf, darker damp patches. Colours: map "soil" (4 hex, top -> deep) or a default tinted by the variant.
+  function earthBody(c, x0, x1, seed) {
+    const gy = G.GROUND_Y, MAP = show.map, w = x1 - x0, bot = G.H + 10;
+    const S0 = MAP.soil || ['#6a4529', '#86603d', '#5b3e27', '#35241a'];
+    let rnd = seed * 9173 + 29; const R = () => H.hash(rnd++);
+    const tone = (hex) => (LK.night ? H.mixHex(hex, '#1c2236', 0.35) : LK.kind === 'evening' ? H.mixHex(hex, '#5a2f3a', 0.15) : LK.kind === 'overcast' ? H.mixHex(hex, '#55575c', 0.12) : hex);
+    const SO = S0.map(tone);
+    const bg = c.createLinearGradient(0, gy + 8, 0, bot); bg.addColorStop(0, SO[0]); bg.addColorStop(0.35, SO[1]); bg.addColorStop(0.7, SO[2]); bg.addColorStop(1, SO[3]);
+    c.fillStyle = bg; c.fillRect(x0 - 2, gy, w + 4, bot - gy);
+    // strata: wavy bands with a lighter top edge and a darker lower edge
+    const bands = [[gy + 22, SO[0], 0.7], [gy + 46, H.mixHex(SO[1], '#a07a52', 0.25), 0.55], [gy + 78, SO[1], 0.6], [gy + 112, H.mixHex(SO[2], '#6d6458', 0.35), 0.55], [gy + 142, SO[2], 0.6]];
+    bands.forEach(([y0, col, a], k) => {
+      const yb = (x) => y0 + 7 * (vnoise(x / 85 + k * 3.1, seed + k) - 0.5) + 2.4 * Math.sin(x / 31 + k * 1.7 + seed);
+      c.beginPath(); c.moveTo(x0 - 2, yb(x0)); for (let x = x0; x <= x1 + 4; x += 6) c.lineTo(x, yb(x)); c.lineTo(x1 + 4, bot); c.lineTo(x0 - 2, bot); c.closePath();
+      c.fillStyle = H.hexA(col.length === 7 ? col : '#5b3e27', a); c.fill();
+      c.strokeStyle = 'rgba(255,235,205,0.12)'; c.lineWidth = 1; c.beginPath(); for (let x = x0; x <= x1 + 4; x += 6) { if (x === x0) c.moveTo(x, yb(x)); else c.lineTo(x, yb(x)); } c.stroke();
+      c.save(); c.translate(0, 1.6); c.strokeStyle = 'rgba(15,8,4,0.22)'; c.stroke(); c.restore();
+    });
+    // grain
+    for (let k = 0; k < w * 4.5; k++) { const x = x0 + R() * w, y = gy + 10 + R() * (bot - gy); c.fillStyle = R() < 0.5 ? 'rgba(255,230,190,0.10)' : 'rgba(10,5,2,0.16)'; c.fillRect(x, y, 0.8 + R() * 1.2, 0.8 + R() * 0.9); }
+    // damp patches (more at night / in the rain)
+    for (let k = 0, n = LK.wet ? 12 : 7; k < n; k++) {
+      const x = x0 + R() * w, y = gy + 30 + R() * (bot - gy - 40), r = 14 + R() * 34, g = c.createRadialGradient(x, y, 1, x, y, r);
+      g.addColorStop(0, `rgba(18,10,5,${LK.wet ? 0.34 : 0.24})`); g.addColorStop(1, 'rgba(18,10,5,0)'); c.fillStyle = g; c.beginPath(); c.ellipse(x, y, r * 1.4, r, 0, 0, TAU); c.fill();
+      if (LK.wet && R() < 0.5) { c.fillStyle = 'rgba(210,225,245,0.10)'; c.beginPath(); c.ellipse(x - r * 0.3, y - r * 0.2, r * 0.35, r * 0.12, -0.2, 0, TAU); c.fill(); }
+    }
+    // embedded stones: shadow, body with a light-side gradient, rim highlight; more and bigger in the gravel layer
+    for (let k = 0, n = Math.floor(w / 6.5); k < n; k++) {
+      const deep = R(), y = gy + 20 + deep * (bot - gy - 24), x = x0 + R() * w;
+      const r = (deep > 0.45 ? 2 + R() * 5.5 : 1.2 + R() * 3) * (R() < 0.06 ? 2.1 : 1), ry = r * (0.55 + 0.3 * R()), rot = (R() - 0.5) * 0.8;
+      const base = H.mixHex(H.mixHex('#8f8a80', '#6e6457', R()), SO[1], 0.25);
+      c.fillStyle = 'rgba(12,6,2,0.38)'; c.beginPath(); c.ellipse(x + 0.8, y + ry * 0.45, r * 1.05, ry * 1.05, rot, 0, TAU); c.fill();
+      const g = c.createRadialGradient(x - r * 0.35 * -LK.dir, y - ry * 0.4, 0.3, x, y, r * 1.1); g.addColorStop(0, H.shade(base, 0.28)); g.addColorStop(0.65, base); g.addColorStop(1, H.shade(base, -0.3));
+      c.fillStyle = g; c.beginPath(); c.ellipse(x, y, r, ry, rot, 0, TAU); c.fill();
+      if (r > 2.5) { c.strokeStyle = 'rgba(255,250,240,0.25)'; c.lineWidth = 0.7; c.beginPath(); c.ellipse(x, y, r * 0.85, ry * 0.8, rot, Math.PI * 1.1, Math.PI * 1.7); c.stroke(); }
+    }
+    // roots from the turf: tapered wiggly strands with small side roots, pale on the lit side
+    for (let k = 0, n = Math.floor(w / 13); k < n; k++) {
+      let x = x0 + 4 + R() * (w - 8), y = gy + 11, wd = 0.8 + R() * 1.3; const L = 16 + R() * 70, steps = 7 + Math.floor(R() * 5);
+      const pts = [[x, y]];
+      for (let i = 0; i < steps; i++) { x += (R() - 0.5) * 6; y += L / steps; pts.push([x, y]); }
+      for (let i = 1; i < pts.length; i++) {
+        const f = 1 - i / pts.length;
+        c.strokeStyle = 'rgba(25,14,6,0.5)'; c.lineWidth = wd * f + 0.9; c.lineCap = 'round'; c.beginPath(); c.moveTo(pts[i - 1][0] + 0.5, pts[i - 1][1] + 0.4); c.lineTo(pts[i][0] + 0.5, pts[i][1] + 0.4); c.stroke();
+        c.strokeStyle = H.hexA(H.mixHex('#c9a57a', SO[0], 0.25), 0.85); c.lineWidth = wd * f + 0.35; c.beginPath(); c.moveTo(pts[i - 1][0], pts[i - 1][1]); c.lineTo(pts[i][0], pts[i][1]); c.stroke();
+        if (R() < 0.28) { const [bx, by] = pts[i], d = R() < 0.5 ? -1 : 1; c.lineWidth = 0.5; c.beginPath(); c.moveTo(bx, by); c.quadraticCurveTo(bx + d * 4, by + 3, bx + d * (6 + R() * 6), by + 6 + R() * 6); c.stroke(); }
+      }
+    }
+  }
   A.platform = function (c, x0, x1, seed) {
     stats.staticBuilds++;
     const gy = G.GROUND_Y, MAP = show.map, RK = MAP.rock, GR = MAP.grass, inner = seed === 1 ? x1 : x0;
     const litInner = (seed === 1 && LK.dir > 0.2) || (seed === 2 && LK.dir < -0.2); // inner wall faces the key light
     c.save(); platPath(c, x0, x1, seed);
+    if (EARTH) { c.clip(); earthBody(c, x0, x1, seed); } else { // P10: soil instead of masonry (flag earth_platforms)
     c.fillStyle = H.shade(RK[2], -0.35); c.fill(); c.clip(); // mortar
     let rnd = seed * 7777 + 13; const R = () => H.hash(rnd++);
     for (let row = 0, y = gy + 11; y < G.H + 10; row++) {
@@ -182,6 +249,7 @@
         x += bw;
       }
       y += bh;
+    }
     }
     // ambient occlusion under the turf lip, darker towards the bottom
     const ao = c.createLinearGradient(0, gy + 8, 0, gy + 44); ao.addColorStop(0, 'rgba(8,6,4,0.55)'); ao.addColorStop(1, 'rgba(8,6,4,0)');
@@ -230,6 +298,9 @@
     // worn line paint: break up the halfway line and the circle with small darker flecks
     for (let k = 0; k < 120; k++) { const y = py + 4 + H.hash(k * 11 + 7) * (G.H - py - 4); c.fillStyle = `rgba(60,110,50,${0.15 + 0.25 * H.hash(k * 13)})`; c.fillRect(640 - 1.2 + H.hash(k * 17) * 1.6, y, 1.1, 1.6); }
     for (let k = 0; k < 160; k++) { const a = H.hash(k * 19 + 3) * TAU; c.fillStyle = `rgba(60,110,50,${0.12 + 0.25 * H.hash(k * 23)})`; c.fillRect(640 + Math.cos(a) * 132 - 0.6, 612 + Math.sin(a) * 26 - 0.6, 1.3, 1.2); }
+    if (!LK.wet && on('pitch_reflections') && LK.flood >= 0.7) { // P10: dry evening/night pitch: faint floodlight reflections
+      for (const x of [470, 560, 720, 810]) { const g = c.createLinearGradient(0, py, 0, G.H); g.addColorStop(0, 'rgba(255,245,225,0.09)'); g.addColorStop(1, 'rgba(255,245,225,0)'); c.fillStyle = g; c.beginPath(); c.moveTo(x - 5, py); c.lineTo(x + 5, py); c.lineTo(x + 16, G.H); c.lineTo(x - 16, G.H); c.closePath(); c.fill(); }
+    }
     if (LK.wet) { // damp pitch: darker, with soft floodlight reflections
       c.fillStyle = 'rgba(5,15,30,0.18)'; c.fillRect(L0 - 30, py, R0 - L0 + 60, G.H - py);
       for (const x of [470, 560, 720, 810]) { const g = c.createLinearGradient(0, py, 0, G.H); g.addColorStop(0, 'rgba(230,240,255,0.16)'); g.addColorStop(1, 'rgba(230,240,255,0)'); c.fillStyle = g; c.beginPath(); c.moveTo(x - 6, py); c.lineTo(x + 6, py); c.lineTo(x + 22, G.H); c.lineTo(x - 22, G.H); c.closePath(); c.fill(); }
@@ -257,6 +328,13 @@
     c.restore();
   };
 
+  // P10: floodlights switching on in the intro: every roof light flares at once (a = 0..1)
+  A.flareBurst = function (c, a) {
+    if (!lights.length || a <= 0.01) return;
+    c.save(); c.globalCompositeOperation = 'lighter';
+    for (const [x, y] of lights) { const s2 = 60; c.globalAlpha = clamp(a, 0, 1); c.drawImage(flareSprite, x - s2, y - s2 * 0.5, 2 * s2, s2); }
+    c.restore();
+  };
   // ---------- per frame: ambient (after the background) ----------
   A.ambient = function (c, t) {
     // floodlight flares with a gentle pulse
@@ -267,6 +345,15 @@
         const a = LK.flood * (0.42 + 0.1 * Math.sin(t * 1.6 + ph) + 0.05 * Math.sin(t * 5.3 + ph * 2));
         const s = 26 + 20 * LK.flood;
         c.globalAlpha = clamp(a, 0, 1); c.drawImage(flareSprite, x - s, y - s * 0.5, 2 * s, s);
+      }
+      c.restore();
+    }
+    if (insects.length && lights.length) { // P10: insects circling the floodlights (evening / night)
+      c.save(); c.globalCompositeOperation = 'lighter'; c.fillStyle = '#fff3d0';
+      for (let i = 0; i < insects.length; i++) {
+        const [h1, h2, h3] = insects[i], L = lights[i % lights.length], r = 5 + 16 * h1, w = (1.8 + 3 * h2) * (h3 < 0.5 ? 1 : -1);
+        const x = L[0] + Math.cos(t * w + h3 * TAU) * r + Math.sin(t * 7.3 + i) * 1.5, y = L[1] + Math.sin(t * w * 1.3 + h1 * TAU) * r * 0.6 + Math.cos(t * 5.1 + i) * 1.2;
+        c.globalAlpha = clamp(0.45 + 0.35 * Math.sin(t * 11 + i), 0, 1); c.fillRect(x - 0.6, y - 0.6, 1.2, 1.2);
       }
       c.restore();
     }
@@ -282,14 +369,17 @@
   };
   // grass blades with wind sway (drawn after the background, before the play objects)
   A.blades = function (c, t) {
-    const GR = show.map.grass, gy = G.GROUND_Y, cols = [show.map.grass_blades || GR[0], GR[1], H.shade(show.map.grass_blades || GR[0], 0.18)];
-    for (let tone = 0; tone < 3; tone++) {
+    const GR = show.map.grass, gy = G.GROUND_Y, cols = [show.map.grass_blades || GR[0], GR[1], H.shade(show.map.grass_blades || GR[0], 0.18), H.shade(GR[2], -0.1)];
+    const WD = EARTH && on('wind');
+    for (const tone of [3, 0, 1, 2]) {
       c.fillStyle = cols[tone]; c.beginPath();
+      const bw = tone === 3 ? 0.95 : EARTH ? 1.05 : 1.25;
       for (const [x, h, tn, ph] of blades) {
         if (tn !== tone) continue;
-        const gust = 0.5 + 0.5 * Math.sin(t * 0.37 + x * 0.004);
-        const sw = (Math.sin(t * 1.9 + x * 0.045 + ph * 0.2) * 0.65 + Math.sin(t * 3.3 + x * 0.13) * 0.25) * h * (0.25 + 0.35 * gust) - h * 0.15;
-        c.moveTo(x - 1.25, gy + 0.6); c.quadraticCurveTo(x + sw * 0.3, gy - h * 0.6, x + sw, gy - h); c.lineTo(x + 1.25, gy + 0.6);
+        let sw;
+        if (WD) { const w = A.wind(t, x); sw = h * (0.55 * w + (0.16 + 0.22 * Math.abs(w)) * (Math.sin(t * 1.9 + x * 0.045 + ph) * 0.65 + Math.sin(t * 3.3 + x * 0.13) * 0.25)); }
+        else { const gust = 0.5 + 0.5 * Math.sin(t * 0.37 + x * 0.004); sw = (Math.sin(t * 1.9 + x * 0.045 + ph * 0.2) * 0.65 + Math.sin(t * 3.3 + x * 0.13) * 0.25) * h * (0.25 + 0.35 * gust) - h * 0.15; }
+        c.moveTo(x - bw, gy + 0.6); c.quadraticCurveTo(x + sw * 0.3, gy - h * 0.6, x + sw, gy - h); c.lineTo(x + bw, gy + 0.6);
       }
       c.fill();
     }
@@ -500,7 +590,8 @@
     const rp = st && st.rip;
     const P = ys.map((y) => xs.map((x) => {
       const fx = (x - x0) / (x1 - x0), fy = (y - y0) / (y1 - y0);
-      let ox = 0.9 * Math.sin(t * 1.3 + y * 0.05) * fx + 1.6 * Math.sin(Math.PI * fy) * fx, oy = 1.2 * Math.sin(Math.PI * fx) * fy; // sway + sag
+      const ws = on('wind') ? 0.6 + 1.1 * Math.abs(A.wind(t, x)) : 1; // P10: idle sway follows the wind
+      let ox = 0.9 * ws * Math.sin(t * 1.3 + y * 0.05) * fx + 1.6 * Math.sin(Math.PI * fy) * fx, oy = 1.2 * Math.sin(Math.PI * fx) * fy; // sway + sag
       if (rp) {
         const dx = x - rp.x, dy = y - rp.y, r = Math.hypot(dx, dy) || 1;
         const front = sm((rp.u * 300 + 24 - r) / 24), d = rp.a * Math.exp(-3 * rp.u) * Math.sin(0.15 * r - 20 * rp.u) * Math.exp(-r / 150) * front;
@@ -566,6 +657,7 @@
     for (let k = 0; k < 8; k++) { c.fillStyle = 'rgba(70,120,50,0.35)'; c.fillRect(x0 - 3 + H.hash(k * 3) * 5, y1 + H.hash(k * 5) * 12, 1.2, 1.2); }
     // frame: crossbar + front post exactly on their colliders, shaded as round tubes; vibrates a little after a hit
     const vib = st.vib || 0, vy = vib * Math.sin(t * 95), vx = vib * 0.6 * Math.sin(t * 83 + 1);
+    if (on('rounded_goal')) { goalFrameRound(c, t, vx, vy); sparkle(c, P, st); flashes(c, st); c.restore(); return; }
     c.save(); c.translate(0, vy);
     const bt = G.BAR_TOP, bb = G.BAR_BOTTOM, cb = c.createLinearGradient(0, bt, 0, bb);
     cb.addColorStop(0, '#d9e0e7'); cb.addColorStop(0.28, '#ffffff'); cb.addColorStop(0.62, '#e3e8ee'); cb.addColorStop(1, '#8996a4');
@@ -580,8 +672,84 @@
     c.fillStyle = 'rgba(0,0,0,0.18)'; c.fillRect(pl, y1 - 3, G.POST_W, 3); // foot in the grass
     if (LK.flood >= 0.7) { c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.35 * LK.flood; c.drawImage(glowSprite, pl - 6, pt - 8, G.POST_W + 12, 18); c.globalAlpha = 1; c.globalCompositeOperation = 'source-over'; }
     c.restore();
+    sparkle(c, P, st); flashes(c, st);
+    c.restore();
+  };
+  function flashes(c, st) {
     if (st.barFlash > 0) { c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.7 * st.barFlash; c.fillStyle = '#fff1c2'; c.fillRect(G.BAR_X0 - 2, G.BAR_TOP - 3, G.BAR_X1 - G.BAR_X0 + 2, G.BAR_THICK + 6); c.drawImage(glowSprite, st.barX - 30, G.BAR_Y - 30, 60, 60); c.restore(); }
     if (st.flash > 0) { c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.55 * st.flash; c.drawImage(glowSprite, st.fx - 110, st.fy - 110, 220, 220); c.restore(); }
+  }
+  // P10 section 3: one bent round tube (post -> rounded corner -> crossbar), shaded in layers, with weld collars, net
+  // clips, a ground socket and the post's shadow on the net. Drawing only: the colliders (post and crossbar rectangles)
+  // are unchanged (tests/p10_tests.js compares the physics objects).
+  const CORNER_R = 9;
+  A.goalCorner = () => ({ x: G.GOAL_LINE_X, y: G.BAR_Y, r: CORNER_R });
+  function goalFrameRound(c, t, vx, vy) {
+    const xc = G.GOAL_LINE_X, yc = G.BAR_Y, y1 = G.GROUND_Y, Rc = CORNER_R, W = 8.6;
+    const ps = c.createLinearGradient(xc + 4, 0, xc + 26, 0); ps.addColorStop(0, `rgba(10,20,30,${0.22 * LK.shadow / 0.34})`); ps.addColorStop(1, 'rgba(10,20,30,0)');
+    c.fillStyle = ps; c.fillRect(xc + 4, yc + 4, 22, y1 - yc - 4); // post shadow on the net
+    c.save(); c.translate(vx, vy); c.lineCap = 'butt'; c.lineJoin = 'round';
+    const path = (dx, dy) => { c.beginPath(); c.moveTo(xc + dx, y1 + 1); c.lineTo(xc + dx, yc + Rc + dy); c.arcTo(xc + dx, yc + dy, xc + Rc + dx, yc + dy, Rc); c.lineTo(G.W + 6, yc + dy); };
+    c.fillStyle = 'rgba(0,0,0,0.18)'; c.fillRect(xc + 4, yc + 4.5, G.W - xc, 1.4); // bar shadow line
+    path(0.9, 0.9); c.strokeStyle = 'rgba(20,28,38,0.35)'; c.lineWidth = W; c.stroke();
+    path(0, 0); c.strokeStyle = '#7a8795'; c.lineWidth = W; c.stroke();
+    path(-0.7, -0.7); c.strokeStyle = '#d5dde5'; c.lineWidth = W * 0.72; c.stroke();
+    path(-1.2, -1.2); c.strokeStyle = '#f3f6f9'; c.lineWidth = W * 0.42; c.stroke();
+    path(-1.9, -1.9); c.strokeStyle = 'rgba(255,255,255,0.95)'; c.lineWidth = 1.2; c.stroke(); // specular line
+    path(2.6, 2.6); c.strokeStyle = 'rgba(150,170,190,0.45)'; c.lineWidth = 0.9; c.stroke();   // bounce light on the shadow edge
+    const collar = (x, y, vert) => { // weld collars where the bend meets the straight tubes
+      const g = vert ? c.createLinearGradient(x - 5, 0, x + 5, 0) : c.createLinearGradient(0, y - 5, 0, y + 5);
+      g.addColorStop(0, '#6f7b88'); g.addColorStop(0.35, '#f7f9fb'); g.addColorStop(1, '#5d6874');
+      c.fillStyle = g; if (vert) H.rrect(c, x - 5.2, y - 1.4, 10.4, 2.8, 1); else H.rrect(c, x - 1.4, y - 5.2, 2.8, 10.4, 1); c.fill();
+      c.fillStyle = 'rgba(40,48,58,0.8)'; c.beginPath(); c.arc(vert ? x + 3 : x, vert ? y : y + 3, 0.7, 0, TAU); c.fill();
+    };
+    collar(xc, yc + Rc + 1, true); collar(xc + Rc + 1, yc, false);
+    c.fillStyle = '#eef2f6'; for (let x = xc + 20; x < G.W; x += 18) c.fillRect(x, yc + W / 2 - 0.4, 1.2, 2.4); // net clips
+    for (let y = yc + 26; y < y1 - 8; y += 22) c.fillRect(xc + W / 2 - 0.4, y, 2.4, 1.2);
+    const sg = c.createLinearGradient(xc - 7, 0, xc + 7, 0); sg.addColorStop(0, '#4b5560'); sg.addColorStop(0.4, '#c8d0d8'); sg.addColorStop(1, '#3e4750');
+    c.fillStyle = sg; c.beginPath(); c.ellipse(xc, y1 + 0.5, 7, 2.2, 0, 0, TAU); c.fill(); // ground socket
+    if (LK.flood >= 0.7) { c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.35 * LK.flood; c.drawImage(glowSprite, xc - 10, yc - 10, 22, 18); c.globalAlpha = 1; c.globalCompositeOperation = 'source-over'; }
+    c.restore();
+  }
+  // gentle net + goal-line sparkle after a goal (st.spark = s since the goal, undefined otherwise)
+  function sparkle(c, P, st) {
+    if (st.spark == null || !on('net_sparkle') || st.spark > 1.8) return;
+    const u = st.spark, cols = P[0].length, nodes = P.length * cols;
+    c.save(); c.globalCompositeOperation = 'lighter'; c.fillStyle = '#ffffff';
+    for (let i = 0; i < 30; i++) {
+      const k = Math.floor(H.hash(i * 89 + 7) * nodes), p = i < 24 ? P[Math.floor(k / cols)][k % cols] : [G.GOAL_LINE_X - 2 + H.hash(i * 3) * 4, G.GROUND_Y + 2 + H.hash(i * 5) * 9];
+      const ph = H.hash(i * 97 + 1) * 1.2, q = (u - ph * 0.6) / 0.55; if (q <= 0 || q >= 1) continue;
+      const a = Math.sin(Math.PI * q) * (1 - u / 1.8), r = 2 + 3.5 * Math.sin(Math.PI * q);
+      c.globalAlpha = 0.85 * a; c.beginPath(); c.moveTo(p[0], p[1] - r); c.lineTo(p[0] + r * 0.22, p[1]); c.lineTo(p[0], p[1] + r); c.lineTo(p[0] - r * 0.22, p[1]); c.closePath(); c.fill();
+      c.fillRect(p[0] - r, p[1] - 0.35, 2 * r, 0.7); c.globalAlpha = 0.4 * a; c.drawImage(glowSprite, p[0] - 4, p[1] - 4, 8, 8);
+    }
+    c.restore();
+  }
+  // P10 section 8: corner flag on the left platform (right of the pipe), waving with the wind; drawing only
+  A.cornerFlag = function (c, t) {
+    if (!on('corner_flags')) return;
+    const x = 62, gy = G.GROUND_Y, top = gy - 38, w = on('wind') ? A.wind(t, x) : 0.5, d = w >= 0 ? 1 : -1, aw = Math.min(1, Math.abs(w) * 1.2), ext = 12 * (0.55 + 0.45 * aw);
+    c.save(); c.lineCap = 'round';
+    c.strokeStyle = 'rgba(0,0,0,0.25)'; c.lineWidth = 2.4; c.beginPath(); c.moveTo(x + 1, gy); c.lineTo(x + 1, top + 1); c.stroke();
+    const pg = c.createLinearGradient(x - 1.2, 0, x + 1.2, 0); pg.addColorStop(0, '#f4f4f4'); pg.addColorStop(1, '#9aa2aa');
+    c.strokeStyle = pg; c.lineWidth = 2; c.beginPath(); c.moveTo(x, gy); c.lineTo(x, top); c.stroke();
+    c.strokeStyle = '#d9382f'; for (let b = 0; b < 3; b++) { c.beginPath(); c.moveTo(x, gy - 6 - b * 10); c.lineTo(x, gy - 10 - b * 10); c.stroke(); }
+    const wave = (k) => Math.sin(t * (6 + 5 * aw) + k * 1.3) * (1 + 2 * aw) * (k / 4);
+    c.beginPath(); c.moveTo(x, top);
+    for (let k = 1; k <= 4; k++) c.lineTo(x + d * ext * k / 4, top + wave(k) + k * 0.5 * (1 - aw));
+    for (let k = 4; k >= 0; k--) c.lineTo(x + d * ext * k / 4, top + 8 + wave(k) + k * 0.7 * (1 - aw));
+    c.closePath(); c.fillStyle = '#ffd23f'; c.fill(); c.strokeStyle = 'rgba(120,80,0,0.45)'; c.lineWidth = 0.6; c.stroke();
+    c.restore();
+  };
+  // dust / turf puff where a ball hits the windmill very hard (u = s since the hit)
+  A.dustPuff = function (c, x, y, u, seed, big) {
+    if (!on('dust_puffs') || u < 0 || u > 0.9) return;
+    c.save(); c.fillStyle = LK.night ? 'rgb(170,165,160)' : 'rgb(205,185,155)';
+    for (let k = 0; k < 10; k++) {
+      const a = H.hash(seed * 53 + k) * TAU, sp = (40 + 70 * H.hash(seed * 59 + k)) * (big ? 1.4 : 1), tau = (1 - Math.exp(-4 * u)) / 4;
+      const px = x + Math.cos(a) * sp * tau, py = y + Math.sin(a) * sp * tau * 0.6 - 18 * u, r = (3 + 9 * eo(u / 0.9)) * (big ? 1.3 : 1);
+      c.globalAlpha = 0.3 * (1 - sm(u / 0.9)); c.beginPath(); c.arc(px, py, r, 0, TAU); c.fill();
+    }
     c.restore();
   };
   // grass + dust kicked up where the goal ball lands in the net (u = s since the goal)
@@ -688,13 +856,23 @@
   A.rain = function (c, t) {
     if (!LK.rain) return;
     c.save(); c.lineCap = 'round';
-    for (const [n, sp, len, a, w, sx] of [[60, 560, 11, 0.16, 0.8, 70], [26, 900, 22, 0.28, 1.3, 120]]) { // far + near layer
+    const wx = on('wind') ? 60 + 140 * WIND.str : 90, dir = on('wind') ? WIND.dir : -1;
+    const layers = on('rain') ? [[90, 380, 7, 0.12, 0.6, wx * 0.5], [56, 620, 13, 0.18, 0.9, wx * 0.8], [22, 980, 26, 0.26, 1.4, wx * 1.2]] : [[60, 560, 11, 0.16, 0.8, 70], [26, 900, 22, 0.28, 1.3, 120]];
+    for (const [n, sp, len, a, w, sx0] of layers) { // far -> near (parallax: nearer = faster, longer, thicker)
+      const sx = on('rain') ? -dir * sx0 : sx0;
       c.strokeStyle = `rgba(205,220,245,${a})`; c.lineWidth = w; c.beginPath();
       for (let i = 0; i < n; i++) {
         const h1 = H.hash(i * 17 + n), h2 = H.hash(i * 29 + n * 3), v = sp * (0.85 + 0.3 * H.hash(i * 7 + n));
-        const y = ((h2 * (G.H + 60) + t * v) % (G.H + 60)) - 30, x = ((h1 * (G.W + 120) - t * sx) % (G.W + 120) + G.W + 120) % (G.W + 120) - 60;
+        const y = (((h2 * (G.H + 60) + t * v) % (G.H + 60)) + G.H + 60) % (G.H + 60) - 30, x = ((h1 * (G.W + 120) - t * sx) % (G.W + 120) + G.W + 120) % (G.W + 120) - 60;
         c.moveTo(x, y); c.lineTo(x - len * sx / sp, y + len);
       }
+      c.stroke();
+    }
+    if (on('rain')) for (let i = 0; i < 18; i++) { // splashes on the platform turf (crowns of 3 droplets)
+      const u = ((t * 1.6 + H.hash(i * 61 + 3)) % 1 + 1) % 1; if (u > 0.22) continue;
+      const k = Math.floor(t * 1.6 + H.hash(i * 61 + 3)), x = (i % 2 ? G.RIGHT_PLAT[0] + 10 : 20) + H.hash(i * 67 + k * 13) * 350, y = G.GROUND_Y - 1, q = u / 0.22;
+      c.strokeStyle = `rgba(225,236,255,${0.55 * (1 - q)})`; c.lineWidth = 0.8; c.beginPath();
+      for (const d of [-1, 0, 1]) { c.moveTo(x + d * 1.5, y); c.lineTo(x + d * (2 + 5 * q), y - 4 * Math.sin(Math.PI * q) - (d === 0 ? 2 : 0)); }
       c.stroke();
     }
     // splashes + puddle ripples (wet pitch and turf tops), each spot repeating on its own phase
